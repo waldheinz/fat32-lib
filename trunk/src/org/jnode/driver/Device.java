@@ -23,7 +23,6 @@ package org.jnode.driver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import org.jnode.system.BootLog;
 import org.jnode.util.StopWatch;
 
 /**
@@ -37,15 +36,12 @@ import org.jnode.util.StopWatch;
  * @see org.jnode.driver.DeviceToDriverMapper
  */
 public class Device {
-
-    /**
-     * The bus that i'm connected to
-     */
-    private final Bus bus;
+    
     /**
      * My driver
      */
     private Driver driver;
+    
     /**
      * My identifier
      */
@@ -71,12 +67,10 @@ public class Device {
     /**
      * Create a new instance
      *
-     * @param bus
      * @param id
      */
-    public Device(Bus bus, String id) {
+    public Device(String id) {
         this.id = id;
-        this.bus = bus;
     }
 
     /**
