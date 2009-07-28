@@ -67,7 +67,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
         this.device = device;
 
         try {
-            api = device.getAPI(BlockDeviceAPI.class);
+            api = device.getAPI();
         } catch (Exception e) {
             throw new FileSystemException("Device is not a partition!", e);
         }
@@ -143,7 +143,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
      * @throws ApiNotFoundException
      */
     public final FSBlockDeviceAPI getFSApi() {
-        return device.getAPI(FSBlockDeviceAPI.class);
+        return device.getAPI();
     }
 
     /**

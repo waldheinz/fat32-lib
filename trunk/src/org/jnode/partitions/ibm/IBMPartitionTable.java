@@ -92,7 +92,7 @@ public class IBMPartitionTable implements PartitionTable<IBMPartitionTableEntry>
         final ByteBuffer sector = ByteBuffer.allocate(SECTOR_SIZE);
         try {
             log.finer("Try to read the Extended Partition Table");
-            BlockDeviceAPI api = drivedDevice.getAPI(BlockDeviceAPI.class);
+            BlockDeviceAPI api = drivedDevice.getAPI();
             api.read(startLBA * SECTOR_SIZE, sector);
         } catch (IOException e) {
             // I think we ca'nt get it

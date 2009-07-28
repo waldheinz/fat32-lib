@@ -32,7 +32,7 @@ import org.jnode.driver.block.FSBlockDeviceAPI;
  * @see org.jnode.driver.Driver
  * @see org.jnode.driver.DeviceToDriverMapper
  */
-public class Device {
+public interface Device {
     
 
     /**
@@ -41,10 +41,6 @@ public class Device {
      * @param apiInterface
      * @return The api implementation (guaranteed not null)
      */
-    public final FSBlockDeviceAPI getAPI(Class<?> apiInterface) {
-
-        return null;
-    }
-
+    public FSBlockDeviceAPI getAPI();
 
 }
