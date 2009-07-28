@@ -63,4 +63,12 @@ public interface BlockDeviceAPI {
      * @throws IOException
      */
     public abstract void flush() throws IOException;
+
+    /**
+     * Gets the sector size for this device.
+     *
+     * @return The sector size in bytes
+     * @throws IOException
+     */
+    int getSectorSize() throws IOException;
 }

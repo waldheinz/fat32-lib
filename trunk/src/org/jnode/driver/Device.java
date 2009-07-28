@@ -20,7 +20,8 @@
  
 package org.jnode.driver;
 
-import org.jnode.driver.block.FSBlockDeviceAPI;
+import org.jnode.driver.block.BlockDeviceAPI;
+
 
 /**
  * A software representation of a hardware device.
@@ -41,6 +42,6 @@ public interface Device {
      * @param apiInterface
      * @return The api implementation (guaranteed not null)
      */
-    public FSBlockDeviceAPI getAPI();
+    public BlockDeviceAPI getAPI();
 
 }

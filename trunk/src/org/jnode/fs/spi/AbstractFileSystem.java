@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 import org.jnode.driver.Device;
 import org.jnode.driver.block.BlockDeviceAPI;
-import org.jnode.driver.block.FSBlockDeviceAPI;
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
 import org.jnode.fs.FSFile;
@@ -142,7 +141,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
      * @return Returns the FSApi.
      * @throws ApiNotFoundException
      */
-    public final FSBlockDeviceAPI getFSApi() {
+    public final BlockDeviceAPI getFSApi() {
         return device.getAPI();
     }
 
