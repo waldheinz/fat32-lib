@@ -1,5 +1,5 @@
 /*
- * $Id: Device.java 4973 2009-02-02 07:52:47Z lsantha $
+ * $Id: PartitionTableType.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -18,33 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package org.jnode.driver;
+package org.jnode.partitions;
 
-import org.jnode.driver.block.FSBlockDeviceAPI;
+import org.jnode.driver.Device;
+import org.jnode.driver.block.BlockDeviceAPI;
 
 /**
- * A software representation of a hardware device.
- * <p/>
- * Every device is controlled by a Driver. These drivers are found by DeviceToDriverMapper
- * instances.
- *
  * @author Ewout Prangsma (epr@users.sourceforge.net)
- * @see org.jnode.driver.Driver
- * @see org.jnode.driver.DeviceToDriverMapper
  */
-public class Device {
-    
+public interface PartitionTableType {
 
     /**
-     * Gets the implementation of a given API.
-     *
-     * @param apiInterface
-     * @return The api implementation (guaranteed not null)
+     * Gets the unique name of this partition table type.
      */
-    public final FSBlockDeviceAPI getAPI(Class<?> apiInterface) {
+    public String getName();
 
-        return null;
-    }
+    /**
+     * Can this partition table type be used on the given first sector of a
+     * blockdevice?
+     * 
+     * @param devApi
+     */
+    public boolean supports(byte[] firstSector, BlockDeviceAPI devApi);
 
+    /**
+     * Create a partition table for a given device.
+     * 
+     * @param device
+     * @param readOnly
+     */
+    public PartitionTable create(byte[] firstSector, Device device) throws PartitionTableException;
 
 }

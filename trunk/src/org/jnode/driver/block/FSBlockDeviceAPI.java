@@ -1,5 +1,5 @@
 /*
- * $Id: Device.java 4973 2009-02-02 07:52:47Z lsantha $
+ * $Id: FSBlockDeviceAPI.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -18,33 +18,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package org.jnode.driver;
+package org.jnode.driver.block;
 
-import org.jnode.driver.block.FSBlockDeviceAPI;
+import java.io.IOException;
+import org.jnode.partitions.PartitionTableEntry;
 
 /**
- * A software representation of a hardware device.
- * <p/>
- * Every device is controlled by a Driver. These drivers are found by DeviceToDriverMapper
- * instances.
+ * An FSBlockDeviceAPI is an API for blockdevices that (may) contain a filesystem.
  *
- * @author Ewout Prangsma (epr@users.sourceforge.net)
- * @see org.jnode.driver.Driver
- * @see org.jnode.driver.DeviceToDriverMapper
+ * @author epr
  */
-public class Device {
-    
+public interface FSBlockDeviceAPI extends BlockDeviceAPI {
 
     /**
-     * Gets the implementation of a given API.
+     * Gets the sector size for this device.
      *
-     * @param apiInterface
-     * @return The api implementation (guaranteed not null)
+     * @return The sector size in bytes
+     * @throws IOException
      */
-    public final FSBlockDeviceAPI getAPI(Class<?> apiInterface) {
+    public int getSectorSize() throws IOException;
 
-        return null;
-    }
-
+    /**
+     * Gets the partition table entry specifying this device.
+     *
+     * @return A PartitionTableEntry or null if no partition table entry exists.
+     */
+    public PartitionTableEntry getPartitionTableEntry();
 
 }

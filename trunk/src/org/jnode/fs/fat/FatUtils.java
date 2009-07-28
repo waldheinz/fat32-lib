@@ -20,7 +20,6 @@
  
 package org.jnode.fs.fat;
 
-import org.apache.log4j.Logger;
 import org.jnode.util.LittleEndian;
 
 /**
@@ -211,9 +210,6 @@ public class FatUtils {
         LittleEndian.setInt16(dest, destOffset + 28, src[srcOffset + 11]);
         LittleEndian.setInt16(dest, destOffset + 30, src[srcOffset + 12]);
 
-        if (log.isDebugEnabled()) {
-            log.debug("<<< END writeSubString dest=\n" /* +FSUtils.toString(dest) */ + ">>>");
-        }
     }
 
     public static byte getOrdinal(byte[] rawData, int offset) {
@@ -233,38 +229,22 @@ public class FatUtils {
      * @param offset
      */
     public static void appendSubstring(StringBuffer sb, byte[] rawData, int offset) {
-        if (log.isDebugEnabled()) {
-            log.debug("<<< BEGIN appendSubstring buffer=" + sb.toString() + ">>>");
-        }
-
+        
         int index = 12;
         char[] unicodechar = getUnicodeChars(rawData, offset);
 
-        if (log.isDebugEnabled()) {
-            log.debug("appendSubstring: unicodechar=" + new String(unicodechar));
-        }
 
         while (unicodechar[index] == 0)
             index--;
 
         sb.append(unicodechar, 0, index + 1);
 
-        if (log.isDebugEnabled()) {
-            log.debug("<<< END appendSubstring buffer=" + sb.toString() + ">>>");
-        }
     }
 
     /**
      * Return a part of a long file name read from the given byte array
      */
     public static String getSubstring(byte[] rawData, int offset) {
-        if (log.isDebugEnabled()) {
-            log.debug("<<< BEGIN getSubString: rawData=" /*
-                                                             * +FSUtils.toString(rawData,
-                                                             * offset, 12)
-                                                             */
-                    + " >>>");
-        }
 
         // log.debug("getSubString: rawData as
         // chars="+FSUtils.toStringAsChars(rawData, offset, 12));
@@ -276,10 +256,6 @@ public class FatUtils {
         // log.debug("getSubString: rawData.length="+rawData.length+"
         // offset="+offset+" nbChars(index)="+index);
         String str = new String(unicodechar, 0, index);
-
-        if (log.isDebugEnabled()) {
-            log.debug("<<< END getSubString: return=" + str + " >>>");
-        }
 
         return str;
     }
@@ -304,7 +280,5 @@ public class FatUtils {
         unicodechar[12] = (char) LittleEndian.getUInt16(rawData, offset + 30);
         return unicodechar;
     }
-
-    private static final Logger log = Logger.getLogger(FatUtils.class);
 
 }

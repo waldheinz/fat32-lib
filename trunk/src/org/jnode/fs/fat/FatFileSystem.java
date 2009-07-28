@@ -44,9 +44,9 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     /**
      * Constructor for FatFileSystem in specified readOnly mode
      */
-    public FatFileSystem(Device device, boolean readOnly, FatFileSystemType type)
+    public FatFileSystem(Device device, boolean readOnly)
         throws FileSystemException {
-        super(device, readOnly, type); // false = read/write mode
+        super(device, readOnly); // false = read/write mode
 
         try {
             bs = new BootSector(512);

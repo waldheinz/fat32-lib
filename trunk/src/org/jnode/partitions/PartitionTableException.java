@@ -1,5 +1,5 @@
 /*
- * $Id: Device.java 4973 2009-02-02 07:52:47Z lsantha $
+ * $Id: PartitionTableException.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -18,33 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package org.jnode.driver;
-
-import org.jnode.driver.block.FSBlockDeviceAPI;
+package org.jnode.partitions;
 
 /**
- * A software representation of a hardware device.
- * <p/>
- * Every device is controlled by a Driver. These drivers are found by DeviceToDriverMapper
- * instances.
- *
  * @author Ewout Prangsma (epr@users.sourceforge.net)
- * @see org.jnode.driver.Driver
- * @see org.jnode.driver.DeviceToDriverMapper
  */
-public class Device {
-    
+public class PartitionTableException extends Exception {
 
-    /**
-     * Gets the implementation of a given API.
-     *
-     * @param apiInterface
-     * @return The api implementation (guaranteed not null)
-     */
-    public final FSBlockDeviceAPI getAPI(Class<?> apiInterface) {
-
-        return null;
+    public PartitionTableException() {
+        super();
     }
 
+    public PartitionTableException(String s, Throwable cause) {
+        super(s, cause);
+    }
+
+    public PartitionTableException(String s) {
+        super(s);
+    }
+
+    public PartitionTableException(Throwable cause) {
+        super(cause);
+    }
 
 }

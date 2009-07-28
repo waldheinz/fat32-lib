@@ -29,8 +29,6 @@ import org.jnode.driver.Device;
  */
 public interface FileSystem<T extends FSEntry> {
 
-    public FileSystemType<? extends FileSystem<T>> getType();
-
     /**
      * Gets the device this FS driver operates on.
      */
