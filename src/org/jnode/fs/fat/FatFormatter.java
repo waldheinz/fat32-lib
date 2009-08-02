@@ -24,7 +24,6 @@ import java.io.IOException;
 
 import org.jnode.driver.block.BlockDeviceAPI;
 
-
 /**
  * @author epr
  */
@@ -37,6 +36,15 @@ public class FatFormatter {
     private BootSector bs;
     private Fat fat;
     private FatDirectory rootDir;
+
+    public static FatFormatter superFloppyFormatter(BlockDeviceAPI d) throws IOException {
+        final BootSector bs = new BootSector(FatFileSystemFormatter.BOOT_BYTES);
+        
+        return new FatFormatter(
+                HD_DESC, 512, 4, (int)(d.getLength() / d.getSectorSize()),
+
+                52, 5, FatType.FAT32, 2, 0, 1, bs);
+    }
 
     public static FatFormatter fat144FloppyFormatter(int reservedSectors, BootSector bs) {
         return new FatFormatter(FLOPPY_DESC, 512, 1, 2880, 18, 2, FatType.FAT32, 2, 0,
@@ -62,7 +70,14 @@ public class FatFormatter {
         bs.setNrReservedSectors(reservedSectors);
         bs.setNrRootDirEntries(mediumDescriptor == FLOPPY_DESC ? 224
                 : calculateDefaultRootDirectorySize(bps, nbTotalSectors));
-        bs.setNrLogicalSectors(nbTotalSectors);
+        if (fatSize == FatType.FAT32) {
+            bs.setNrLogicalSectors(0);
+            bs.setNrTotalSectors(nbTotalSectors);
+        } else {
+            throw new AssertionError();
+//            bs.setNrLogicalSectors(nbTotalSectors);
+        }
+
         bs.setSectorsPerFat((Math.round(nbTotalSectors / (spc * (bps / fatEntrySize))) + 1));
         bs.setSectorsPerCluster(spc);
         bs.setNrFats(2);

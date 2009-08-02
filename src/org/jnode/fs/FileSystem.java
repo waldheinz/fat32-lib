@@ -22,18 +22,12 @@ package org.jnode.fs;
 
 import java.io.IOException;
 
-import org.jnode.driver.Device;
 
 /**
  * @author epr
  */
 public interface FileSystem<T extends FSEntry> {
-
-    /**
-     * Gets the device this FS driver operates on.
-     */
-    public Device getDevice();
-
+    
     /**
      * Gets the root entry of this filesystem. This is usually a directory, but
      * this is not required.

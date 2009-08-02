@@ -23,7 +23,6 @@ package org.jnode.fs.fat;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.jnode.driver.Device;
 import org.jnode.driver.block.BlockDeviceAPI;
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
@@ -44,9 +43,9 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     /**
      * Constructor for FatFileSystem in specified readOnly mode
      */
-    public FatFileSystem(Device device, boolean readOnly)
+    public FatFileSystem(BlockDeviceAPI api, boolean readOnly)
         throws FileSystemException {
-        super(device, readOnly); // false = read/write mode
+        super(api, readOnly); // false = read/write mode
 
         try {
             bs = new BootSector(512);

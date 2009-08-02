@@ -204,6 +204,10 @@ public class BootSector {
         set16(0x13, v);
     }
 
+    public void setNrTotalSectors(int v) {
+        set32(0x20, v);
+    }
+    
     /**
      * Gets the medium descriptor byte
      * 

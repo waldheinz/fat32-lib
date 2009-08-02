@@ -41,7 +41,6 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
 
     private static final Logger log = Logger.getLogger(AbstractFileSystem.class.getName());
     private boolean readOnly;
-    private final Device device;
     private final BlockDeviceAPI api;
     private boolean closed;
     private T rootEntry;
@@ -59,27 +58,10 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
      * @param readOnly
      * @throws FileSystemException
      */
-    public AbstractFileSystem(Device device, boolean readOnly) throws FileSystemException {
-        if (device == null)
-            throw new IllegalArgumentException("null device!");
-
-        this.device = device;
-
-        try {
-            api = device.getAPI();
-        } catch (Exception e) {
-            throw new FileSystemException("Device is not a partition!", e);
-        }
-
+    public AbstractFileSystem(BlockDeviceAPI api, boolean readOnly) throws FileSystemException {
+        this.api = api;
         this.closed = false;
         this.readOnly = readOnly;
-    }
-
-    /**
-     * @see org.jnode.fs.FileSystem#getDevice()
-     */
-    public final Device getDevice() {
-        return device;
     }
 
     /**
@@ -142,7 +124,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
      * @throws ApiNotFoundException
      */
     public final BlockDeviceAPI getFSApi() {
-        return device.getAPI();
+        return api;
     }
 
     /**
