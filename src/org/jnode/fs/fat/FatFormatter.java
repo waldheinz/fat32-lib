@@ -22,7 +22,10 @@ package org.jnode.fs.fat;
 
 import java.io.IOException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.fs.FileSystemException;
 
 /**
  * @author epr
@@ -42,7 +45,6 @@ public class FatFormatter {
         
         return new FatFormatter(
                 HD_DESC, 512, 4, (int)(d.getLength() / d.getSectorSize()),
-
                 52, 5, FatType.FAT32, 2, 0, 1, bs);
     }
 
@@ -87,7 +89,7 @@ public class FatFormatter {
 
         fat = new Fat(fatSize, mediumDescriptor, bs.getSectorsPerFat(), bs.getBytesPerSector());
         fat.setMediumDescriptor(bs.getMediumDescriptor());
-
+        
         rootDir = new FatLfnDirectory(null, bs.getNrRootDirEntries());
     }
 
@@ -129,29 +131,32 @@ public class FatFormatter {
             return totalSize / (5 * 32);
         }
     }
-
-    /**
-     * Set the label
-     * 
-     * @param label
-     */
-    public void setLabel(String label) throws IOException {
-        rootDir.setLabel(label);
-    }
-
+    
     /**
      * Format the given device, according to my settings
      * 
      * @param api
+     * @param label 
      * @throws IOException
      */
-    public void format(BlockDeviceAPI api) throws IOException {
+    public void format(BlockDeviceAPI api, String label) throws IOException {
         bs.write(api);
         for (int i = 0; i < bs.getNrFats(); i++) {
             fat.write(api, FatUtils.getFatOffset(bs, i));
         }
         rootDir.write(api, FatUtils.getRootDirOffset(bs));
         api.flush();
+
+        if (label != null) {
+            try {
+                FatFileSystem fs = new FatFileSystem(api, false);
+                fs.getRootDir().setLabel(label);
+                fs.flush();
+                api.flush();
+            } catch (FileSystemException ex) {
+                throw new IOException(ex);
+            }
+        }
     }
 
     /**

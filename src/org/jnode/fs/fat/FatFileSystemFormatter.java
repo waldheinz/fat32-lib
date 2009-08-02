@@ -61,7 +61,7 @@ public class FatFileSystemFormatter {
                     FatFormatter.HDFormatter(sectorSize, (int) numberOfSectors, SECTOR_PER_TRACK,
                             NB_HEADS, fatSize, (int) offset, 1, FAT_STANDARD_BS);
                             
-            ff.format(api);
+            ff.format(api, null);
 
             return new FatFileSystem(api, false); // not readOnly !
         } catch (IOException ioe) {

@@ -128,7 +128,7 @@ public class GrubFatFormatter {
      */
     public void format(BlockDeviceAPI api) throws IOException {
 
-        formatter.format(api);
+        formatter.format(api, null);
         GrubBootSector bs = (GrubBootSector) formatter.getBootSector();
         /* Fixup the blocklist end the end of the first sector of stage2 */
         LittleEndian.setInt32(stage2, 512 - 8, bootSectorOffset + 2);
