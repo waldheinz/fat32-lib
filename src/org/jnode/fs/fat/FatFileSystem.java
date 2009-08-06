@@ -95,6 +95,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
      * 
      * @throws IOException
      */
+    @Override
     public void flush() throws IOException {
 
         final BlockDeviceAPI api = getApi();

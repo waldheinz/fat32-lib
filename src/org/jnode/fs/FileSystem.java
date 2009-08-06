@@ -73,4 +73,6 @@ public interface FileSystem<T extends FSEntry> {
      * @throws IOException if an I/O error occurs
      */
     public long getUsableSpace() throws IOException;
+
+    public void flush() throws IOException;
 }
