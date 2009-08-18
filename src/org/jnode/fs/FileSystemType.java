@@ -27,7 +27,7 @@ import org.jnode.driver.Device;
  * 
  * @author epr
  */
-public interface FileSystemType<T extends FileSystem<?>> {
+public interface FileSystemType<T extends FileSystem> {
 
     /**
      * Gets the unique name of this file system type.

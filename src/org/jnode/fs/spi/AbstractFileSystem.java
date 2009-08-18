@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import java.util.logging.Logger;
-import org.jnode.driver.Device;
 import org.jnode.driver.block.BlockDeviceAPI;
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
@@ -37,7 +36,7 @@ import org.jnode.fs.FileSystemException;
  * 
  * @author Fabien DUMINY
  */
-public abstract class AbstractFileSystem<T extends FSEntry> implements FileSystem<T> {
+public abstract class AbstractFileSystem<T extends FSEntry> implements FileSystem {
 
     private static final Logger log = Logger.getLogger(AbstractFileSystem.class.getName());
     private boolean readOnly;

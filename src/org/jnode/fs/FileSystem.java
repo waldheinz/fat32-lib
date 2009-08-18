@@ -26,13 +26,13 @@ import java.io.IOException;
 /**
  * @author epr
  */
-public interface FileSystem<T extends FSEntry> {
+public interface FileSystem {
     
     /**
      * Gets the root entry of this filesystem. This is usually a directory, but
      * this is not required.
      */
-    public T getRootEntry() throws IOException;
+    public FSEntry getRootEntry() throws IOException;
 
     /**
      * Is the file system. mounted in read-only mode ?

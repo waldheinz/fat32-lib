@@ -39,6 +39,6 @@ public interface FSObject {
     /**
      * Gets the filesystem to which this object belongs.
      */
-    public FileSystem<?> getFileSystem();
+    public FileSystem getFileSystem();
 
 }
