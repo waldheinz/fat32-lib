@@ -71,6 +71,7 @@ public class BootSector extends Sector {
      * Write the contents of this bootsector to the given device.
      * 
      * @param device
+     * @throws IOException on write error
      */
     public synchronized void write(BlockDevice device) throws IOException {
         device.write(0, ByteBuffer.wrap(data));
@@ -92,9 +93,13 @@ public class BootSector extends Sector {
     }
 
     /**
-     * Sets the OEM name
+     * Sets the OEM name, must be at most 8 characters long.
+     * 
+     * @param name the new OEM name
      */
     public void setOemName(String name) {
+        if (name.length() > 8) throw new IllegalArgumentException();
+        
         for (int i = 0; i < 8; i++) {
             char ch;
             if (i < name.length()) {
@@ -117,8 +122,12 @@ public class BootSector extends Sector {
 
     /**
      * Sets the number of bytes/sector
+     * 
+     * @param v the new value for bytes per sector
      */
     public void setBytesPerSector(int v) {
+        if (v == getBytesPerSector()) return;
+        
         set16(0x0b, v);
     }
 
@@ -137,7 +146,7 @@ public class BootSector extends Sector {
     public void setSectorsPerCluster(int v) {
         set8(0x0d, v);
     }
-
+    
     /**
      * Gets the number of reserved (for bootrecord) sectors
      * 

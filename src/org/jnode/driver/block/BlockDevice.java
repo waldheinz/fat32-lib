@@ -34,10 +34,8 @@ public interface BlockDevice {
      * Gets the total length in bytes
      *
      * @return long
-     * @throws IOException
      */
-    public abstract long getLength()
-        throws IOException;
+    public abstract long getLength();
 
     /**
      * Read a block of data

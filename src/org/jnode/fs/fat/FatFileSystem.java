@@ -87,6 +87,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
                     System.out.println("FAT " + i + " differs from FAT 0");
                 }
             }
+            
             fat = fats[0];
             rootDir.read(getApi(), FatUtils.getRootDirOffset(bs));
             rootEntry = new FatRootEntry(rootDir);

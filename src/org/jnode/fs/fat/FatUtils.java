@@ -212,54 +212,6 @@ public class FatUtils {
 
     }
 
-    public static byte getOrdinal(byte[] rawData, int offset) {
-        return (byte) LittleEndian.getUInt8(rawData, offset);
-    }
-
-    public static byte getCheckSum(byte[] rawData, int offset) {
-        return (byte) LittleEndian.getUInt8(rawData, offset + 13);
-    }
-
-    /**
-     * Read a part of the long filename from the given byte array and append the
-     * result to the given StringBuffer
-     * 
-     * @param sb
-     * @param rawData
-     * @param offset
-     */
-    public static void appendSubstring(StringBuffer sb, byte[] rawData, int offset) {
-        
-        int index = 12;
-        char[] unicodechar = getUnicodeChars(rawData, offset);
-
-
-        while (unicodechar[index] == 0)
-            index--;
-
-        sb.append(unicodechar, 0, index + 1);
-
-    }
-
-    /**
-     * Return a part of a long file name read from the given byte array
-     */
-    public static String getSubstring(byte[] rawData, int offset) {
-
-        // log.debug("getSubString: rawData as
-        // chars="+FSUtils.toStringAsChars(rawData, offset, 12));
-        int index = 12;
-        char[] unicodechar = getUnicodeChars(rawData, offset);
-        while (unicodechar[index] == 0)
-            index--;
-
-        // log.debug("getSubString: rawData.length="+rawData.length+"
-        // offset="+offset+" nbChars(index)="+index);
-        String str = new String(unicodechar, 0, index);
-
-        return str;
-    }
-
     /**
      * convert an array of bytes to an array of chars (unicode)
      */
@@ -280,5 +232,7 @@ public class FatUtils {
         unicodechar[12] = (char) LittleEndian.getUInt16(rawData, offset + 30);
         return unicodechar;
     }
+
+    private FatUtils() { /* no instances */ }
 
 }

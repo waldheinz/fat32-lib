@@ -44,42 +44,47 @@ public class FatFormatter {
     public static FatFormatter superFloppyFormatter(BlockDevice d) throws IOException {
         final BootSector bs = new BootSector(SF_BS);
         final int totalSectors = (int)(d.getLength() / d.getSectorSize());
-        final FatType fatSize = FatType.FAT32;
-        final int spc = calculateDefaultSectorsPerCluster(BYTES_PER_SECTOR, totalSectors);
+        final FatType fatSize = defaultFatSize(d);
+        final int spc = defaultSectorsPerCluster(BYTES_PER_SECTOR, totalSectors);
 
         bs.setNrFats(2);
         bs.setSectorsPerTrack(32);
         bs.setBytesPerSector(BYTES_PER_SECTOR);
         bs.setMediumDescriptor(HD_DESC);
         bs.setNrHeads(64);
-        bs.setNrReservedSectors(32);
+        bs.setOemName("fat32lib");
+        
         bs.setSectorsPerCluster(spc);
-        bs.write(d);
-
-        final FsInfoSector fsInfo = new FsInfoSector(bs, d);
-        fsInfo.init();
-        fsInfo.write();
         
         if (fatSize == FatType.FAT32) {
             bs.setNrLogicalSectors(0);
             bs.setNrTotalSectors(totalSectors);
             bs.setSectorsPerFatEx(1009);
+            bs.setNrReservedSectors(32);
+            
+            final FsInfoSector fsInfo = new FsInfoSector(bs, d);
+            fsInfo.init();
         } else {
+            bs.setNrReservedSectors(1);
             bs.setSectorsPerFat((Math.round(totalSectors / (spc *
                 (BYTES_PER_SECTOR / fatSize.getEntrySize()))) + 1));
+            bs.setNrRootDirEntries(calculateDefaultRootDirectorySize(
+                    BYTES_PER_SECTOR, totalSectors));
         }
-
-        System.out.println(bs);
-
+        
         return new FatFormatter(totalSectors, FatType.FAT32, bs);
     }
+    
+    private static FatType defaultFatSize(BlockDevice d) {
+        final long len = d.getLength();
 
+        if (len < 1024 * 1024 * 1024) return FatType.FAT16;
+        else return FatType.FAT32;
+    }
+    
     protected FatFormatter(int nbTotalSectors, FatType fatSize, BootSector bs) {
         this.bs = bs;
         
-//        bs.setNrRootDirEntries(mediumDescriptor == FLOPPY_DESC ? 224
-//                : calculateDefaultRootDirectorySize(bps, nbTotalSectors));
-
         final int spf = (int) ((fatSize == FatType.FAT32) ?
             bs.getSectorsPerFatEx() : bs.getSectorsPerFat());
 
@@ -90,10 +95,9 @@ public class FatFormatter {
         rootDir = new FatLfnDirectory(null, bs.getNrRootDirEntries());
     }
 
-    private static int calculateDefaultSectorsPerCluster(int bps, int nbTotalSectors) {
+    private static int defaultSectorsPerCluster(int bps, int sectors) {
         // Apply the default cluster size from MS
-        long sizeInMB = (nbTotalSectors * bps) / (1024 * 1024);
-
+        final long sizeInMB = (sectors * bps) / (1024 * 1024);
         int spc;
 
         if (sizeInMB < 32) {
@@ -115,7 +119,9 @@ public class FatFormatter {
         } else if (sizeInMB < 16384) {
             spc = 512;
         } else
-            throw new IllegalArgumentException("Disk too large to be formatted in FAT16");
+            throw new IllegalArgumentException(
+                    "Disk too large to be formatted in FAT16");
+        
         return spc;
     }
 
