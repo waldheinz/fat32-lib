@@ -20,7 +20,7 @@
  
 package org.jnode.driver;
 
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 
 
 /**
@@ -42,6 +42,6 @@ public interface Device {
      * @param apiInterface
      * @return The api implementation (guaranteed not null)
      */
-    public BlockDeviceAPI getAPI();
+    public BlockDevice getAPI();
 
 }

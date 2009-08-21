@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FSEntry;
 
 /**
@@ -89,7 +89,7 @@ public class FatDirectory extends AbstractDirectory {
         resetDirty();
     }
 
-    public synchronized void read(BlockDeviceAPI device, long offset) throws IOException {
+    public synchronized void read(BlockDevice device, long offset) throws IOException {
         ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
         device.read(offset, data);
         // System.out.println("Directory at offset :" + offset);
@@ -98,7 +98,7 @@ public class FatDirectory extends AbstractDirectory {
         resetDirty();
     }
 
-    public synchronized void write(BlockDeviceAPI device, long offset) throws IOException {
+    public synchronized void write(BlockDevice device, long offset) throws IOException {
         if (label != null)
             applyLabel();
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);

@@ -25,7 +25,7 @@ import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FileSystemFullException;
 
 /**
@@ -79,7 +79,7 @@ public class Fat {
      * 
      * @param device
      */
-    public synchronized void read(BlockDeviceAPI device, long offset) throws IOException {
+    public synchronized void read(BlockDevice device, long offset) throws IOException {
         byte[] data = new byte[nrSectors * sectorSize];
         device.read(offset, ByteBuffer.wrap(data));
         for (int i = 0; i < entries.length; i++) {
@@ -120,7 +120,7 @@ public class Fat {
      * 
      * @param device
      */
-    public synchronized void write(BlockDeviceAPI device, long offset) throws IOException {
+    public synchronized void write(BlockDevice device, long offset) throws IOException {
         byte[] data = new byte[nrSectors * sectorSize];
         for (int i = 0; i < entries.length; i++) {
             long v = entries[i];

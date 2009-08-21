@@ -23,34 +23,31 @@ package org.jnode.fs.fat;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 import org.jnode.driver.block.Geometry;
 import org.jnode.driver.block.Geometry.GeometryException;
 import org.jnode.partitions.ibm.IBMPartitionTable;
 import org.jnode.partitions.ibm.IBMPartitionTableEntry;
 import org.jnode.partitions.ibm.IBMPartitionTypes;
-import org.jnode.util.LittleEndian;
 import org.jnode.util.NumberUtils;
 
 /**
  * @author epr
  */
-public class BootSector {
+public class BootSector extends Sector {
 
-    private byte[] data;
-    private boolean dirty;
     private final IBMPartitionTableEntry[] partitions;
 
     public BootSector(int size) {
-        data = new byte[size];
-        dirty = false;
+        super(size);
+        
         partitions = new IBMPartitionTableEntry[4];
     }
 
     public BootSector(byte[] src) {
-        data = new byte[src.length];
+        super(src.length);
+        
         System.arraycopy(src, 0, data, 0, src.length);
-        dirty = false;
         partitions = new IBMPartitionTableEntry[4];
     }
 
@@ -62,8 +59,9 @@ public class BootSector {
      * Read the contents of this bootsector from the given device.
      * 
      * @param device
+     * @throws IOException on read error
      */
-    public synchronized void read(BlockDeviceAPI device) throws IOException {
+    public synchronized void read(BlockDevice device) throws IOException {
         device.read(0, ByteBuffer.wrap(data));
 
         dirty = false;
@@ -74,7 +72,7 @@ public class BootSector {
      * 
      * @param device
      */
-    public synchronized void write(BlockDeviceAPI device) throws IOException {
+    public synchronized void write(BlockDevice device) throws IOException {
         device.write(0, ByteBuffer.wrap(data));
         dirty = false;
     }
@@ -197,6 +195,10 @@ public class BootSector {
         return get16(0x13);
     }
 
+    public int getFsInfoSectorOffset() {
+        return get16(0x30);
+    }
+    
     /**
      * Sets the number of logical sectors
      */
@@ -233,6 +235,14 @@ public class BootSector {
         return get16(0x16);
     }
 
+    public void setSectorsPerFatEx(int v) {
+        set32(0x24, v);
+    }
+
+    public long getSectorsPerFatEx() {
+        return get32(0x24);
+    }
+    
     /**
      * Sets the number of sectors/fat
      */
@@ -286,66 +296,6 @@ public class BootSector {
      */
     public void setNrHiddenSectors(int v) {
         set16(0x1c, v);
-    }
-
-    /**
-     * Gets an unsigned 8-bit byte from a given offset
-     * 
-     * @param offset
-     * @return int
-     */
-    protected int get8(int offset) {
-        return LittleEndian.getUInt8(data, offset);
-    }
-
-    /**
-     * Sets an unsigned 8-bit byte at a given offset
-     * 
-     * @param offset
-     */
-    protected void set8(int offset, int value) {
-        LittleEndian.setInt8(data, offset, value);
-        dirty = true;
-    }
-
-    /**
-     * Gets an unsigned 16-bit word from a given offset
-     * 
-     * @param offset
-     * @return int
-     */
-    protected int get16(int offset) {
-        return LittleEndian.getUInt16(data, offset);
-    }
-
-    /**
-     * Sets an unsigned 16-bit word at a given offset
-     * 
-     * @param offset
-     */
-    protected void set16(int offset, int value) {
-        LittleEndian.setInt16(data, offset, value);
-        dirty = true;
-    }
-
-    /**
-     * Gets an unsigned 32-bit word from a given offset
-     * 
-     * @param offset
-     * @return int
-     */
-    protected long get32(int offset) {
-        return LittleEndian.getUInt32(data, offset);
-    }
-
-    /**
-     * Sets an unsigned 32-bit word at a given offset
-     * 
-     * @param offset
-     */
-    protected void set32(int offset, long value) {
-        LittleEndian.setInt32(data, offset, (int) value);
-        dirty = true;
     }
 
     /**

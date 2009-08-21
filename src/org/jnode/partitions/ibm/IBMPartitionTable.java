@@ -28,7 +28,7 @@ import java.util.List;
 
 import java.util.logging.Logger;
 import org.jnode.driver.Device;
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 import org.jnode.partitions.PartitionTable;
 import org.jnode.partitions.PartitionTableType;
 
@@ -92,7 +92,7 @@ public class IBMPartitionTable implements PartitionTable<IBMPartitionTableEntry>
         final ByteBuffer sector = ByteBuffer.allocate(SECTOR_SIZE);
         try {
             log.finer("Try to read the Extended Partition Table");
-            BlockDeviceAPI api = drivedDevice.getAPI();
+            BlockDevice api = drivedDevice.getAPI();
             api.read(startLBA * SECTOR_SIZE, sector);
         } catch (IOException e) {
             // I think we ca'nt get it

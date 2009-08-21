@@ -23,7 +23,7 @@ package org.jnode.fs.fat;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FSFile;
 import org.jnode.fs.ReadOnlyFileSystemException;
 
@@ -61,7 +61,7 @@ public class FatFile extends FatObject implements FSFile {
 
         final FatFileSystem fs = getFatFileSystem();
         final long[] chain = fs.getFat().getChain(startCluster);
-        final BlockDeviceAPI api = fs.getApi();
+        final BlockDevice api = fs.getApi();
 
         int chainIdx = (int) (fileOffset / clusterSize);
         if (fileOffset % clusterSize != 0) {
@@ -101,7 +101,7 @@ public class FatFile extends FatObject implements FSFile {
 
         final FatFileSystem fs = getFatFileSystem();
         final long[] chain = fs.getFat().getChain(getStartCluster());
-        final BlockDeviceAPI api = fs.getApi();
+        final BlockDevice api = fs.getApi();
 
         int chainIdx = (int) (fileOffset / clusterSize);
         if (fileOffset % clusterSize != 0) {

@@ -23,7 +23,7 @@ package org.jnode.fs.fat;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
 import org.jnode.fs.FSFile;
@@ -32,9 +32,11 @@ import org.jnode.fs.spi.AbstractFileSystem;
 
 /**
  * @author epr
+ * @author Matthias Treydte
  */
 public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     private BootSector bs;
+    private FsInfoSector fsInfo;
     private Fat fat;
     private final FatDirectory rootDir;
     private final FatRootEntry rootEntry;
@@ -42,18 +44,25 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
 
     /**
      * Constructor for FatFileSystem in specified readOnly mode
+     * 
+     * @param api the BlockDevice holding the file system
+     * @param readOnly if this FS should be read-lonly
+     * @throws FileSystemException on error
      */
-    public FatFileSystem(BlockDeviceAPI api, boolean readOnly)
-        throws FileSystemException {
-        super(api, readOnly); // false = read/write mode
+    public FatFileSystem(BlockDevice api, boolean readOnly)
+            throws FileSystemException {
+        
+        super(api, readOnly);
 
         try {
             bs = new BootSector(512);
             bs.read(getApi());
-            if (!bs.isaValidBootSector())
-                throw new FileSystemException("Can't mount this partition: Invalid BootSector");
 
-            // System.out.println(bs);
+            this.fsInfo = new FsInfoSector(bs, getApi());
+            System.out.println(fsInfo);
+
+            if (!bs.isaValidBootSector()) throw new FileSystemException(
+                    "invalid boot sector"); //NOI18N
 
             Fat[] fats = new Fat[bs.getNrFats()];
             rootDir = new FatLfnDirectory(this, bs.getNrRootDirEntries());
@@ -66,13 +75,13 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
             }
 
             for (int i = 0; i < fats.length; i++) {
-                Fat fat = new Fat(
+                Fat tmpFat = new Fat(
                         bitSize, bs.getMediumDescriptor(), bs.getSectorsPerFat(), 
                         bs.getBytesPerSector());
-                fats[i] = fat;
-                fat.read(getApi(), FatUtils.getFatOffset(bs, i));
+                fats[i] = tmpFat;
+                tmpFat.read(getApi(), FatUtils.getFatOffset(bs, i));
             }
-
+            
             for (int i = 1; i < fats.length; i++) {
                 if (!fats[0].equals(fats[i])) {
                     System.out.println("FAT " + i + " differs from FAT 0");
@@ -98,12 +107,14 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     @Override
     public void flush() throws IOException {
 
-        final BlockDeviceAPI api = getApi();
+        final BlockDevice api = getApi();
 
         if (bs.isDirty()) {
             bs.write(api);
         }
 
+        if (fsInfo.isDirty()) fsInfo.write();
+        
         for (FatFile f : files.values()) {
             f.flush();
         }
@@ -123,7 +134,10 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     /**
      * Gets the root entry of this filesystem. This is usually a director, but
      * this is not required.
+     *
+     * @return 
      */
+    @Override
     public FatRootEntry getRootEntry() {
         return rootEntry;
     }
@@ -132,6 +146,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
      * Gets the file for the given entry.
      * 
      * @param entry
+     * @return 
      */
     public synchronized FatFile getFile(FatDirEntry entry) {
 

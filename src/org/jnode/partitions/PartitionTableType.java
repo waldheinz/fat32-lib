@@ -21,7 +21,7 @@
 package org.jnode.partitions;
 
 import org.jnode.driver.Device;
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 
 /**
  * @author Ewout Prangsma (epr@users.sourceforge.net)
@@ -39,7 +39,7 @@ public interface PartitionTableType {
      * 
      * @param devApi
      */
-    public boolean supports(byte[] firstSector, BlockDeviceAPI devApi);
+    public boolean supports(byte[] firstSector, BlockDevice devApi);
 
     /**
      * Create a partition table for a given device.

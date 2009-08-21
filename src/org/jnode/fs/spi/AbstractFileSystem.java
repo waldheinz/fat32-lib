@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import java.util.logging.Logger;
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
 import org.jnode.fs.FSFile;
@@ -40,7 +40,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
 
     private static final Logger log = Logger.getLogger(AbstractFileSystem.class.getName());
     private boolean readOnly;
-    private final BlockDeviceAPI api;
+    private final BlockDevice api;
     private boolean closed;
     private T rootEntry;
 
@@ -57,7 +57,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
      * @param readOnly
      * @throws FileSystemException
      */
-    public AbstractFileSystem(BlockDeviceAPI api, boolean readOnly) throws FileSystemException {
+    public AbstractFileSystem(BlockDevice api, boolean readOnly) throws FileSystemException {
         this.api = api;
         this.closed = false;
         this.readOnly = readOnly;
@@ -114,7 +114,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
     /**
      * @return Returns the api.
      */
-    public final BlockDeviceAPI getApi() {
+    public final BlockDevice getApi() {
         return api;
     }
 
@@ -122,7 +122,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
      * @return Returns the FSApi.
      * @throws ApiNotFoundException
      */
-    public final BlockDeviceAPI getFSApi() {
+    public final BlockDevice getFSApi() {
         return api;
     }
 

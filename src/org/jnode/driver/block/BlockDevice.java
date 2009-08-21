@@ -1,5 +1,5 @@
 /*
- * $Id: BlockDeviceAPI.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: BlockDevice.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
  *
  * @author epr
  */
-public interface BlockDeviceAPI {
+public interface BlockDevice {
 
     /**
      * Gets the total length in bytes

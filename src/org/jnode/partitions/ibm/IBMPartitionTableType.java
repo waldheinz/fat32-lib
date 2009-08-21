@@ -21,7 +21,7 @@
 package org.jnode.partitions.ibm;
 
 import org.jnode.driver.Device;
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 import org.jnode.partitions.PartitionTable;
 import org.jnode.partitions.PartitionTableException;
 import org.jnode.partitions.PartitionTableType;
@@ -48,9 +48,9 @@ public class IBMPartitionTableType implements PartitionTableType {
     }
 
     /**
-     * @see org.jnode.partitions.PartitionTableType#supports(org.jnode.driver.block.BlockDeviceAPI)
+     * @see org.jnode.partitions.PartitionTableType#supports(org.jnode.driver.block.BlockDevice)
      */
-    public boolean supports(byte[] firstSector, BlockDeviceAPI devApi) {
+    public boolean supports(byte[] firstSector, BlockDevice devApi) {
         // TODO Make a suitable implementation
         return true;
     }

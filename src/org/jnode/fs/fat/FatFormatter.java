@@ -22,7 +22,7 @@ package org.jnode.fs.fat;
 
 import java.io.IOException;
 
-import org.jnode.driver.block.BlockDeviceAPI;
+import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FileSystemException;
 
 /**
@@ -30,6 +30,8 @@ import org.jnode.fs.FileSystemException;
  * @author Matthias Treydte
  */
 public class FatFormatter {
+    public static final int BYTES_PER_SECTOR = 512;
+    
     public static final int MAX_DIRECTORY = 512;
     public static final int FLOPPY_DESC = 0xf0;
     public static final int HD_DESC = 0xf8;
@@ -39,54 +41,50 @@ public class FatFormatter {
     private Fat fat;
     private FatDirectory rootDir;
 
-    public static FatFormatter superFloppyFormatter(BlockDeviceAPI d) throws IOException {
+    public static FatFormatter superFloppyFormatter(BlockDevice d) throws IOException {
         final BootSector bs = new BootSector(SF_BS);
+        final int totalSectors = (int)(d.getLength() / d.getSectorSize());
+        final FatType fatSize = FatType.FAT32;
+        final int spc = calculateDefaultSectorsPerCluster(BYTES_PER_SECTOR, totalSectors);
+
+        bs.setNrFats(2);
+        bs.setSectorsPerTrack(32);
+        bs.setBytesPerSector(BYTES_PER_SECTOR);
+        bs.setMediumDescriptor(HD_DESC);
+        bs.setNrHeads(64);
+        bs.setNrReservedSectors(32);
+        bs.setSectorsPerCluster(spc);
+        bs.write(d);
+
+        final FsInfoSector fsInfo = new FsInfoSector(bs, d);
+        fsInfo.init();
+        fsInfo.write();
         
-        return new FatFormatter(
-                HD_DESC, 512, 4, (int)(d.getLength() / d.getSectorSize()),
-                32, 64, FatType.FAT32, 2, 0, 1, bs);
-    }
-    
-    public static FatFormatter fat144FloppyFormatter(int reservedSectors, BootSector bs) {
-        return new FatFormatter(FLOPPY_DESC, 512, 1, 2880, 18, 2, FatType.FAT32, 2, 0,
-                reservedSectors, bs);
-    }
-
-    public static FatFormatter HDFormatter(int bps, int nbTotalSectors, int sectorsPerTrack,
-            int nbHeads, FatType fatSize, int hiddenSectors, int reservedSectors, BootSector bs) {
-        return new FatFormatter(HD_DESC, bps,
-                calculateDefaultSectorsPerCluster(bps, nbTotalSectors), nbTotalSectors,
-                sectorsPerTrack, nbHeads, fatSize, 2, hiddenSectors, reservedSectors, bs);
-    }
-
-    protected FatFormatter(int mediumDescriptor, int bps, int spc, int nbTotalSectors,
-            int sectorsPerTrack, int nbHeads, FatType fatSize, int nbFats, int hiddenSectors,
-            int reservedSectors, BootSector bs) {
-        this.bs = bs;
-        final float fatEntrySize = fatSize.getEntrySize();
-
-        bs.setMediumDescriptor(mediumDescriptor);
-//        bs.setOemName("JNode1.0");
-        bs.setBytesPerSector(bps);
-        bs.setNrReservedSectors(reservedSectors);
-//        bs.setNrRootDirEntries(mediumDescriptor == FLOPPY_DESC ? 224
-//                : calculateDefaultRootDirectorySize(bps, nbTotalSectors));
         if (fatSize == FatType.FAT32) {
             bs.setNrLogicalSectors(0);
-            bs.setNrTotalSectors(nbTotalSectors);
+            bs.setNrTotalSectors(totalSectors);
+            bs.setSectorsPerFatEx(1009);
         } else {
-            throw new AssertionError();
-//            bs.setNrLogicalSectors(nbTotalSectors);
+            bs.setSectorsPerFat((Math.round(totalSectors / (spc *
+                (BYTES_PER_SECTOR / fatSize.getEntrySize()))) + 1));
         }
 
-        bs.setSectorsPerFat((Math.round(nbTotalSectors / (spc * (bps / fatEntrySize))) + 1));
-        bs.setSectorsPerCluster(spc);
-        bs.setNrFats(2);
-        bs.setSectorsPerTrack(sectorsPerTrack);
-        bs.setNrHeads(nbHeads);
-        bs.setNrHiddenSectors(hiddenSectors);
+        System.out.println(bs);
 
-        fat = new Fat(fatSize, mediumDescriptor, bs.getSectorsPerFat(), bs.getBytesPerSector());
+        return new FatFormatter(totalSectors, FatType.FAT32, bs);
+    }
+
+    protected FatFormatter(int nbTotalSectors, FatType fatSize, BootSector bs) {
+        this.bs = bs;
+        
+//        bs.setNrRootDirEntries(mediumDescriptor == FLOPPY_DESC ? 224
+//                : calculateDefaultRootDirectorySize(bps, nbTotalSectors));
+
+        final int spf = (int) ((fatSize == FatType.FAT32) ?
+            bs.getSectorsPerFatEx() : bs.getSectorsPerFat());
+
+        fat = new Fat(fatSize,
+                bs.getMediumDescriptor(), spf, bs.getBytesPerSector());
         fat.setMediumDescriptor(bs.getMediumDescriptor());
         
         rootDir = new FatLfnDirectory(null, bs.getNrRootDirEntries());
@@ -138,7 +136,7 @@ public class FatFormatter {
      * @param label 
      * @throws IOException
      */
-    public void format(BlockDeviceAPI api, String label) throws IOException {
+    public void format(BlockDevice api, String label) throws IOException {
         bs.write(api);
         for (int i = 0; i < bs.getNrFats(); i++) {
             fat.write(api, FatUtils.getFatOffset(bs, i));
@@ -178,7 +176,7 @@ public class FatFormatter {
         (byte) 0x00, (byte) 0x68, (byte) 0x02, (byte) 0x00, (byte) 0x00,
         (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x02,
         (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x00,
-        (byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+        (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
         (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
         (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
         (byte) 0x00, (byte) 0x29, (byte) 0xcd, (byte) 0xa3, (byte) 0x9b,
