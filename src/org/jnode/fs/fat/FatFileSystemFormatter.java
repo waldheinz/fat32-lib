@@ -24,8 +24,6 @@ import java.io.IOException;
 
 import org.jnode.driver.block.BlockDeviceAPI;
 import org.jnode.fs.FileSystemException;
-import org.jnode.partitions.PartitionTableEntry;
-import org.jnode.partitions.ibm.IBMPartitionTableEntry;
 
 
 /**
@@ -43,7 +41,7 @@ public class FatFileSystemFormatter {
 
     /**
      * 
-     * @param device
+     * @param api 
      * @return
      * @throws FileSystemException
      */

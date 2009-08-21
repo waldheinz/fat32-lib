@@ -20,9 +20,6 @@
  
 package org.jnode.util;
 
-/**
- * @deprecated use DecimalPrefix or BinaryPrefix instead.
- */
 public enum SizeUnit {
     B(1l, "B"),
     K(1024l, "K"),
@@ -55,6 +52,7 @@ public enum SizeUnit {
         return unit;
     }
 
+    @Override
     public String toString() {
         return multiplier + ", " + unit;
     }

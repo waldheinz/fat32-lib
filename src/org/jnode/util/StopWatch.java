@@ -54,6 +54,7 @@ public final class StopWatch {
         return getElapsedTimed() > ms;
     }
 
+    @Override
     public String toString() {
         return String.valueOf(getElapsedTimed()) + "ms";
     }
