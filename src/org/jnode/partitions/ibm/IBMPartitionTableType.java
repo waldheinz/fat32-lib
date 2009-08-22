@@ -20,7 +20,6 @@
  
 package org.jnode.partitions.ibm;
 
-import org.jnode.driver.Device;
 import org.jnode.driver.block.BlockDevice;
 import org.jnode.partitions.PartitionTable;
 import org.jnode.partitions.PartitionTableException;
@@ -36,7 +35,10 @@ public class IBMPartitionTableType implements PartitionTableType {
     /**
      * @see org.jnode.partitions.PartitionTableType#create(org.jnode.driver.Device)
      */
-    public PartitionTable create(byte[] firstSector, Device device) throws PartitionTableException {
+    public PartitionTable<IBMPartitionTableEntry> create(
+            byte[] firstSector, BlockDevice device) throws
+            PartitionTableException {
+        
         return new IBMPartitionTable(this, firstSector, device);
     }
 

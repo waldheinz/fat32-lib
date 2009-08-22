@@ -20,7 +20,6 @@
  
 package org.jnode.partitions;
 
-import org.jnode.driver.Device;
 import org.jnode.driver.block.BlockDevice;
 
 /**
@@ -30,6 +29,8 @@ public interface PartitionTableType {
 
     /**
      * Gets the unique name of this partition table type.
+     * 
+     * @return
      */
     public String getName();
 
@@ -37,16 +38,20 @@ public interface PartitionTableType {
      * Can this partition table type be used on the given first sector of a
      * blockdevice?
      * 
+     * @param firstSector 
      * @param devApi
+     * @return 
      */
     public boolean supports(byte[] firstSector, BlockDevice devApi);
 
     /**
      * Create a partition table for a given device.
      * 
+     * @param firstSector
      * @param device
-     * @param readOnly
+     * @return
+     * @throws PartitionTableException
      */
-    public PartitionTable create(byte[] firstSector, Device device) throws PartitionTableException;
+    public PartitionTable<?> create(byte[] firstSector, BlockDevice device) throws PartitionTableException;
 
 }

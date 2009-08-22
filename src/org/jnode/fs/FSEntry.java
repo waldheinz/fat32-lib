@@ -86,16 +86,10 @@ public interface FSEntry extends FSObject {
      * if <code>isDirectory</code> returns true.
      * 
      * @return The directory described by this entry
+     * @throws IOException on read error
      */
     public FSDirectory getDirectory() throws IOException;
-
-    /**
-     * Gets the accessrights for this entry.
-     * 
-     * @throws IOException
-     */
-    public FSAccessRights getAccessRights() throws IOException;
-
+    
     /**
      * Indicate if the entry has been modified in memory (ie need to be saved)
      * 

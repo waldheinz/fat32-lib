@@ -23,14 +23,11 @@ package org.jnode.fs.fat;
 import java.io.IOException;
 import java.util.Date;
 
-import org.jnode.fs.FSAccessRights;
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
 import org.jnode.fs.FSFile;
-import org.jnode.fs.spi.UnixFSAccessRights;
 import org.jnode.fs.util.DosUtils;
 import org.jnode.util.LittleEndian;
-import org.jnode.util.NumberUtils;
 
 /**
  * @author epr
@@ -73,9 +70,6 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
     /** Directory this entry is a part of */
     private final AbstractDirectory parent;
 
-    /** access rights of the entry */
-    private final FSAccessRights rights;
-
     public static FatBasicDirEntry create(
             AbstractDirectory dir, byte[] src, int offset) {
         
@@ -117,7 +111,6 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
         this.flags = F_ARCHIVE;
         this.created = this.lastModified = this.lastAccessed = System.currentTimeMillis();
         this._dirty = false;
-        this.rights = new UnixFSAccessRights(getFileSystem());
     }
 
     /**
@@ -161,7 +154,6 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
         this.startCluster = LittleEndian.getUInt16(src, offset + 0x1a);
         this.length = LittleEndian.getUInt32(src, offset + 0x1c);
         this._dirty = false;
-        this.rights = new UnixFSAccessRights(getFileSystem());
     }
 
     /**
@@ -512,10 +504,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
         if (isArchive()) {
             b.append('A');
         }
-        b.append("(0x");
-        b.append(NumberUtils.hex(flags, 2));
-        b.append(")");
-
+        
         b.append(" created=");
         b.append(new Date(getCreated()));
         b.append(" lastModified=");
@@ -553,15 +542,5 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
      */
     public FSDirectory getParent() {
         return parent;
-    }
-
-    /**
-     * Gets the accessrights for this entry.
-     * 
-     * @return 
-     * @throws IOException
-     */
-    public FSAccessRights getAccessRights() throws IOException {
-        return rights;
     }
 }

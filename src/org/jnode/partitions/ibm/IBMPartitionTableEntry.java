@@ -23,7 +23,6 @@ package org.jnode.partitions.ibm;
 import org.jnode.driver.block.CHS;
 import org.jnode.partitions.PartitionTableEntry;
 import org.jnode.util.LittleEndian;
-import org.jnode.util.NumberUtils;
 
 /**
  * @author epr
@@ -52,6 +51,7 @@ public class IBMPartitionTableEntry implements PartitionTableEntry {
     }
 
     /**
+     * @return 
      * @see org.jnode.partitions.PartitionTableEntry#hasChildPartitionTable()
      */
     public boolean hasChildPartitionTable() {
@@ -142,26 +142,5 @@ public class IBMPartitionTableEntry implements PartitionTableEntry {
             LittleEndian.setInt8(bs, ofs + i, 0);
         }
     }
-
-    public String dump() {
-        StringBuilder b = new StringBuilder(64);
-        for (int i = 0; i < 16; i++) {
-            b.append(NumberUtils.hex(LittleEndian.getUInt8(bs, ofs + i), 2));
-            b.append(' ');
-        }
-        return b.toString();
-    }
-
-    /**
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        StringBuilder b = new StringBuilder(32);
-        b.append('[').append(getBootIndicator() ? 'A' : ' ').append(' ');
-        b.append(NumberUtils.hex(getSystemIndicator().getCode(), 2)).append(' ');
-        b.append("s:").append(getStartLba()).append(' ');
-        b.append("e:").append(getStartLba() + getNrSectors() - 1).append(']');
-        return b.toString();
-    }
-
+    
 }

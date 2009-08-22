@@ -53,7 +53,9 @@ public final class FatFile extends FatObject implements FSFile {
         this.isDir = isDir;
     }
 
-    public synchronized void read(long fileOffset, ByteBuffer destBuf) throws IOException {
+    public synchronized void read(long fileOffset, ByteBuffer destBuf)
+            throws IOException {
+
         int len = destBuf.remaining();
 
         final long max = isDir ? getLengthOnDisk() : getLength();
@@ -68,7 +70,8 @@ public final class FatFile extends FatObject implements FSFile {
         int chainIdx = (int) (fileOffset / clusterSize);
         if (fileOffset % clusterSize != 0) {
             int clusOfs = (int) (fileOffset % clusterSize);
-            int size = Math.min(len, (int) (clusterSize - (fileOffset % clusterSize) - 1));
+            int size = Math.min(len,
+                    (int) (clusterSize - (fileOffset % clusterSize) - 1));
             destBuf.limit(destBuf.position() + size);
             api.read(getDevOffset(chain[chainIdx], clusOfs), destBuf);
             fileOffset += size;
@@ -85,7 +88,8 @@ public final class FatFile extends FatObject implements FSFile {
         }
     }
 
-    public synchronized void write(long fileOffset, ByteBuffer srcBuf) throws IOException {
+    public synchronized void write(long fileOffset, ByteBuffer srcBuf)
+            throws IOException {
         
         if (getFileSystem().isReadOnly())
             throw new ReadOnlyFileSystemException(
@@ -106,7 +110,8 @@ public final class FatFile extends FatObject implements FSFile {
         int chainIdx = (int) (fileOffset / clusterSize);
         if (fileOffset % clusterSize != 0) {
             int clusOfs = (int) (fileOffset % clusterSize);
-            int size = Math.min(len, (int) (clusterSize - (fileOffset % clusterSize) - 1));
+            int size = Math.min(len,
+                    (int) (clusterSize - (fileOffset % clusterSize) - 1));
             srcBuf.limit(srcBuf.position() + size);
             api.write(getDevOffset(chain[chainIdx], clusOfs), srcBuf);
             fileOffset += size;
@@ -186,7 +191,7 @@ public final class FatFile extends FatObject implements FSFile {
         final long[] chain = fs.getFat().getChain(getStartCluster());
         return ((long) chain.length) * fs.getClusterSize();
     }
-
+    
     /**
      * Returns the startCluster.
      * 
@@ -220,7 +225,8 @@ public final class FatFile extends FatObject implements FSFile {
     protected long getDevOffset(long cluster, int clusterOffset) {
         final FatFileSystem fs = getFatFileSystem();
         final long filesOffset = FatUtils.getFilesOffset(fs.getBootSector());
-        return filesOffset + clusterOffset + ((cluster - FatUtils.FIRST_CLUSTER) * clusterSize);
+        return filesOffset + clusterOffset +
+                ((cluster - FatUtils.FIRST_CLUSTER) * clusterSize);
     }
 
     /**

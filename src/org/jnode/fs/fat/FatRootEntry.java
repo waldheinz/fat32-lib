@@ -22,7 +22,6 @@ package org.jnode.fs.fat;
 
 import java.io.IOException;
 
-import org.jnode.fs.FSAccessRights;
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
 import org.jnode.fs.FSFile;
@@ -103,16 +102,7 @@ public class FatRootEntry extends FatObject implements FSEntry {
     public FSDirectory getDirectory() {
         return rootDir;
     }
-
-    /**
-     * Gets the accessrights for this entry.
-     * 
-     * @throws IOException
-     */
-    public FSAccessRights getAccessRights() throws IOException {
-        throw new UnsupportedOperationException("not implemented yet");
-    }
-
+    
     /**
      * Indicate if the entry has been modified in memory (ie need to be saved)
      * @return true if the entry need to be saved

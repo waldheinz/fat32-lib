@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import java.util.logging.Logger;
-import org.jnode.driver.Device;
 import org.jnode.driver.block.BlockDevice;
 import org.jnode.partitions.PartitionTable;
 import org.jnode.partitions.PartitionTableType;
@@ -45,7 +44,7 @@ public class IBMPartitionTable implements PartitionTable<IBMPartitionTableEntry>
     private final IBMPartitionTableEntry[] partitions;
 
     /** The device */
-    private final Device drivedDevice;
+    private final BlockDevice drivedDevice;
 
     /** Extended partition */
     private final ArrayList<IBMPartitionTableEntry> extendedPartitions =
@@ -61,9 +60,11 @@ public class IBMPartitionTable implements PartitionTable<IBMPartitionTableEntry>
     /**
      * Create a new instance
      * 
+     * @param tableType 
      * @param bootSector
+     * @param device 
      */
-    public IBMPartitionTable(IBMPartitionTableType tableType, byte[] bootSector, Device device) {
+    public IBMPartitionTable(IBMPartitionTableType tableType, byte[] bootSector, BlockDevice device) {
         // this.bootSector = bootSector;
         this.tableType = tableType;
         this.drivedDevice = device;
@@ -92,8 +93,7 @@ public class IBMPartitionTable implements PartitionTable<IBMPartitionTableEntry>
         final ByteBuffer sector = ByteBuffer.allocate(SECTOR_SIZE);
         try {
             log.finer("Try to read the Extended Partition Table");
-            BlockDevice api = drivedDevice.getAPI();
-            api.read(startLBA * SECTOR_SIZE, sector);
+            drivedDevice.read(startLBA * SECTOR_SIZE, sector);
         } catch (IOException e) {
             // I think we ca'nt get it
             log.severe("IOException");
@@ -124,6 +124,7 @@ public class IBMPartitionTable implements PartitionTable<IBMPartitionTableEntry>
      * Does the given bootsector contain an IBM partition table?
      * 
      * @param bootSector
+     * @return 
      */
     public static boolean containsPartitionTable(byte[] bootSector) {
         if ((bootSector[510] & 0xFF) != 0x55) {

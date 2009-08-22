@@ -34,6 +34,7 @@ import org.jnode.fs.FileSystemException;
 /**
  * Abstract class with common things in different FileSystem implementations
  * 
+ * @param <T> 
  * @author Fabien DUMINY
  */
 public abstract class AbstractFileSystem<T extends FSEntry> implements FileSystem {
@@ -53,7 +54,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
     /**
      * Construct an AbstractFileSystem in specified readOnly mode
      * 
-     * @param device
+     * @param api 
      * @param readOnly
      * @throws FileSystemException
      */
@@ -89,11 +90,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
             api.flush();
             files.clear();
             directories.clear();
-
-            // these fields are final, can't nullify them
-            // device = null;
-            // api = null;
-
+            
             rootEntry = null;
             files = null;
             directories = null;
@@ -120,7 +117,6 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
 
     /**
      * @return Returns the FSApi.
-     * @throws ApiNotFoundException
      */
     public final BlockDevice getFSApi() {
         return api;

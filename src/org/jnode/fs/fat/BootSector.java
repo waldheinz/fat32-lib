@@ -29,7 +29,6 @@ import org.jnode.driver.block.Geometry.GeometryException;
 import org.jnode.partitions.ibm.IBMPartitionTable;
 import org.jnode.partitions.ibm.IBMPartitionTableEntry;
 import org.jnode.partitions.ibm.IBMPartitionTypes;
-import org.jnode.util.NumberUtils;
 
 /**
  * @author epr
@@ -440,14 +439,7 @@ public class BootSector extends Sector {
         res.append("Nr Root Dir Entries = ");
         res.append(getNrRootDirEntries());
         res.append('\n');
-
-        for (int i = 0; i < data.length / 16; i++) {
-            res.append(Integer.toHexString(i));
-            res.append('-');
-            res.append(NumberUtils.hex(data, i * 16, 16));
-            res.append('\n');
-        }
-
+        
         return res.toString();
     }
 }

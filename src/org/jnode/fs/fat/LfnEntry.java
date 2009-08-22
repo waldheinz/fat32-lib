@@ -23,7 +23,6 @@ package org.jnode.fs.fat;
 import java.io.IOException;
 import java.util.List;
 
-import org.jnode.fs.FSAccessRights;
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
 import org.jnode.fs.FSFile;
@@ -159,10 +158,6 @@ class LfnEntry implements FSEntry {
 
     public FSDirectory getDirectory() throws IOException {
         return realEntry.getDirectory();
-    }
-
-    public FSAccessRights getAccessRights() throws IOException {
-        return realEntry.getAccessRights();
     }
 
     public boolean isValid() {
