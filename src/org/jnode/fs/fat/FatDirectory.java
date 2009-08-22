@@ -33,7 +33,8 @@ import org.jnode.fs.FSEntry;
 public class FatDirectory extends AbstractDirectory {
 
     private boolean root = false;
-    private String label;
+
+    protected FatDirEntry labelEntry;
 
     /**
      * Constructor for Directory.
@@ -55,6 +56,11 @@ public class FatDirectory extends AbstractDirectory {
         root = true;
     }
 
+    String getLabel() {
+        if (labelEntry != null) return labelEntry.getName();
+        else return null;
+    }
+    
     public boolean isRoot() {
         return this.root;
     }
@@ -73,8 +79,26 @@ public class FatDirectory extends AbstractDirectory {
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
         file.read(0, data);
         read(data.array());
-
         resetDirty();
+    }
+
+    @Override
+    protected synchronized void read(byte[] src) {
+        super.read(src);
+        findLabelEntry();
+    }
+    
+    private void findLabelEntry() {
+        for (int i=0; i < entries.size(); i++) {
+            if (entries.get(i) instanceof FatDirEntry) {
+                FatDirEntry e = (FatDirEntry) entries.get(i);
+                if (e.isLabel()) {
+                    labelEntry = e;
+                    entries.set(i, null);
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -84,8 +108,6 @@ public class FatDirectory extends AbstractDirectory {
      * @throws IOException on write error
      */
     protected synchronized void write() throws IOException {
-        if (label != null)
-            applyLabel();
         // TODO optimize it also to use ByteBuffer at lower level
         // final byte[] data = new byte[entries.size() * 32];
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
@@ -108,8 +130,6 @@ public class FatDirectory extends AbstractDirectory {
     }
 
     public synchronized void write(BlockDevice device, long offset) throws IOException {
-        if (label != null)
-            applyLabel();
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
         write(data.array());
         device.write(offset, data);
@@ -137,42 +157,38 @@ public class FatDirectory extends AbstractDirectory {
     protected boolean canChangeSize(int newSize) {
         return !root;
     }
-
-    /**
-     * Set the label
-     * 
-     * @param label
-     * @throws IOException on write error
-     */
-    public void setLabel(String label) throws IOException {
+    
+    void setLabel(String label) throws IOException {
         if (!root) {
             throw new IOException(
                     "volume name change on non-root directory"); //NOI18N
         }
 
-        this.label = label;
-    }
-
-    private void applyLabel() throws IOException {
-        FatDirEntry labelEntry = null;
-        Iterator<FSEntry> i = iterator();
-        FatDirEntry current;
-        while (labelEntry == null && i.hasNext()) {
-            current = (FatDirEntry) i.next();
-            if (current.isLabel() &&
-                    !(current.isHidden() && current.isReadonly() && current.isSystem())) {
-                labelEntry = current;
+        if (label != null) {
+            Iterator<FSEntry> i = iterator();
+            FatDirEntry current;
+            while (labelEntry == null && i.hasNext()) {
+                current = (FatDirEntry) i.next();
+                if (current.isLabel() &&
+                        !(current.isHidden() && current.isReadonly() && current.isSystem())) {
+                    labelEntry = current;
+                }
             }
-        }
-        if (labelEntry == null) {
-            labelEntry = addFatFile(label);
-            labelEntry.setLabel();
-        }
-        labelEntry.setName(label);
-        if (label.length() > 8) {
-            labelEntry.setExt(label.substring(8));
+
+            if (labelEntry == null) {
+                labelEntry = addFatFile(label);
+                labelEntry.setLabel();
+            }
+
+            labelEntry.setName(label);
+
+            if (label.length() > 8) {
+                labelEntry.setExt(label.substring(8));
+            } else {
+                labelEntry.setExt("");
+            }
         } else {
-            labelEntry.setExt("");
+            labelEntry = null;
         }
     }
 }

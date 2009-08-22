@@ -81,7 +81,7 @@ public class Utils {
         for (int pos=0; pos < bb.remaining(); pos++) {
             final int b = bb.get(bb.position() + pos) & 0xff;
 
-            if (inLine == 0) ps.print(hexOffset(pos, 4));
+            if (inLine == 0) ps.print(hexOffset(pos, 6));
 
             ps.print(Character.forDigit(b / 16, 16));
             ps.print(Character.forDigit(b % 16, 16));

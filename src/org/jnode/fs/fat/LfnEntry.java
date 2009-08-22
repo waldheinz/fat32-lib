@@ -31,7 +31,7 @@ import org.jnode.fs.FileSystem;
 /**
  * @author gbin
  */
-class LfnEntry implements FSEntry {
+public class LfnEntry implements FSEntry {
     // decompacted LFN entry
     private String fileName;
     // TODO: Make them available

@@ -39,7 +39,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     private final Fat fat;
     private final FsInfoSector fsInfo;
     private final BootSector bs;
-    private final FatDirectory rootDir;
+    private final FatLfnDirectory rootDir;
     private final FatRootEntry rootEntry;
     private final HashMap<FatDirEntry, FatFile> files =
             new HashMap<FatDirEntry, FatFile>();
@@ -112,6 +112,25 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     }
 
     /**
+     * Returns the volume label of this file system.
+     *
+     * @return the volume label
+     */
+    public String getVolumeLabel() {
+        return getRootDir().getLabel();
+    }
+
+    /**
+     * Sets the volume label for this file system.
+     *
+     * @param label the new volume label, may be {@code null}
+     * @throws IOException on write error
+     */
+    public void setVolumeLabel(String label) throws IOException {
+        getRootDir().setLabel(label);
+    }
+
+    /**
      * Flush all changed structures to the device.
      * 
      * @throws IOException
@@ -125,7 +144,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
             bs.write(api);
         }
 
-        if (fsInfo.isDirty()) fsInfo.write();
+        if (fsInfo != null && fsInfo.isDirty()) fsInfo.write();
         
         for (FatFile f : files.values()) {
             f.flush();
@@ -199,7 +218,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
      *
      * @return RootDirectory
      */
-    public FatDirectory getRootDir() {
+    public FatLfnDirectory getRootDir() {
         return rootDir;
     }
 

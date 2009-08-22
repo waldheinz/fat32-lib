@@ -142,16 +142,18 @@ public class FatFormatter {
      */
     public void format(BlockDevice api, String label) throws IOException {
         bs.write(api);
+        
         for (int i = 0; i < bs.getNrFats(); i++) {
             fat.write(api, FatUtils.getFatOffset(bs, i));
         }
+
         rootDir.write(api, FatUtils.getRootDirOffset(bs));
         api.flush();
 
         if (label != null) {
             try {
                 FatFileSystem fs = new FatFileSystem(api, false);
-                fs.getRootDir().setLabel(label);
+                fs.setVolumeLabel(label);
                 fs.flush();
                 api.flush();
             } catch (FileSystemException ex) {

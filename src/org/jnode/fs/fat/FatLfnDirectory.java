@@ -60,9 +60,9 @@ public class FatLfnDirectory extends FatDirectory {
     public FatLfnDirectory(FatFileSystem fs, int nrEntries) {
         super(fs, nrEntries);
     }
-
+    
     @Override
-    public FSEntry addFile(String name) throws IOException {
+    public LfnEntry addFile(String name) throws IOException {
         if (getFileSystem().isReadOnly()) {
             throw new ReadOnlyFileSystemException("addFile in readonly filesystem");
         }
@@ -182,6 +182,8 @@ public class FatLfnDirectory extends FatDirectory {
 
     private void updateLFN() throws IOException {
         ArrayList<FatBasicDirEntry> destination = new ArrayList<FatBasicDirEntry>();
+
+        if (labelEntry != null) destination.add(labelEntry);
 
         for (LfnEntry currentEntry : shortNameIndex.values()) {
             FatBasicDirEntry[] encoded = currentEntry.compactForm();

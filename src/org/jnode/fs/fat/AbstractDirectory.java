@@ -96,7 +96,6 @@ public abstract class AbstractDirectory
             if (e == null) {
                 entries.set(i, newEntry);
                 setDirty();
-                flush();
                 return newEntry;
             }
         }
@@ -105,7 +104,6 @@ public abstract class AbstractDirectory
         if (canChangeSize(newSize)) {
             entries.setSize(newSize);
             setDirty();
-            flush();
             return newEntry;
         }
         

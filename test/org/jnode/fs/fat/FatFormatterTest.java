@@ -1,8 +1,12 @@
 
 package org.jnode.fs.fat;
 
+import com.meetwise.fat32.Utils;
+import java.nio.ByteBuffer;
+import java.util.Iterator;
 import org.jnode.driver.block.BlockDevice;
 import org.jnode.driver.block.RamDisk;
+import org.jnode.fs.FSEntry;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -23,14 +27,40 @@ public class FatFormatterTest {
 
         FatFileSystem fs = new FatFileSystem(d, false);
         final BootSector bs = fs.getBootSector();
-        System.out.println(bs);
-//        Utils.hexDump(System.out, ByteBuffer.wrap(bs.data));
         
         assertEquals(2, bs.getNrFats());
         assertEquals(d.getSectorSize(), bs.getBytesPerSector());
         assertTrue(bs.getNrRootDirEntries() % d.getSectorSize() == 0);
-        System.out.println(bs.getNrLogicalSectors());
         
         assertTrue(fs.getClusterSize() < 32 * 1024);
+    }
+
+    @Test
+    public void testVolumeLabel() throws Exception {
+        System.out.println("testVolumeLabel");
+        
+        BlockDevice d = new RamDisk(512 * 1024);
+
+        FatFormatter ff = FatFormatter.superFloppyFormatter(d);
+        ff.format(d, "TESTVOL");
+
+        FatFileSystem fs = new FatFileSystem(d, false);
+
+        ByteBuffer bb = ByteBuffer.allocate(128);
+        d.read(FatUtils.getRootDirOffset(fs.getBootSector()), bb);
+        bb.flip();
+        Utils.hexDump(System.out, bb);
+        
+        assertEquals("TESTVOL", fs.getVolumeLabel());
+        
+        final FatLfnDirectory root = fs.getRootDir();
+        final Iterator<FSEntry> i = root.iterator();
+
+        assertFalse(i.hasNext());
+    }
+
+    public static void main(String[] args) throws Exception {
+        FatFormatterTest t = new FatFormatterTest();
+        t.testVolumeLabel();
     }
 }
