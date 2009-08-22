@@ -25,19 +25,23 @@ import java.util.Iterator;
 
 /**
  * @author epr
+ * @author Matthias Treydte
  */
-public interface FSDirectory extends FSObject {
+public interface FSDirectory extends FSObject, Iterable<FSEntry> {
 
     /**
      * Gets an iterator used to iterate over all the entries of this directory.
      * All elements returned by the iterator must be instanceof FSEntry.
+     *
+     * @return 
      */
-    public Iterator<? extends FSEntry> iterator() throws IOException;
+    public Iterator<FSEntry> iterator();
 
     /**
      * Gets the entry with the given name.
      * 
      * @param name
+     * @return 
      * @throws IOException
      */
     public FSEntry getEntry(String name) throws IOException;
@@ -46,6 +50,7 @@ public interface FSDirectory extends FSObject {
      * Add a new file with a given name to this directory.
      * 
      * @param name
+     * @return 
      * @throws IOException
      */
     public FSEntry addFile(String name) throws IOException;
@@ -54,6 +59,7 @@ public interface FSDirectory extends FSObject {
      * Add a new (sub-)directory with a given name to this directory.
      * 
      * @param name
+     * @return 
      * @throws IOException
      */
     public FSEntry addDirectory(String name) throws IOException;
@@ -72,5 +78,4 @@ public interface FSDirectory extends FSObject {
      * @throws IOException
      */
     public void flush() throws IOException;
-
 }

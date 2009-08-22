@@ -40,24 +40,32 @@ public class FatDirectory extends AbstractDirectory {
      * 
      * @param fs
      * @param file
+     * @throws IOException on read error
      */
     public FatDirectory(FatFileSystem fs, FatFile file) throws IOException {
         super(fs, file);
+        
         this.file = file;
-        read();
     }
 
     // for root
     protected FatDirectory(FatFileSystem fs, int nrEntries) {
         super(fs, nrEntries, null);
+        
         root = true;
+    }
+
+    public boolean isRoot() {
+        return this.root;
     }
 
     /**
      * Read the contents of this directory from the persistent storage at the
      * given offset.
+     * 
+     * @throws IOException on read error
      */
-    protected synchronized void read() throws IOException {
+    protected void read() throws IOException {
         entries.setSize((int) file.getLengthOnDisk() / 32);
 
         // TODO optimize it also to use ByteBuffer at lower level
@@ -72,6 +80,8 @@ public class FatDirectory extends AbstractDirectory {
     /**
      * Write the contents of this directory to the given persistent storage at
      * the given offset.
+     *
+     * @throws IOException on write error
      */
     protected synchronized void write() throws IOException {
         if (label != null)
@@ -83,6 +93,7 @@ public class FatDirectory extends AbstractDirectory {
         if (canChangeSize(entries.size())) {
             file.setLength(data.capacity());
         }
+        
         write(data.array());
         // file.write(0, data, 0, data.length);
         file.write(0, data);
@@ -92,8 +103,6 @@ public class FatDirectory extends AbstractDirectory {
     public synchronized void read(BlockDevice device, long offset) throws IOException {
         ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
         device.read(offset, data);
-        // System.out.println("Directory at offset :" + offset);
-        // System.out.println("Length in bytes = " + entries.size() * 32);
         read(data.array());
         resetDirty();
     }
@@ -133,11 +142,14 @@ public class FatDirectory extends AbstractDirectory {
      * Set the label
      * 
      * @param label
+     * @throws IOException on write error
      */
     public void setLabel(String label) throws IOException {
         if (!root) {
-            throw new IOException("You cannot change the volume name on a non-root directory");
+            throw new IOException(
+                    "volume name change on non-root directory"); //NOI18N
         }
+
         this.label = label;
     }
 

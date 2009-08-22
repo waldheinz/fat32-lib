@@ -33,7 +33,7 @@ import org.jnode.fs.ReadOnlyFileSystemException;
  * 
  * @author epr
  */
-public class FatFile extends FatObject implements FSFile {
+public final class FatFile extends FatObject implements FSFile {
     private long startCluster;
     private long length;
     private FatDirectory dir;
@@ -41,9 +41,11 @@ public class FatFile extends FatObject implements FSFile {
     private boolean isDir;
     private final FatDirEntry myEntry;
 
-    public FatFile(FatFileSystem fs, FatDirEntry myEntry, long startCluster, long length,
-            boolean isDir) {
+    public FatFile(FatFileSystem fs, FatDirEntry myEntry,
+            long startCluster, long length, boolean isDir) {
+        
         super(fs);
+
         this.myEntry = myEntry;
         this.startCluster = startCluster;
         this.length = length;
@@ -54,10 +56,10 @@ public class FatFile extends FatObject implements FSFile {
     public synchronized void read(long fileOffset, ByteBuffer destBuf) throws IOException {
         int len = destBuf.remaining();
 
-        final long max = (isDir) ? getLengthOnDisk() : getLength();
-        if (fileOffset + len > max) {
-            throw new IOException("Cannot read beyond the EOF");
-        }
+        final long max = isDir ? getLengthOnDisk() : getLength();
+        
+        if (fileOffset + len > max)
+            throw new IOException("Cannot read beyond EOF"); //NOI18N
 
         final FatFileSystem fs = getFatFileSystem();
         final long[] chain = fs.getFat().getChain(startCluster);
@@ -73,6 +75,7 @@ public class FatFile extends FatObject implements FSFile {
             len -= size;
             chainIdx++;
         }
+
         while (len > 0) {
             int size = Math.min(clusterSize, len);
             destBuf.limit(destBuf.position() + size);
@@ -83,21 +86,18 @@ public class FatFile extends FatObject implements FSFile {
     }
 
     public synchronized void write(long fileOffset, ByteBuffer srcBuf) throws IOException {
-        int len = srcBuf.remaining();
-
-        if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException("write in readonly filesystem");
-        }
+        
+        if (getFileSystem().isReadOnly())
+            throw new ReadOnlyFileSystemException(
+                    "write in readonly filesystem"); //NOI18N
 
         final long max = (isDir) ? getLengthOnDisk() : getLength();
-        if (fileOffset > max) {
-            throw new IOException("Cannot write beyond the EOF");
-        }
+        if (fileOffset > max)
+            throw new IOException("can not write beyond EOF"); //NOI18N
 
-        if (fileOffset + len > max) { // this is too short increase the size
-                                        // of the file
+        int len = srcBuf.remaining();
+        if (fileOffset + len > max)
             setLength(fileOffset + len);
-        }
 
         final FatFileSystem fs = getFatFileSystem();
         final long[] chain = fs.getFat().getChain(getStartCluster());
@@ -129,19 +129,15 @@ public class FatFile extends FatObject implements FSFile {
      */
     public synchronized void setLength(long length) throws IOException {
 
-        if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException("setLength in readonly filesystem");
-        }
+        if (getFileSystem().isReadOnly()) throw new 
+                ReadOnlyFileSystemException("readonly filesystem"); //NOI18N
 
-        if (this.length == length) {
-            // Do nothing
-            return;
-        }
-
+        if (this.length == length) return;
+        
         final FatFileSystem fs = getFatFileSystem();
         final Fat fat = fs.getFat();
         final int nrClusters = (int) ((length + clusterSize - 1) / clusterSize);
-
+        
         if (this.length == 0) {
             final long[] chain = fat.allocNew(nrClusters);
             this.startCluster = chain[0];
@@ -186,13 +182,9 @@ public class FatFile extends FatObject implements FSFile {
      * @return long
      */
     public long getLengthOnDisk() {
-        if (this.length == 0) {
-            return 0;
-        } else {
-            final FatFileSystem fs = getFatFileSystem();
-            final long[] chain = fs.getFat().getChain(getStartCluster());
-            return ((long) chain.length) * fs.getClusterSize();
-        }
+        final FatFileSystem fs = getFatFileSystem();
+        final long[] chain = fs.getFat().getChain(getStartCluster());
+        return ((long) chain.length) * fs.getClusterSize();
     }
 
     /**
@@ -208,12 +200,13 @@ public class FatFile extends FatObject implements FSFile {
      * Gets the directory contained in this file.
      * 
      * @return Directory
+     * @throws IOException on read error
      */
     public synchronized FatDirectory getDirectory() throws IOException {
         if (dir == null) {
-            final FatFileSystem fs = getFatFileSystem();
-            dir = new FatLfnDirectory(fs, this);
+            dir = new FatLfnDirectory(getFatFileSystem(), this);
         }
+        
         return dir;
     }
 

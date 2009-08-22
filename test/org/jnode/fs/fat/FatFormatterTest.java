@@ -1,8 +1,6 @@
 
 package org.jnode.fs.fat;
 
-import com.meetwise.fat32.Utils;
-import java.nio.ByteBuffer;
 import org.jnode.driver.block.BlockDevice;
 import org.jnode.driver.block.RamDisk;
 import org.junit.Test;
@@ -26,12 +24,12 @@ public class FatFormatterTest {
         FatFileSystem fs = new FatFileSystem(d, false);
         final BootSector bs = fs.getBootSector();
 
-        Utils.hexDump(System.out, ByteBuffer.wrap(bs.data));
+//        Utils.hexDump(System.out, ByteBuffer.wrap(bs.data));
         
         assertEquals(2, bs.getNrFats());
         assertEquals(d.getSectorSize(), bs.getBytesPerSector());
         assertTrue(bs.getNrRootDirEntries() % d.getSectorSize() == 0);
-        
+
+        assertTrue(fs.getClusterSize() < 32 * 1024);
     }
-    
 }

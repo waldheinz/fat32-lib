@@ -35,12 +35,14 @@ import org.jnode.fs.spi.AbstractFileSystem;
  * @author Matthias Treydte
  */
 public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
-    private BootSector bs;
-    private FsInfoSector fsInfo;
-    private Fat fat;
+    
+    private final Fat fat;
+    private final FsInfoSector fsInfo;
+    private final BootSector bs;
     private final FatDirectory rootDir;
     private final FatRootEntry rootEntry;
-    private final HashMap<FatDirEntry, FatFile> files = new HashMap<FatDirEntry, FatFile>();
+    private final HashMap<FatDirEntry, FatFile> files =
+            new HashMap<FatDirEntry, FatFile>();
 
     /**
      * Constructor for FatFileSystem in specified readOnly mode
@@ -58,15 +60,14 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
             bs = new BootSector(512);
             bs.read(getApi());
 
-            this.fsInfo = new FsInfoSector(bs, getApi());
-            System.out.println(fsInfo);
+            //this.fsInfo = new FsInfoSector(bs, getApi());
+            this.fsInfo = null;
 
             if (!bs.isaValidBootSector()) throw new FileSystemException(
                     "invalid boot sector"); //NOI18N
 
             Fat[] fats = new Fat[bs.getNrFats()];
-            rootDir = new FatLfnDirectory(this, bs.getNrRootDirEntries());
-            FatType bitSize;
+            final FatType bitSize;
 
             if (bs.getMediumDescriptor() == 0xf8) {
                 bitSize = FatType.FAT16;
@@ -84,14 +85,16 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
             
             for (int i = 1; i < fats.length; i++) {
                 if (!fats[0].equals(fats[i])) {
-                    System.out.println("FAT " + i + " differs from FAT 0");
+                    throw new FileSystemException(
+                            "FAT " + i + " differs from FAT 0");
                 }
             }
             
             fat = fats[0];
+            rootDir = new FatLfnDirectory(this, bs.getNrRootDirEntries());
             rootDir.read(getApi(), FatUtils.getRootDirOffset(bs));
+            
             rootEntry = new FatRootEntry(rootDir);
-            // files = new FatFile[fat.getNrEntries()];
         } catch (IOException ex) {
             throw new FileSystemException(ex);
         } catch (Exception e) { // something bad happened in the FAT boot
@@ -150,13 +153,14 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
      * @return 
      */
     public synchronized FatFile getFile(FatDirEntry entry) {
-
         FatFile file = files.get(entry);
+        
         if (file == null) {
-            file = new FatFile(
-                    this, entry, entry.getStartCluster(), entry.getLength(), entry.isDirectory());
+            file = new FatFile(this, entry, entry.getStartCluster(),
+                    entry.getLength(), entry.isDirectory());
             files.put(entry, file);
         }
+        
         return file;
     }
 

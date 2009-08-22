@@ -1,8 +1,11 @@
 
 package org.jnode.driver.block;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.zip.GZIPInputStream;
 
 /**
  * A {@link BlockDevice} that lives entirely in heap memory. This is basically
@@ -20,6 +23,41 @@ public final class RamDisk implements BlockDevice {
     private final int sectorSize;
     private final ByteBuffer data;
     private final int size;
+
+    /**
+     * 
+     *
+     * @param in
+     * @return
+     * @throws IOException on read error
+     */
+    public static RamDisk readGzipped(InputStream in) throws IOException {
+        final GZIPInputStream zis = new GZIPInputStream(in);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        
+        final byte[] buffer = new byte[4096];
+        
+        int read = zis.read(buffer);
+        int total = 0;
+        
+        while (read >= 0) {
+            total += read;
+            bos.write(buffer, 0, read);
+            read = zis.read(buffer);
+        }
+
+        if (total < DEFAULT_SECTOR_SIZE) throw new IOException(
+                "read only " + total + " bytes"); //NOI18N
+                
+        final ByteBuffer bb = ByteBuffer.wrap(bos.toByteArray(), 0, total);
+        return new RamDisk(bb, DEFAULT_SECTOR_SIZE);
+    }
+    
+    private RamDisk(ByteBuffer buffer, int sectorSize) {
+        this.size = buffer.limit();
+        this.sectorSize = sectorSize;
+        this.data = buffer;
+    }
 
     /**
      * Creates a new instance of {@code RamDisk} of this specified

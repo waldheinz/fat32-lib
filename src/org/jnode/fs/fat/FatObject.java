@@ -28,11 +28,16 @@ import org.jnode.fs.FileSystem;
  */
 public abstract class FatObject implements FSObject {
 
-    /** The filesystem I'm a part of */
+    /** 
+     * The filesystem I'm a part of
+     */
     private final FatFileSystem fs;
-    /** Is this object still valid? */
-    private boolean valid;
 
+    /** 
+     * Is this object still valid?
+     */
+    private boolean valid;
+    
     public FatObject(FatFileSystem fs) {
         this.fs = fs;
         this.valid = true;
@@ -44,6 +49,8 @@ public abstract class FatObject implements FSObject {
      * An object is not valid anymore if it has been removed from the filesystem.
      * All invocations on methods (exception this method) of invalid objects 
      * must throw an IOException.
+     * 
+     * @return
      */
     public final boolean isValid() {
         return valid;
@@ -58,6 +65,7 @@ public abstract class FatObject implements FSObject {
 
     /**
      * Gets the filesystem I'm a part of.
+     * @return 
      */
     public final FileSystem getFileSystem() {
         return fs;
@@ -65,6 +73,7 @@ public abstract class FatObject implements FSObject {
 
     /**
      * Gets the filesystem I'm a part of.
+     * @return 
      */
     public final FatFileSystem getFatFileSystem() {
         return fs;

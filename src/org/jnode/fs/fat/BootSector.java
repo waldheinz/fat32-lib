@@ -85,10 +85,13 @@ public class BootSector extends Sector {
      */
     public String getOemName() {
         StringBuilder b = new StringBuilder(8);
+        
         for (int i = 0; i < 8; i++) {
             int v = data[0x3 + i];
+            if (v == 0) break;
             b.append((char) v);
         }
+        
         return b.toString();
     }
 
@@ -142,8 +145,12 @@ public class BootSector extends Sector {
 
     /**
      * Sets the number of sectors/cluster
+     *
+     * @param v the new number of sectors per cluster
      */
     public void setSectorsPerCluster(int v) {
+        if (v == getSectorsPerCluster()) return;
+        
         set8(0x0d, v);
     }
     
@@ -158,8 +165,12 @@ public class BootSector extends Sector {
 
     /**
      * Sets the number of reserved (for bootrecord) sectors
+     * 
+     * @param v the new number of reserved sectors
      */
     public void setNrReservedSectors(int v) {
+        if (v == getNrReservedSectors()) return;
+        
         set16(0xe, v);
     }
 
@@ -174,8 +185,12 @@ public class BootSector extends Sector {
 
     /**
      * Sets the number of fats
+     *
+     * @param v the new number of fats
      */
     public void setNrFats(int v) {
+        if (v == getNrFats()) return;
+        
         set8(0x10, v);
     }
 
@@ -190,8 +205,12 @@ public class BootSector extends Sector {
 
     /**
      * Sets the number of entries in the root directory
+     * 
+     * @param v the new number of entries in the root directory
      */
     public void setNrRootDirEntries(int v) {
+        if (v == getNrRootDirEntries()) return;
+        
         set16(0x11, v);
     }
 
@@ -210,8 +229,12 @@ public class BootSector extends Sector {
     
     /**
      * Sets the number of logical sectors
+     * 
+     * @param v the new number of logical sectors
      */
     public void setNrLogicalSectors(int v) {
+        if (v == getNrLogicalSectors()) return;
+        
         set16(0x13, v);
     }
 
@@ -219,6 +242,10 @@ public class BootSector extends Sector {
         set32(0x20, v);
     }
     
+    public long getNrTotalSectors() {
+        return get32(0x20);
+    }
+
     /**
      * Gets the medium descriptor byte
      * 
@@ -230,6 +257,8 @@ public class BootSector extends Sector {
 
     /**
      * Sets the medium descriptor byte
+     * 
+     * @param v the new medium descriptor
      */
     public void setMediumDescriptor(int v) {
         set8(0x15, v);
@@ -254,8 +283,12 @@ public class BootSector extends Sector {
     
     /**
      * Sets the number of sectors/fat
+     * 
+     * @param v  the new number of sectors per fat
      */
     public void setSectorsPerFat(int v) {
+        if (v == getSectorsPerFat()) return;
+        
         set16(0x16, v);
     }
 
@@ -270,8 +303,12 @@ public class BootSector extends Sector {
 
     /**
      * Sets the number of sectors/track
+     *
+     * @param v the new number of sectors per track
      */
     public void setSectorsPerTrack(int v) {
+        if (v == getSectorsPerTrack()) return;
+        
         set16(0x18, v);
     }
 
@@ -286,8 +323,12 @@ public class BootSector extends Sector {
 
     /**
      * Sets the number of heads
+     * 
+     * @param v the new number of heads
      */
     public void setNrHeads(int v) {
+        if (v == getNrHeads()) return;
+        
         set16(0x1a, v);
     }
 
@@ -302,8 +343,12 @@ public class BootSector extends Sector {
 
     /**
      * Sets the number of hidden sectors
+     *
+     * @param v the new number of hidden sectors
      */
     public void setNrHiddenSectors(int v) {
+        if (v == getNrHiddenSectors()) return;
+        
         set16(0x1c, v);
     }
 
@@ -345,6 +390,7 @@ public class BootSector extends Sector {
         return partitions[partNr];
     }
 
+    @Override
     public String toString() {
         StringBuilder res = new StringBuilder(1024);
         res.append("Bootsector :\n");

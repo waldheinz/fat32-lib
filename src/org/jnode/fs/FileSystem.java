@@ -25,17 +25,23 @@ import java.io.IOException;
 
 /**
  * @author epr
+ * @author Matthias Treydte
  */
 public interface FileSystem {
     
     /**
      * Gets the root entry of this filesystem. This is usually a directory, but
      * this is not required.
+     * 
+     * @return
+     * @throws IOException on read error
      */
     public FSEntry getRootEntry() throws IOException;
 
     /**
      * Is the file system. mounted in read-only mode ?
+     *
+     * @return 
      */
     public boolean isReadOnly();
 
@@ -50,6 +56,8 @@ public interface FileSystem {
 
     /**
      * Is this file system. closed.
+     * 
+     * @return 
      */
     public boolean isClosed();
 
@@ -74,5 +82,6 @@ public interface FileSystem {
      */
     public long getUsableSpace() throws IOException;
 
+    
     public void flush() throws IOException;
 }

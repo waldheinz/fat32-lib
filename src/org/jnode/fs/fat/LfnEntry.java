@@ -21,7 +21,7 @@
 package org.jnode.fs.fat;
 
 import java.io.IOException;
-import java.util.Vector;
+import java.util.List;
 
 import org.jnode.fs.FSAccessRights;
 import org.jnode.fs.FSDirectory;
@@ -47,7 +47,7 @@ class LfnEntry implements FSEntry {
         fileName = longName.trim();
     }
 
-    public LfnEntry(FatLfnDirectory parent, Vector<?> entries, int offset, int length) {
+    public LfnEntry(FatLfnDirectory parent, List<?> entries, int offset, int length) {
         this.parent = parent;
         // this is just an old plain 8.3 entry, copy it;
         if (length == 1) {
@@ -177,6 +177,7 @@ class LfnEntry implements FSEntry {
         return realEntry.isDeleted();
     }
 
+    @Override
     public String toString() {
         return "LFN = " + fileName + " / SFN = " + realEntry.getName();
     }

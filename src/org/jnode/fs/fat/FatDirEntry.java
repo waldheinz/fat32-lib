@@ -76,7 +76,9 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
     /** access rights of the entry */
     private final FSAccessRights rights;
 
-    public static FatBasicDirEntry fatDirEntryFactory(AbstractDirectory dir, byte[] src, int offset) {
+    public static FatBasicDirEntry create(
+            AbstractDirectory dir, byte[] src, int offset) {
+        
         int flags = LittleEndian.getUInt8(src, offset + 0x0b);
         boolean r = (flags & F_READONLY) != 0;
         boolean h = (flags & F_HIDDEN) != 0;
@@ -87,9 +89,8 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
             // this is a LFN entry, don't need to parse it!
             return new FatLfnDirEntry(dir, src, offset);
         }
-        FatDirEntry entry = new FatDirEntry(dir, src, offset);
-        return entry;
-
+        
+        return new FatDirEntry(dir, src, offset);
     }
 
     /**
@@ -299,8 +300,6 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
      * @param newLength The length to set
      */
     public synchronized void updateLength(long newLength) {
-        // System.out.println("updateLength(" + newLength + ") on " +
-        // getName());
         this.length = newLength;
         setDirty();
     }
@@ -310,6 +309,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
      * null if the file is 0 bytes long
      * 
      * @return File
+     * @throws IOException on read error
      */
     public FSFile getFile() throws IOException {
         if (isFile()) {
@@ -322,6 +322,8 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
     /**
      * Gets the directory this entry refers to. This method can only be called
      * if <code>isDirectory</code> returns true.
+     *
+     * @throws IOException on read error
      */
     public FSDirectory getDirectory() throws IOException {
         if (isDirectory()) {
@@ -407,6 +409,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
     /**
      * Does this entry refer to a file?
      * 
+     * @return 
      * @see org.jnode.fs.FSEntry#isFile()
      */
     public boolean isFile() {
@@ -416,6 +419,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
     /**
      * Does this entry refer to a directory?
      * 
+     * @return 
      * @see org.jnode.fs.FSEntry#isDirectory()
      */
     public boolean isDirectory() {
@@ -440,8 +444,9 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
      * @param dest
      * @param offset
      */
+    @Override
     public void write(byte[] dest, int offset) {
-        // System.out.println("FatDir entry write at" + offset);
+        
         if (unused) {
             dest[offset] = 0;
         } else if (deleted) {
@@ -482,6 +487,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
         this._dirty = false;
     }
 
+    @Override
     public String toString() {
         StringBuilder b = new StringBuilder(64);
 
@@ -520,6 +526,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
         b.append(getStartCluster());
         b.append(" length=");
         b.append(getLength());
+        
         if (deleted) {
             b.append(" deleted");
         }
@@ -551,6 +558,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
     /**
      * Gets the accessrights for this entry.
      * 
+     * @return 
      * @throws IOException
      */
     public FSAccessRights getAccessRights() throws IOException {

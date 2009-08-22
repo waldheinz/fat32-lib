@@ -23,9 +23,9 @@ package org.jnode.fs.fat;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Vector;
 
 import org.jnode.fs.FSEntry;
 import org.jnode.fs.ReadOnlyFileSystemException;
@@ -34,9 +34,13 @@ import org.jnode.fs.ReadOnlyFileSystemException;
  * @author gbin
  */
 public class FatLfnDirectory extends FatDirectory {
-    private HashMap<String, LfnEntry> shortNameIndex = new HashMap<String, LfnEntry>();
-    private HashMap<String, LfnEntry> longFileNameIndex = new HashMap<String, LfnEntry>();
 
+    private final HashMap<String, LfnEntry> shortNameIndex =
+            new HashMap<String, LfnEntry>();
+    
+    private final HashMap<String, LfnEntry> longFileNameIndex =
+            new HashMap<String, LfnEntry>();
+            
     /**
      * @param fs
      * @param file
@@ -44,13 +48,20 @@ public class FatLfnDirectory extends FatDirectory {
      */
     public FatLfnDirectory(FatFileSystem fs, FatFile file) throws IOException {
         super(fs, file);
+        read();
     }
 
-    // for root
+    /**
+     * Constructor for the root directory.
+     *
+     * @param fs
+     * @param nrEntries
+     */
     public FatLfnDirectory(FatFileSystem fs, int nrEntries) {
         super(fs, nrEntries);
     }
 
+    @Override
     public FSEntry addFile(String name) throws IOException {
         if (getFileSystem().isReadOnly()) {
             throw new ReadOnlyFileSystemException("addFile in readonly filesystem");
@@ -67,6 +78,7 @@ public class FatLfnDirectory extends FatDirectory {
         return entry;
     }
 
+    @Override
     public FSEntry addDirectory(String name) throws IOException {
         if (getFileSystem().isReadOnly()) {
             throw new ReadOnlyFileSystemException("addDirectory in readonly filesystem");
@@ -85,8 +97,8 @@ public class FatLfnDirectory extends FatDirectory {
 
         final int clusterSize = getFatFileSystem().getClusterSize();
         realEntry.setFlags(FatConstants.F_DIRECTORY);
-        final FatFile file = realEntry.getFatFile();
-        file.setLength(clusterSize);
+        final FatFile f = realEntry.getFatFile();
+        f.setLength(clusterSize);
 
         // TODO optimize it also to use ByteBuffer at lower level
         // final byte[] buf = new byte[clusterSize];
@@ -95,9 +107,9 @@ public class FatLfnDirectory extends FatDirectory {
         // Clean the contents of this cluster to avoid reading strange data
         // in the directory.
         // file.write(0, buf, 0, buf.length);
-        file.write(0, buf);
+        f.write(0, buf);
 
-        file.getDirectory().initialize(file.getStartCluster(), parentCluster);
+        f.getDirectory().initialize(f.getStartCluster(), parentCluster);
 
         LfnEntry entry = new LfnEntry(this, realEntry, name);
         shortNameIndex.put(shortName, entry);
@@ -107,6 +119,7 @@ public class FatLfnDirectory extends FatDirectory {
         return entry;
     }
 
+    @Override
     public FSEntry getEntry(String name) {
         // System.out.println("Search : " + name);
         name = name.trim();
@@ -120,13 +133,14 @@ public class FatLfnDirectory extends FatDirectory {
 
     }
 
-    protected synchronized void read(byte[] src) {
+    @Override
+    protected void read(byte[] src) {
         super.read(src);
         readLFN();
     }
 
     private void readLFN() {
-        // System.out.println("Read LFN");
+//        System.out.println("Read LFN");
         int i = 0;
         int size = entries.size();
 
@@ -155,7 +169,7 @@ public class FatLfnDirectory extends FatDirectory {
                 // This is a cutted entry, forgive it
                 break;
             }
-
+            
             LfnEntry current = new LfnEntry(this, entries, offset, i - offset);
 
             if (!current.isDeleted() && current.isValid()) {
@@ -167,7 +181,7 @@ public class FatLfnDirectory extends FatDirectory {
     }
 
     private void updateLFN() throws IOException {
-        Vector<FatBasicDirEntry> destination = new Vector<FatBasicDirEntry>();
+        ArrayList<FatBasicDirEntry> destination = new ArrayList<FatBasicDirEntry>();
 
         for (LfnEntry currentEntry : shortNameIndex.values()) {
             FatBasicDirEntry[] encoded = currentEntry.compactForm();
@@ -204,11 +218,14 @@ public class FatLfnDirectory extends FatDirectory {
 
     }
 
+    @Override
     public void flush() throws IOException {
         updateLFN();
+        
         super.flush();
     }
 
+    @Override
     public Iterator<FSEntry> iterator() {
         return new Iterator<FSEntry>() {
             Iterator<LfnEntry> it = shortNameIndex.values().iterator();
@@ -312,6 +329,7 @@ public class FatLfnDirectory extends FatDirectory {
      * @param name
      * @throws IOException
      */
+    @Override
     public void remove(String name) throws IOException {
         name = name.trim();
         LfnEntry byLongName = longFileNameIndex.get(name);
@@ -329,7 +347,14 @@ public class FatLfnDirectory extends FatDirectory {
             longFileNameIndex.remove(byShortName.getName());
             shortNameIndex.remove(uppedName);
         }
+        
         throw new FileNotFoundException(name);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() +
+                " [size="  + shortNameIndex.size() + "]";
+    }
+    
 }
