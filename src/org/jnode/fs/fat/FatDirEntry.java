@@ -448,23 +448,33 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
         for (int i = 0; i < 8; i++) {
             char ch;
             if (i < name.length()) {
-                ch = Character.toUpperCase(name.charAt(i));
+                if (!isLabel()) {
+                    ch = Character.toUpperCase(name.charAt(i));
+                } else {
+                    ch = name.charAt(i);
+                }
                 if (ch == 0xe5) {
                     ch = (char) 0x05;
                 }
             } else {
                 ch = ' ';
             }
+            
             dest[offset + i] = (byte) ch;
         }
 
         for (int i = 0; i < 3; i++) {
             char ch;
             if (i < ext.length()) {
-                ch = Character.toUpperCase(ext.charAt(i));
+                if (!isLabel()) {
+                    ch = Character.toUpperCase(ext.charAt(i));
+                } else {
+                    ch = ext.charAt(i);
+                }
             } else {
                 ch = ' ';
             }
+
             dest[offset + 0x08 + i] = (byte) ch;
         }
 

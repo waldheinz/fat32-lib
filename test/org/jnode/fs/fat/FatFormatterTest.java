@@ -42,7 +42,7 @@ public class FatFormatterTest {
         BlockDevice d = new RamDisk(512 * 1024);
 
         FatFormatter ff = FatFormatter.superFloppyFormatter(d);
-        ff.format(d, "TESTVOL");
+        ff.format(d, "TestVol");
 
         FatFileSystem fs = new FatFileSystem(d, false);
 
@@ -51,7 +51,7 @@ public class FatFormatterTest {
         bb.flip();
         Utils.hexDump(System.out, bb);
         
-        assertEquals("TESTVOL", fs.getVolumeLabel());
+        assertEquals("TestVol", fs.getVolumeLabel());
         
         final FatLfnDirectory root = fs.getRootDir();
         final Iterator<FSEntry> i = root.iterator();
