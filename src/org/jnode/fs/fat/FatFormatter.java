@@ -53,12 +53,10 @@ public class FatFormatter {
         bs.setMediumDescriptor(HD_DESC);
         bs.setNrHeads(64);
         bs.setOemName("fat32lib");
-        
+        bs.setSectorCount(totalSectors);
         bs.setSectorsPerCluster(spc);
         
         if (fatSize == FatType.FAT32) {
-            bs.setNrLogicalSectors(0);
-            bs.setNrTotalSectors(totalSectors);
             bs.setSectorsPerFatEx(1009);
             bs.setNrReservedSectors(32);
             

@@ -232,13 +232,23 @@ public class BootSector extends Sector {
      * 
      * @param v the new number of logical sectors
      */
-    public void setNrLogicalSectors(int v) {
+    private void setNrLogicalSectors(int v) {
         if (v == getNrLogicalSectors()) return;
         
         set16(0x13, v);
     }
 
-    public void setNrTotalSectors(int v) {
+    public void setSectorCount(int count) {
+        if (count > 65535) {
+            setNrLogicalSectors(0);
+            setNrTotalSectors(count);
+        } else {
+            setNrLogicalSectors(count);
+            setNrTotalSectors(count);
+        }
+    }
+
+    private void setNrTotalSectors(int v) {
         set32(0x20, v);
     }
     

@@ -44,14 +44,21 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     private final HashMap<FatDirEntry, FatFile> files =
             new HashMap<FatDirEntry, FatFile>();
 
+    public FatFileSystem(BlockDevice api, boolean readOnly)
+            throws FileSystemException {
+
+        this(api, readOnly, false);
+    }
+    
     /**
      * Constructor for FatFileSystem in specified readOnly mode
      * 
      * @param api the BlockDevice holding the file system
      * @param readOnly if this FS should be read-lonly
+     * @param ignoreFatDifferences 
      * @throws FileSystemException on error
      */
-    public FatFileSystem(BlockDevice api, boolean readOnly)
+    public FatFileSystem(BlockDevice api, boolean readOnly, boolean ignoreFatDifferences)
             throws FileSystemException {
         
         super(api, readOnly);
@@ -82,10 +89,11 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
                 fats[i] = tmpFat;
                 tmpFat.read(getApi(), FatUtils.getFatOffset(bs, i));
             }
-            
-            for (int i = 1; i < fats.length; i++) {
+
+
+            if (!ignoreFatDifferences) for (int i = 1; i < fats.length; i++) {
                 if (!fats[0].equals(fats[i])) {
-                    throw new FileSystemException(
+                        throw new FileSystemException(
                             "FAT " + i + " differs from FAT 0");
                 }
             }
