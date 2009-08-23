@@ -16,6 +16,31 @@ import static org.junit.Assert.*;
  */
 public class FatFileSystemTest {
 
+    @Test
+    public void testMaxRootEntries() throws Exception {
+        System.out.println("testMaxRootEntries");
+
+        RamDisk d = new RamDisk(512 * 1024);
+        final FatFormatter ff = FatFormatter.superFloppyFormatter(d);
+        ff.format(d, null);
+        final FatFileSystem fs = new FatFileSystem(d, false);
+        final FatLfnDirectory root = fs.getRootDir();
+        
+        /* divide by 2 because we use LFNs which take entries, too */
+        final int max = fs.getBootSector().getNrRootDirEntries() / 2;
+        
+        for (int i=0; i < max; i++) {
+            root.addFile("f-" + i);
+        }
+        
+        try {
+            root.addFile("fails");
+            fail("added too many files to root directory");
+        } catch (RootDirectoryFullException ex) {
+            /* fine */
+        }
+    }
+    
     /**
      * $ cat fat16-test.img.gz | gunzip | hexdump -C
      *
@@ -89,9 +114,10 @@ public class FatFileSystemTest {
             final FSEntry e = i.next();
             System.out.println("     - " + e);
         }
-
-
+        
     }
+
+    
 
     public static void main(String[] args) throws Exception {
         FatFileSystemTest test = new FatFileSystemTest();

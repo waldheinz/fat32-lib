@@ -195,7 +195,7 @@ public class FatLfnDirectory extends FatDirectory {
         final int size = destination.size();
         if (entries.size() < size) {
             if (!canChangeSize(size)) {
-                throw new IOException("Directory is full");
+                throw new RootDirectoryFullException();
             }
         }
 

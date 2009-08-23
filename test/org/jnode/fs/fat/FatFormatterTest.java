@@ -36,6 +36,14 @@ public class FatFormatterTest {
     }
 
     @Test
+    public void testFat32Format() {
+        System.out.println("testFat32Format");
+
+        BlockDevice d = new RamDisk(280 * 1024 * 1024);
+        
+    }
+
+    @Test
     public void testVolumeLabel() throws Exception {
         System.out.println("testVolumeLabel");
         
@@ -46,7 +54,7 @@ public class FatFormatterTest {
 
         FatFileSystem fs = new FatFileSystem(d, false);
 
-        ByteBuffer bb = ByteBuffer.allocate(128);
+        ByteBuffer bb = ByteBuffer.allocate(64);
         d.read(FatUtils.getRootDirOffset(fs.getBootSector()), bb);
         bb.flip();
         Utils.hexDump(System.out, bb);
