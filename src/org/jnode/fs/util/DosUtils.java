@@ -26,7 +26,7 @@ import java.util.Calendar;
  * This class contains some methods for date and time conversions between Java
  * and the format known from DOS filesystems (e.g. fat)
  * 
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public class DosUtils {
 

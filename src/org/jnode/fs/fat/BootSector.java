@@ -31,7 +31,7 @@ import org.jnode.partitions.ibm.IBMPartitionTableEntry;
 import org.jnode.partitions.ibm.IBMPartitionTypes;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public class BootSector extends Sector {
 

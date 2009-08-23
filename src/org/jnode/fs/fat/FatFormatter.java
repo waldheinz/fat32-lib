@@ -26,7 +26,7 @@ import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FileSystemException;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte
  */
 public class FatFormatter {

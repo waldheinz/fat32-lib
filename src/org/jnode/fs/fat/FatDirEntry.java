@@ -30,7 +30,7 @@ import org.jnode.fs.util.DosUtils;
 import org.jnode.util.LittleEndian;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
 

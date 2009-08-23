@@ -24,7 +24,7 @@ import org.jnode.fs.FSObject;
 import org.jnode.fs.FileSystem;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public abstract class FatObject implements FSObject {
 

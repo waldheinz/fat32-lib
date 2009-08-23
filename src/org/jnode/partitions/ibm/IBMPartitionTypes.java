@@ -21,7 +21,7 @@
 package org.jnode.partitions.ibm;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public enum IBMPartitionTypes {
     PARTTYPE_EMPTY(0x00, "empty"),

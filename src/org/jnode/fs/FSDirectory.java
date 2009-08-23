@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte
  */
 public interface FSDirectory extends FSObject, Iterable<FSEntry> {

@@ -32,7 +32,7 @@ import org.jnode.partitions.PartitionTable;
 import org.jnode.partitions.PartitionTableType;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public class IBMPartitionTable implements PartitionTable<IBMPartitionTableEntry> {
     private static final int TABLE_SIZE = 4;

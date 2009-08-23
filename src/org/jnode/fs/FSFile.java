@@ -31,7 +31,7 @@ import java.nio.ByteBuffer;
  * possible that the system uses a single FSFile instance to create two
  * inputstream's for two different principals.
  * 
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public interface FSFile extends FSObject {
 

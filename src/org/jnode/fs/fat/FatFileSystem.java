@@ -31,7 +31,7 @@ import org.jnode.fs.FileSystemException;
 import org.jnode.fs.spi.AbstractFileSystem;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte
  */
 public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {

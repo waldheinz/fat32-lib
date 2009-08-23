@@ -33,7 +33,7 @@ import org.jnode.fs.FSEntry;
 import org.jnode.fs.ReadOnlyFileSystemException;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public abstract class AbstractDirectory
         extends FatObject

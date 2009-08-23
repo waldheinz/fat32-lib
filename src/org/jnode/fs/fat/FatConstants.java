@@ -21,7 +21,7 @@
 package org.jnode.fs.fat;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public interface FatConstants {
     public static final int F_READONLY = 0x01;

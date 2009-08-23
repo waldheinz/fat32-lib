@@ -23,12 +23,12 @@ package org.jnode.fs;
 import java.io.IOException;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 /**
  * Entry of an FSDirectory.
  * 
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public interface FSEntry extends FSObject {
 

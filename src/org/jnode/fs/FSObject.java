@@ -23,7 +23,7 @@ package org.jnode.fs;
 /**
  * This interface is the base interface for objects that are part of a FileSystem.
  * 
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public interface FSObject {
 

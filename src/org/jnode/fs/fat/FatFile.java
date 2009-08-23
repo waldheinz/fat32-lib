@@ -31,7 +31,7 @@ import org.jnode.fs.ReadOnlyFileSystemException;
  * A File instance is the in-memory representation of a single file (chain of
  * clusters).
  * 
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public final class FatFile extends FatObject implements FSFile {
     private long startCluster;

@@ -21,7 +21,7 @@
 package org.jnode.partitions;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public interface PartitionTableEntry {
 

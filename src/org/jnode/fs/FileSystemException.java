@@ -21,10 +21,12 @@
 package org.jnode.fs;
 
 /**
- * @author epr
+ * 
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public class FileSystemException extends Exception {
-
+    private final static long serialVersionUID = 1;
+    
     /**
      * 
      */

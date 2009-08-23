@@ -28,7 +28,7 @@ import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FSEntry;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public class FatDirectory extends AbstractDirectory {
 

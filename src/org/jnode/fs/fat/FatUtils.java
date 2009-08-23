@@ -25,7 +25,7 @@ import org.jnode.util.LittleEndian;
 /**
  * <description>
  * 
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Fabien DUMINY
  */
 public class FatUtils {

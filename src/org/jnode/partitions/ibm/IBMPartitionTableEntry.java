@@ -25,7 +25,7 @@ import org.jnode.partitions.PartitionTableEntry;
 import org.jnode.util.LittleEndian;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public class IBMPartitionTableEntry implements PartitionTableEntry {
 

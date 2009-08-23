@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 /**
  * <description>
  *
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public interface BlockDevice {
 

@@ -21,7 +21,7 @@
 package org.jnode.driver.block;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public class CHS {
 

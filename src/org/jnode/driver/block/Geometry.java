@@ -23,7 +23,7 @@ package org.jnode.driver.block;
 import java.io.IOException;
 
 /**
- * @author epr
+ * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public class Geometry {
 
