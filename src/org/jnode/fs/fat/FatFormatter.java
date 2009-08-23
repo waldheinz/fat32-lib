@@ -146,17 +146,13 @@ public class FatFormatter {
         api.flush();
 
         if (label != null) {
-            try {
-                FatFileSystem fs = new FatFileSystem(api, false);
-                fs.setVolumeLabel(label);
-                fs.flush();
-                api.flush();
-            } catch (FileSystemException ex) {
-                throw new IOException(ex);
-            }
+            FatFileSystem fs = new FatFileSystem(api, false);
+            fs.setVolumeLabel(label);
+            fs.flush();
+            api.flush();
         }
     }
-
+    
     /**
      * Returns the bs.
      *

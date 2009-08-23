@@ -47,7 +47,7 @@ public class FileSystemException extends IOException {
      * @param cause
      */
     public FileSystemException(FileSystem fs, String message, Throwable cause) {
-        super(message, cause);
+        super(message + " : " + cause);
         
         this.fs = fs;
     }
@@ -57,7 +57,7 @@ public class FileSystemException extends IOException {
      * @param cause
      */
     public FileSystemException(FileSystem fs, Throwable cause) {
-        super(cause);
+        super("FileSystemException : " + cause);
         
         this.fs = fs;
     }
