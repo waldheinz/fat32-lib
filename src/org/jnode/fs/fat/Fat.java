@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.jnode.driver.block.BlockDevice;
+import org.jnode.fs.FileSystemException;
 import org.jnode.fs.FileSystemFullException;
 
 /**
@@ -47,6 +48,8 @@ public final class Fat {
     /** The number of bytes/sector */
     private final int sectorSize;
 
+    private final FatFileSystem fs;
+
     /**
      * If this fat needs to be written to disk.
      */
@@ -58,18 +61,32 @@ public final class Fat {
     /**
      * Create a new instance
      * 
-     * @param type 
-     * @param mediumDescriptor 
+     * @param fs the {@link FatFileSystem} this FAT is part of
+     * @param mediumDescriptor
      * @param sectors
      * @param sectorSize
      */
-    public Fat(FatType type, int mediumDescriptor, int sectors, int sectorSize) {
-        this.fatType = type;
+    public Fat(FatFileSystem fs, int mediumDescriptor, int sectors, int sectorSize) {
+        this.fatType = fs.getFatType();
         this.nrSectors = sectors;
         this.sectorSize = sectorSize;
         this.dirty = false;
+        this.fs = fs;
         entries = new long[(int) ((sectors * sectorSize) /
-                type.getEntrySize())];
+                this.fatType.getEntrySize())];
+        entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
+        
+    }
+
+    Fat(FatType fatType, int mediumDescriptor, int sectors, int sectorSize) {
+        this.fatType = fatType;
+        this.nrSectors = sectors;
+        this.sectorSize = sectorSize;
+        this.dirty = false;
+        this.fs = null;
+        
+        entries = new long[(int) ((sectors * sectorSize) /
+                this.fatType.getEntrySize())];
         entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
     }
 
@@ -223,7 +240,7 @@ public final class Fat {
         }
 
         if (entryIndex < 0) {
-            throw new FileSystemFullException(
+            throw new FileSystemFullException(fs,
                     "FAT Full (" + entries.length + ", " + i + ")"); //NOI18N
         }
 
@@ -240,9 +257,9 @@ public final class Fat {
      * 
      * @param nrClusters when number of clusters to allocate
      * @return long
-     * @throws IOException on write error
+     * @throws FileSystemException on write error
      */
-    public synchronized long[] allocNew(int nrClusters) throws IOException {
+    public synchronized long[] allocNew(int nrClusters) throws FileSystemException {
 
         long rc[] = new long[nrClusters];
 

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.jnode.fs.FSEntry;
+import org.jnode.fs.FileSystemException;
 import org.jnode.fs.ReadOnlyFileSystemException;
 
 /**
@@ -44,9 +45,9 @@ public class FatLfnDirectory extends FatDirectory {
     /**
      * @param fs
      * @param file
-     * @throws IOException
+     * @throws FileSystemException
      */
-    public FatLfnDirectory(FatFileSystem fs, FatFile file) throws IOException {
+    public FatLfnDirectory(FatFileSystem fs, FatFile file) throws FileSystemException {
         super(fs, file);
         read();
     }
@@ -62,9 +63,10 @@ public class FatLfnDirectory extends FatDirectory {
     }
     
     @Override
-    public LfnEntry addFile(String name) throws IOException {
+    public LfnEntry addFile(String name) throws FileSystemException {
         if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException("addFile in readonly filesystem");
+            throw new ReadOnlyFileSystemException(this.getFatFileSystem(),
+                    "addFile in readonly filesystem");
         }
 
         name = name.trim();
@@ -81,7 +83,8 @@ public class FatLfnDirectory extends FatDirectory {
     @Override
     public FSEntry addDirectory(String name) throws IOException {
         if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException("addDirectory in readonly filesystem");
+            throw new ReadOnlyFileSystemException(this.getFatFileSystem(),
+                    "addDirectory in readonly filesystem"); //NOI18N
         }
 
         name = name.trim();
@@ -180,7 +183,7 @@ public class FatLfnDirectory extends FatDirectory {
 
     }
 
-    private void updateLFN() throws IOException {
+    private void updateLFN() throws FileSystemException {
         ArrayList<FatBasicDirEntry> destination = new ArrayList<FatBasicDirEntry>();
 
         if (labelEntry != null) destination.add(labelEntry);
@@ -195,7 +198,7 @@ public class FatLfnDirectory extends FatDirectory {
         final int size = destination.size();
         if (entries.size() < size) {
             if (!canChangeSize(size)) {
-                throw new RootDirectoryFullException();
+                throw new RootDirectoryFullException(this.getFatFileSystem());
             }
         }
 
@@ -221,7 +224,7 @@ public class FatLfnDirectory extends FatDirectory {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void flush() throws FileSystemException {
         updateLFN();
         
         super.flush();

@@ -46,9 +46,9 @@ public interface FSFile extends FSObject {
      * Sets the length of this file.
      * 
      * @param length
-     * @throws IOException
+     * @throws FileSystemException 
      */
-    public void setLength(long length) throws IOException;
+    public void setLength(long length) throws FileSystemException;
 
     /**
      * Read <code>len</code> bytes from the given position. The read data is
@@ -57,9 +57,9 @@ public interface FSFile extends FSObject {
      * 
      * @param fileOffset
      * @param dest
-     * @throws IOException
+     * @throws FileSystemException 
      */
-    public void read(long fileOffset, ByteBuffer dest) throws IOException;
+    public void read(long fileOffset, ByteBuffer dest) throws FileSystemException;
 
     /**
      * Write <code>len</code> bytes to the given position. The data is read
@@ -68,9 +68,9 @@ public interface FSFile extends FSObject {
      * 
      * @param fileOffset
      * @param src
-     * @throws IOException
+     * @throws FileSystemException
      */
-    public void write(long fileOffset, ByteBuffer src) throws IOException;
+    public void write(long fileOffset, ByteBuffer src) throws FileSystemException;
 
     /**
      * Flush any cached data to the disk.

@@ -20,11 +20,10 @@
  
 package org.jnode.fs;
 
-import java.io.IOException;
-
-public class FileSystemFullException extends IOException {
+public class FileSystemFullException extends FileSystemException {
+    private final static long serialVersionUID = 1;
     
-    public FileSystemFullException(String message) {
-        super(message);
+    public FileSystemFullException(FileSystem fs, String message) {
+        super(fs, message);
     }
 }

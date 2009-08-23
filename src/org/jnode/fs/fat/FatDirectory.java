@@ -26,6 +26,7 @@ import java.util.Iterator;
 
 import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FSEntry;
+import org.jnode.fs.FileSystemException;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
@@ -41,9 +42,9 @@ public class FatDirectory extends AbstractDirectory {
      * 
      * @param fs
      * @param file
-     * @throws IOException on read error
+     * @throws FileSystemException 
      */
-    public FatDirectory(FatFileSystem fs, FatFile file) throws IOException {
+    public FatDirectory(FatFileSystem fs, FatFile file) throws FileSystemException {
         super(fs, file);
         
         this.file = file;
@@ -74,9 +75,9 @@ public class FatDirectory extends AbstractDirectory {
      * Read the contents of this directory from the persistent storage at the
      * given offset.
      * 
-     * @throws IOException on read error
+     * @throws FileSystemException
      */
-    protected void read() throws IOException {
+    protected void read() throws FileSystemException {
         entries.setSize((int) file.getLengthOnDisk() / 32);
 
         // TODO optimize it also to use ByteBuffer at lower level
@@ -110,9 +111,9 @@ public class FatDirectory extends AbstractDirectory {
      * Write the contents of this directory to the given persistent storage at
      * the given offset.
      *
-     * @throws IOException on write error
+     * @throws FileSystemException
      */
-    protected synchronized void write() throws IOException {
+    protected synchronized void write() throws FileSystemException {
         // TODO optimize it also to use ByteBuffer at lower level
         // final byte[] data = new byte[entries.size() * 32];
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
@@ -127,24 +128,36 @@ public class FatDirectory extends AbstractDirectory {
         resetDirty();
     }
 
-    public synchronized void read(BlockDevice device, long offset) throws IOException {
+    public synchronized void read(BlockDevice device, long offset) throws FileSystemException {
         ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
-        device.read(offset, data);
+
+        try {
+            device.read(offset, data);
+        } catch (IOException ex) {
+            throw new FileSystemException(this.getFatFileSystem(), ex);
+        }
+        
         read(data.array());
         resetDirty();
     }
 
-    public synchronized void write(BlockDevice device, long offset) throws IOException {
+    public synchronized void write(BlockDevice device, long offset)
+            throws FileSystemException {
+        
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
         write(data.array());
-        device.write(offset, data);
+        try {
+            device.write(offset, data);
+        } catch (IOException ex) {
+            throw new FileSystemException(this.getFatFileSystem(), ex);
+        }
         resetDirty();
     }
 
     /**
      * Flush the contents of this directory to the persistent storage
      */
-    public void flush() throws IOException {
+    public void flush() throws FileSystemException {
         if (file == null) {
             final FatFileSystem fs = (FatFileSystem) getFileSystem();
             long offset = FatUtils.getRootDirOffset(fs.getBootSector());

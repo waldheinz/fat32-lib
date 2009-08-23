@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 
 import org.jnode.driver.block.BlockDevice;
 import org.jnode.fs.FSFile;
+import org.jnode.fs.FileSystemException;
 import org.jnode.fs.ReadOnlyFileSystemException;
 
 /**
@@ -74,14 +75,15 @@ public final class FatFile extends FatObject implements FSFile {
     }
 
     public synchronized void read(long fileOffset, ByteBuffer destBuf)
-            throws IOException {
+            throws FileSystemException {
 
         int len = destBuf.remaining();
 
         final long max = isDir ? getLengthOnDisk() : getLength();
         
         if (fileOffset + len > max)
-            throw new IOException("Cannot read beyond EOF"); //NOI18N
+            throw new FileSystemException(this.getFatFileSystem(),
+                    "can not read beyond EOF"); //NOI18N
 
         final FatFileSystem fs = getFatFileSystem();
         final long[] chain = fs.getFat().getChain(startCluster);
@@ -93,7 +95,13 @@ public final class FatFile extends FatObject implements FSFile {
             int size = Math.min(len,
                     (int) (clusterSize - (fileOffset % clusterSize) - 1));
             destBuf.limit(destBuf.position() + size);
-            api.read(getDevOffset(chain[chainIdx], clusOfs), destBuf);
+
+            try {
+                api.read(getDevOffset(chain[chainIdx], clusOfs), destBuf);
+            } catch (IOException ex) {
+                throw new FileSystemException(fs, ex);
+            }
+            
             fileOffset += size;
             len -= size;
             chainIdx++;
@@ -102,22 +110,29 @@ public final class FatFile extends FatObject implements FSFile {
         while (len > 0) {
             int size = Math.min(clusterSize, len);
             destBuf.limit(destBuf.position() + size);
-            api.read(getDevOffset(chain[chainIdx], 0), destBuf);
+            
+            try {
+                api.read(getDevOffset(chain[chainIdx], 0), destBuf);
+            } catch (IOException ex) {
+                throw new FileSystemException(fs, ex);
+            }
+
             len -= size;
             chainIdx++;
         }
     }
 
     public synchronized void write(long fileOffset, ByteBuffer srcBuf)
-            throws IOException {
+            throws FileSystemException {
         
         if (getFileSystem().isReadOnly())
-            throw new ReadOnlyFileSystemException(
+            throw new ReadOnlyFileSystemException(this.getFatFileSystem(),
                     "write in readonly filesystem"); //NOI18N
 
         final long max = (isDir) ? getLengthOnDisk() : getLength();
         if (fileOffset > max)
-            throw new IOException("can not write beyond EOF"); //NOI18N
+            throw new FileSystemException(this.getFatFileSystem(),
+                    "can not write beyond EOF"); //NOI18N
 
         int len = srcBuf.remaining();
         if (fileOffset + len > max)
@@ -133,7 +148,13 @@ public final class FatFile extends FatObject implements FSFile {
             int size = Math.min(len,
                     (int) (clusterSize - (fileOffset % clusterSize) - 1));
             srcBuf.limit(srcBuf.position() + size);
-            api.write(getDevOffset(chain[chainIdx], clusOfs), srcBuf);
+
+            try {
+                api.write(getDevOffset(chain[chainIdx], clusOfs), srcBuf);
+            } catch (IOException ex) {
+                throw new FileSystemException(fs, ex);
+            }
+            
             fileOffset += size;
             len -= size;
             chainIdx++;
@@ -142,7 +163,13 @@ public final class FatFile extends FatObject implements FSFile {
         while (len > 0) {
             int size = Math.min(clusterSize, len);
             srcBuf.limit(srcBuf.position() + size);
-            api.write(getDevOffset(chain[chainIdx], 0), srcBuf);
+
+            try {
+                api.write(getDevOffset(chain[chainIdx], 0), srcBuf);
+            } catch (IOException ex) {
+                throw new FileSystemException(fs, ex);
+            }
+
             len -= size;
             chainIdx++;
         }
@@ -153,10 +180,10 @@ public final class FatFile extends FatObject implements FSFile {
      * 
      * @param length The length to set
      */
-    public synchronized void setLength(long length) throws IOException {
+    public synchronized void setLength(long length) throws FileSystemException {
 
         if (getFileSystem().isReadOnly()) throw new 
-                ReadOnlyFileSystemException("readonly filesystem"); //NOI18N
+                ReadOnlyFileSystemException(this.getFatFileSystem(), "readonly filesystem"); //NOI18N
 
         if (this.length == length) return;
         

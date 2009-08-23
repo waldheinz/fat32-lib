@@ -20,39 +20,61 @@
  
 package org.jnode.fs;
 
+import java.io.IOException;
+
 /**
  * 
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Matthias Treydte
  */
-public class FileSystemException extends Exception {
+public class FileSystemException extends IOException {
     private final static long serialVersionUID = 1;
-    
+
+    private final FileSystem fs;
+
     /**
      * 
+     * @param fs the file system on which this exception occured
      */
-    public FileSystemException() {
-        super();
+    public FileSystemException(FileSystem fs) {
+        
+        this.fs = fs;
     }
 
     /**
+     * @param fs the file system on which this exception occured
      * @param message
      * @param cause
      */
-    public FileSystemException(String message, Throwable cause) {
+    public FileSystemException(FileSystem fs, String message, Throwable cause) {
         super(message, cause);
+        
+        this.fs = fs;
     }
 
     /**
+     * @param fs 
      * @param cause
      */
-    public FileSystemException(Throwable cause) {
+    public FileSystemException(FileSystem fs, Throwable cause) {
         super(cause);
+        
+        this.fs = fs;
     }
 
     /**
+     * 
+     *
+     * @param fs the file system on which this exception occured
      * @param s
      */
-    public FileSystemException(String s) {
+    public FileSystemException(FileSystem fs, String s) {
         super(s);
+        
+        this.fs = fs;
+    }
+
+    public FileSystem getFileSystem() {
+        return this.fs;
     }
 }

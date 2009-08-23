@@ -30,6 +30,7 @@ import java.util.NoSuchElementException;
 import java.util.Vector;
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
+import org.jnode.fs.FileSystemException;
 import org.jnode.fs.ReadOnlyFileSystemException;
 
 /**
@@ -76,16 +77,20 @@ public abstract class AbstractDirectory
      * Add a directory entry.
      * 
      * @param nameExt
-     * @return 
-     * @throws IOException
+     * @return
+     * @throws FileSystemException 
      */
-    protected synchronized FatDirEntry addFatFile(String nameExt) throws IOException {
+    protected synchronized FatDirEntry addFatFile(String nameExt)
+            throws FileSystemException {
+        
         if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException("addFile in readonly filesystem");
+            throw new ReadOnlyFileSystemException(this.getFatFileSystem(),
+                    "addFile in readonly filesystem"); //NOI18N
         }
 
         if (getFatEntry(nameExt) != null) {
-            throw new IOException("File already exists" + nameExt);
+            throw new FileSystemException(this.getFatFileSystem(),
+                    "file already exists " + nameExt); //NOI18N
         }
         
         final FatDirEntry newEntry =
@@ -107,7 +112,8 @@ public abstract class AbstractDirectory
             return newEntry;
         }
         
-        throw new IOException("directory is full"); //NOI18N
+        throw new FileSystemException(this.getFatFileSystem(),
+                "directory is full"); //NOI18N
     }
 
     /**
@@ -161,7 +167,8 @@ public abstract class AbstractDirectory
      */
     public FSEntry addDirectory(String name) throws IOException {
         if (getFileSystem().isReadOnly()) throw new
-                ReadOnlyFileSystemException("readonly filesystem"); //NOI18N
+                ReadOnlyFileSystemException(this.getFatFileSystem(),
+                "readonly filesystem"); //NOI18N
 
         final long parentCluster;
 

@@ -64,14 +64,17 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
         
         super(api, readOnly);
 
-        try {
             bs = new BootSector(512);
-            bs.read(getApi());
+            try {
+                bs.read(getApi());
+            } catch (IOException ex) {
+                throw new FileSystemException(this, ex);
+            }
 
             //this.fsInfo = new FsInfoSector(bs, getApi());
             this.fsInfo = null;
 
-            if (!bs.isaValidBootSector()) throw new FileSystemException(
+            if (!bs.isaValidBootSector()) throw new FileSystemException(this,
                     "invalid boot sector"); //NOI18N
 
             Fat[] fats = new Fat[bs.getNrFats()];
@@ -79,16 +82,21 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
             
             for (int i = 0; i < fats.length; i++) {
                 Fat tmpFat = new Fat(
-                        bitSize, bs.getMediumDescriptor(), bs.getSectorsPerFat(), 
+                        this, bs.getMediumDescriptor(), bs.getSectorsPerFat(),
                         bs.getBytesPerSector());
                 fats[i] = tmpFat;
-                tmpFat.read(getApi(), FatUtils.getFatOffset(bs, i));
+
+                try {
+                    tmpFat.read(getApi(), FatUtils.getFatOffset(bs, i));
+                } catch (IOException ex) {
+                    throw new FileSystemException(this, ex);
+                }
             }
 
 
             if (!ignoreFatDifferences) for (int i = 1; i < fats.length; i++) {
                 if (!fats[0].equals(fats[i])) {
-                        throw new FileSystemException(
+                        throw new FileSystemException(this,
                             "FAT " + i + " differs from FAT 0");
                 }
             }
@@ -104,9 +112,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
             }
             
             rootEntry = new FatRootEntry(rootDir);
-        } catch (IOException ex) {
-            throw new FileSystemException(ex);
-        }
+
     }
 
     public FatType getFatType() {

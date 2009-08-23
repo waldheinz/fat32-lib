@@ -80,7 +80,7 @@ public class FatFormatter {
         else return FatType.FAT32;
     }
     
-    protected FatFormatter(int nbTotalSectors, FatType fatSize, BootSector bs) {
+    private FatFormatter(int nbTotalSectors, FatType fatSize, BootSector bs) {
         this.bs = bs;
         fat = new Fat(fatSize, bs.getMediumDescriptor(),
                 bs.getSectorsPerFat(), bs.getBytesPerSector());
