@@ -37,9 +37,27 @@ public final class FatFile extends FatObject implements FSFile {
     private long startCluster;
     private long length;
     private FatDirectory dir;
-    private int clusterSize;
+    
     private boolean isDir;
+    
+    private final int clusterSize;
     private final FatDirEntry myEntry;
+    
+    /**
+     * Constructor used for the FAT32 root directory.
+     *
+     * @param fs
+     * @param startCluster
+     */
+    public FatFile(FatFileSystem fs, long startCluster) {
+        super(fs);
+
+        this.myEntry = null;
+        this.startCluster = startCluster;
+        this.clusterSize = fs.getClusterSize();
+        this.length = 0;
+        this.isDir = true;
+    }
 
     public FatFile(FatFileSystem fs, FatDirEntry myEntry,
             long startCluster, long length, boolean isDir) {

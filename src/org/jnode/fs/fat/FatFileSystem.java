@@ -43,6 +43,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     private final FatRootEntry rootEntry;
     private final HashMap<FatDirEntry, FatFile> files =
             new HashMap<FatDirEntry, FatFile>();
+    private final FatType bitSize;
 
     public FatFileSystem(BlockDevice api, boolean readOnly)
             throws FileSystemException {
@@ -74,14 +75,8 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
                     "invalid boot sector"); //NOI18N
 
             Fat[] fats = new Fat[bs.getNrFats()];
-            final FatType bitSize;
-
-            if (bs.getMediumDescriptor() == 0xf8) {
-                bitSize = FatType.FAT16;
-            } else {
-                bitSize = FatType.FAT12;
-            }
-
+            bitSize = bs.getFatType();
+            
             for (int i = 0; i < fats.length; i++) {
                 Fat tmpFat = new Fat(
                         bitSize, bs.getMediumDescriptor(), bs.getSectorsPerFat(), 
@@ -99,16 +94,23 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
             }
             
             fat = fats[0];
-            rootDir = new FatLfnDirectory(this, bs.getNrRootDirEntries());
-            rootDir.read(getApi(), FatUtils.getRootDirOffset(bs));
+            if (bitSize == FatType.FAT32) {
+                FatFile rootDirFile = new FatFile(this,
+                        bs.getRootDirFirstCluster());
+                rootDir = new FatLfnDirectory(this, rootDirFile);
+            } else {
+                rootDir = new FatLfnDirectory(this, bs.getNrRootDirEntries());
+                rootDir.read(getApi(), FatUtils.getRootDirOffset(bs));
+            }
             
             rootEntry = new FatRootEntry(rootDir);
         } catch (IOException ex) {
             throw new FileSystemException(ex);
-        } catch (Exception e) { // something bad happened in the FAT boot
-            // sector... just ignore this FS
-            throw new FileSystemException(e);
         }
+    }
+
+    public FatType getFatType() {
+        return this.bitSize;
     }
 
     /**

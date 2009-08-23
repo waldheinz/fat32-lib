@@ -57,7 +57,7 @@ public class FatFormatter {
         bs.setSectorsPerCluster(spc);
         
         if (fatSize == FatType.FAT32) {
-            bs.setSectorsPerFatEx(1009);
+            bs.setSectorsPerFat32(1009);
             bs.setNrReservedSectors(32);
             
             final FsInfoSector fsInfo = new FsInfoSector(bs, d);
@@ -82,13 +82,8 @@ public class FatFormatter {
     
     protected FatFormatter(int nbTotalSectors, FatType fatSize, BootSector bs) {
         this.bs = bs;
-        
-        final int spf = (int) ((fatSize == FatType.FAT32) ?
-            bs.getSectorsPerFatEx() : bs.getSectorsPerFat());
-
-        fat = new Fat(fatSize,
-                bs.getMediumDescriptor(), spf, bs.getBytesPerSector());
-        fat.setMediumDescriptor(bs.getMediumDescriptor());
+        fat = new Fat(fatSize, bs.getMediumDescriptor(),
+                bs.getSectorsPerFat(), bs.getBytesPerSector());
         
         rootDir = new FatLfnDirectory(null, bs.getNrRootDirEntries());
     }

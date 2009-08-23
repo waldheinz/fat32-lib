@@ -50,6 +50,7 @@ public class Fat {
      * Create a new instance
      * 
      * @param bitSize
+     * @param mediumDescriptor 
      * @param nrSectors
      * @param sectorSize
      */
@@ -58,6 +59,7 @@ public class Fat {
         this.nrSectors = nrSectors;
         this.sectorSize = sectorSize;
         this.dirty = false;
+        
         switch (bitSize) {
             case FAT12:
                 entries = new long[(int) ((nrSectors * sectorSize) / 1.5)];
@@ -71,6 +73,7 @@ public class Fat {
             default:
                 throw new IllegalArgumentException("Invalid bitSize " + bitSize);
         }
+        
         entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFFF00;
     }
 

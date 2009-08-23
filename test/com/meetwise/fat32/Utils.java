@@ -11,11 +11,9 @@ import java.nio.ByteBuffer;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public class Utils {
-
-
-
+    
     private Utils() { /* utility class */ }
-
+    
     /**
      * Converts a integer value to an hex string which will have the specified
      * width.

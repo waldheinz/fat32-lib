@@ -32,7 +32,7 @@ import org.jnode.fs.FSEntry;
  */
 public class FatDirectory extends AbstractDirectory {
 
-    private boolean root = false;
+    private final boolean root;
 
     protected FatDirEntry labelEntry;
 
@@ -47,6 +47,11 @@ public class FatDirectory extends AbstractDirectory {
         super(fs, file);
         
         this.file = file;
+        this.root = 
+                (fs.getFatType() == FatType.FAT32) ? 
+                    (file.getStartCluster() == 
+                    fs.getBootSector().getRootDirFirstCluster()) ?
+                        true : false : false;
     }
 
     // for root

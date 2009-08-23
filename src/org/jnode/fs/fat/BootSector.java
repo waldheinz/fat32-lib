@@ -50,6 +50,12 @@ public class BootSector extends Sector {
         partitions = new IBMPartitionTableEntry[4];
     }
 
+    public FatType getFatType() {
+        if (getSectorsPerFat16() == 0) return FatType.FAT32;
+        else if (getMediumDescriptor() == 0xf8) return FatType.FAT16;
+        else return FatType.FAT12;
+    }
+
     public boolean isaValidBootSector() {
         return IBMPartitionTable.containsPartitionTable(data);
     }
@@ -213,12 +219,16 @@ public class BootSector extends Sector {
         set16(0x11, v);
     }
 
+    public long getRootDirFirstCluster() {
+        return get32(0x2c);
+    }
+    
     /**
      * Gets the number of logical sectors
      * 
      * @return int
      */
-    public int getNrLogicalSectors() {
+    private int getNrLogicalSectors() {
         return get16(0x13);
     }
 
@@ -237,21 +247,26 @@ public class BootSector extends Sector {
         set16(0x13, v);
     }
 
-    public void setSectorCount(int count) {
+    public void setSectorCount(long count) {
         if (count > 65535) {
             setNrLogicalSectors(0);
             setNrTotalSectors(count);
         } else {
-            setNrLogicalSectors(count);
+            setNrLogicalSectors((int) count);
             setNrTotalSectors(count);
         }
     }
-
-    private void setNrTotalSectors(int v) {
+    
+    public long getSectorCount() {
+        if (getNrLogicalSectors() == 0) return getNrTotalSectors();
+        else return getNrLogicalSectors();
+    }
+    
+    private void setNrTotalSectors(long v) {
         set32(0x20, v);
     }
     
-    public long getNrTotalSectors() {
+    private long getNrTotalSectors() {
         return get32(0x20);
     }
 
@@ -272,21 +287,31 @@ public class BootSector extends Sector {
     public void setMediumDescriptor(int v) {
         set8(0x15, v);
     }
+    
+    public int getSectorsPerFat() {
+        if (getFatType() == FatType.FAT32) {
+            final long spf = getSectorsPerFat32();
+            if (spf > Integer.MAX_VALUE) throw new AssertionError();
+            return (int) spf;
+        } else {
+            return getSectorsPerFat16();
+        }
+    }
 
     /**
-     * Gets the number of sectors/fat
+     * Gets the number of sectors/fat for FAT 12/16.
      * 
      * @return int
      */
-    public int getSectorsPerFat() {
+    public int getSectorsPerFat16() {
         return get16(0x16);
     }
-
-    public void setSectorsPerFatEx(int v) {
+    
+    public void setSectorsPerFat32(int v) {
         set32(0x24, v);
     }
 
-    public long getSectorsPerFatEx() {
+    public long getSectorsPerFat32() {
         return get32(0x24);
     }
     
