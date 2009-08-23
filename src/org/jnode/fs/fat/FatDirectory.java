@@ -145,22 +145,20 @@ public class FatDirectory extends AbstractDirectory {
      * Flush the contents of this directory to the persistent storage
      */
     public void flush() throws IOException {
-        if (root) {
+        if (file == null) {
             final FatFileSystem fs = (FatFileSystem) getFileSystem();
-            if (fs != null) {
-                long offset = FatUtils.getRootDirOffset(fs.getBootSector());
-                write(fs.getApi(), offset);
-            }
+            long offset = FatUtils.getRootDirOffset(fs.getBootSector());
+            write(fs.getApi(), offset);
         } else {
             write();
         }
     }
-
+    
     /**
      * @see org.jnode.fs.fat.AbstractDirectory#canChangeSize(int)
      */
     protected boolean canChangeSize(int newSize) {
-        return !root;
+        return (file != null);
     }
     
     void setLabel(String label) throws IOException {

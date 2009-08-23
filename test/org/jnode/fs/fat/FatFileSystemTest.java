@@ -2,6 +2,7 @@
 package org.jnode.fs.fat;
 
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import org.jnode.driver.block.RamDisk;
 import org.jnode.fs.FSDirectory;
@@ -172,8 +173,38 @@ public class FatFileSystemTest {
         }
     }
     
+    @Test
+    public void testFat32Write() throws Exception {
+        System.out.println("testFat32Write");
+
+        final InputStream is = getClass().getResourceAsStream(
+                "/data/fat32-test.img.gz");
+
+        final RamDisk rd = RamDisk.readGzipped(is);
+        FatFileSystem fatFs = new FatFileSystem(rd, false);
+        FatLfnDirectory rootDir = fatFs.getRootDir();
+
+        for (int i=0; i < 1024; i++) {
+            final LfnEntry e = rootDir.addFile("f-" + i);
+            assertTrue(e.isFile());
+            assertFalse(e.isDirectory());
+            final FSFile f = e.getFile();
+            
+            f.write(0, ByteBuffer.wrap(("this is file # " + i).getBytes()));
+        }
+
+        fatFs.close();
+
+        fatFs = new FatFileSystem(rd, false);
+        rootDir = fatFs.getRootDir();
+        
+        for (int i=0; i < 1024; i++) {
+            assertNotNull(rootDir.getEntry("f-" + i));
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         FatFileSystemTest test = new FatFileSystemTest();
-        test.testFat32Read();
+        test.testFat32Write();
     }
 }

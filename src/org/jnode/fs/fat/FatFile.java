@@ -55,7 +55,7 @@ public final class FatFile extends FatObject implements FSFile {
         this.myEntry = null;
         this.startCluster = startCluster;
         this.clusterSize = fs.getClusterSize();
-        this.length = 0;
+        this.length = getLengthOnDisk();
         this.isDir = true;
     }
 
@@ -63,12 +63,14 @@ public final class FatFile extends FatObject implements FSFile {
             long startCluster, long length, boolean isDir) {
         
         super(fs);
-
-        this.myEntry = myEntry;
+        
         this.startCluster = startCluster;
+        this.myEntry = myEntry;
         this.length = length;
         this.clusterSize = fs.getClusterSize();
         this.isDir = isDir;
+        
+        if (length > getLengthOnDisk()) throw new AssertionError();
     }
 
     public synchronized void read(long fileOffset, ByteBuffer destBuf)
@@ -136,6 +138,7 @@ public final class FatFile extends FatObject implements FSFile {
             len -= size;
             chainIdx++;
         }
+        
         while (len > 0) {
             int size = Math.min(clusterSize, len);
             srcBuf.limit(srcBuf.position() + size);
@@ -164,7 +167,8 @@ public final class FatFile extends FatObject implements FSFile {
         if (this.length == 0) {
             final long[] chain = fat.allocNew(nrClusters);
             this.startCluster = chain[0];
-            this.myEntry.setStartCluster((int) startCluster);
+            if (myEntry != null)
+                this.myEntry.setStartCluster((int) startCluster);
         } else {
             final long[] chain = fs.getFat().getChain(startCluster);
 
@@ -185,9 +189,10 @@ public final class FatFile extends FatObject implements FSFile {
                 }
             }
         }
-
+        
         this.length = length;
-        this.myEntry.updateLength(length);
+        if (myEntry != null)
+            this.myEntry.updateLength(length);
     }
 
     /**
@@ -205,6 +210,8 @@ public final class FatFile extends FatObject implements FSFile {
      * @return long
      */
     public long getLengthOnDisk() {
+        if (getStartCluster() == 0) return 0;
+        
         final FatFileSystem fs = getFatFileSystem();
         final long[] chain = fs.getFat().getChain(getStartCluster());
         return ((long) chain.length) * fs.getClusterSize();
@@ -226,6 +233,8 @@ public final class FatFile extends FatObject implements FSFile {
      * @throws IOException on read error
      */
     public synchronized FatDirectory getDirectory() throws IOException {
+        if (!isDir) throw new UnsupportedOperationException();
+        
         if (dir == null) {
             dir = new FatLfnDirectory(getFatFileSystem(), this);
         }
@@ -256,4 +265,11 @@ public final class FatFile extends FatObject implements FSFile {
             dir.flush();
         }
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " [length=" + getLength() +
+                ", first cluster=" + getStartCluster() + "]";
+    }
+    
 }
