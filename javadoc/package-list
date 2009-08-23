@@ -1,0 +1,8 @@
+org.jnode.driver.block
+org.jnode.fs
+org.jnode.fs.fat
+org.jnode.fs.spi
+org.jnode.fs.util
+org.jnode.partitions
+org.jnode.partitions.ibm
+org.jnode.util
