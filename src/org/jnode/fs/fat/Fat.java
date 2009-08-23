@@ -60,33 +60,17 @@ public final class Fat {
      * 
      * @param type 
      * @param mediumDescriptor 
-     * @param nrSectors
+     * @param sectors
      * @param sectorSize
      */
-    public Fat(FatType type, int mediumDescriptor, int nrSectors, int sectorSize) {
+    public Fat(FatType type, int mediumDescriptor, int sectors, int sectorSize) {
         this.fatType = type;
-        this.nrSectors = nrSectors;
+        this.nrSectors = sectors;
         this.sectorSize = sectorSize;
         this.dirty = false;
-        
-        switch (type) {
-            case FAT12:
-                entries = new long[(int) ((nrSectors * sectorSize) / 1.5)];
-                break;
-                
-            case FAT16:
-                entries = new long[(nrSectors * sectorSize) / 2];
-                break;
-
-            case FAT32:
-                entries = new long[(nrSectors * sectorSize) / 4];
-                break;
-
-            default:
-                throw new AssertionError();
-        }
-        
-        entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFFF00;
+        entries = new long[(int) ((sectors * sectorSize) /
+                type.getEntrySize())];
+        entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
     }
 
     /**
@@ -96,43 +80,14 @@ public final class Fat {
      * @param offset the byte offset where to read the FAZ from the device
      * @throws IOException on read error
      */
-    public synchronized void read(BlockDevice device, long offset) throws IOException {
+    public synchronized void read(BlockDevice device, long offset)
+            throws IOException {
+        
         final byte[] data = new byte[nrSectors * sectorSize];
         device.read(offset, ByteBuffer.wrap(data));
 
-        for (int i = 0; i < entries.length; i++) {
-            int idx, b1, b2, v;
-            
-            switch (fatType) {
-                case FAT12:
-                    idx = (int) (i * 1.5);
-                    b1 = data[idx] & 0xFF;
-                    b2 = data[idx + 1] & 0xFF;
-                    v = (b2 << 8) | b1;
-                    if ((i % 2) == 0) {
-                        entries[i] = v & 0xFFF;
-                    } else {
-                        entries[i] = v >> 4;
-                    }
-                    break;
-                    
-                case FAT16:
-                    idx = i * 2;
-                    b1 = data[idx] & 0xFF;
-                    b2 = data[idx + 1] & 0xFF;
-                    entries[i] = (b2 << 8) | b1;
-                    break;
-
-                case FAT32:
-                    idx = i * 4;
-                    long l1 = data[idx] & 0xFF;
-                    long l2 = data[idx + 1] & 0xFF;
-                    long l3 = data[idx + 2] & 0xFF;
-                    long l4 = data[idx + 3] & 0xFF;
-                    entries[i] = (l4 << 24) | (l3 << 16) | (l2 << 8) | l1;
-                    break;
-            }
-        }
+        for (int i = 0; i < entries.length; i++)
+            entries[i] = fatType.readEntry(data, i);
 
         this.dirty = false;
     }
@@ -149,37 +104,8 @@ public final class Fat {
 
         final byte[] data = new byte[nrSectors * sectorSize];
         
-        for (int i = 0; i < entries.length; i++) {
-            long v = entries[i];
-            int idx;
-            
-            switch (fatType) {
-                case FAT12: 
-                    idx = (int) (i * 1.5);
-                    if ((i % 2) == 0) {
-                        data[idx] = (byte) (v & 0xFF);
-                        data[idx + 1] = (byte) ((v >> 8) & 0x0F);
-                    } else {
-                        data[idx] |= (byte) ((v & 0x0F) << 4);
-                        data[idx + 1] = (byte) ((v >> 4) & 0xFF);
-                    }
-                    break;
-
-                case FAT16: 
-                    idx = i << 1;
-                    data[idx] = (byte) (v & 0xFF);
-                    data[idx + 1] = (byte) ((v >> 8) & 0xFF);
-                    break;
-
-                case FAT32:
-                    idx = i << 2;
-                    data[idx] = (byte) (v & 0xFF);
-                    data[idx + 1] = (byte) ((v >> 8) & 0xFF);
-                    data[idx + 2] = (byte) ((v >> 16) & 0xFF);
-                    data[idx + 3] = (byte) ((v >> 24) & 0xFF);
-                    break;
-            }
-
+        for (int index = 0; index < entries.length; index++) {
+            fatType.writeEntry(data, index, entries[index]);
         }
         
         device.write(offset, ByteBuffer.wrap(data));
