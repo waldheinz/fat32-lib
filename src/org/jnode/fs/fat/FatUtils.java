@@ -20,6 +20,7 @@
  
 package org.jnode.fs.fat;
 
+import java.io.IOException;
 import org.jnode.util.LittleEndian;
 
 /**
@@ -38,8 +39,9 @@ public class FatUtils {
      * @param bs
      * @param fatNr (0..)
      * @return long
+     * @throws IOException 
      */
-    public static long getFatOffset(BootSector bs, int fatNr) {
+    public static long getFatOffset(BootSector bs, int fatNr) throws IOException {
         long sectSize = bs.getBytesPerSector();
         long sectsPerFat = bs.getSectorsPerFat();
         long resSects = bs.getNrReservedSectors();
@@ -57,8 +59,9 @@ public class FatUtils {
      * 
      * @param bs
      * @return long
+     * @throws IOException 
      */
-    public static long getRootDirOffset(BootSector bs) {
+    public static long getRootDirOffset(BootSector bs) throws IOException {
         long sectSize = bs.getBytesPerSector();
         long sectsPerFat = bs.getSectorsPerFat();
         int fats = bs.getNrFats();
@@ -75,8 +78,9 @@ public class FatUtils {
      * 
      * @param bs
      * @return long
+     * @throws IOException 
      */
-    public static long getFilesOffset(BootSector bs) {
+    public static long getFilesOffset(BootSector bs) throws IOException {
         long offset = getRootDirOffset(bs);
 
         offset += bs.getNrRootDirEntries() * 32;

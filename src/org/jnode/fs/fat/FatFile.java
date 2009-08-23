@@ -275,10 +275,19 @@ public final class FatFile extends FatObject implements FSFile {
      * @param cluster
      * @param clusterOffset
      * @return long
+     * @throws FileSystemException
      */
-    protected long getDevOffset(long cluster, int clusterOffset) {
+    protected long getDevOffset(long cluster, int clusterOffset)
+            throws FileSystemException {
+        
         final FatFileSystem fs = getFatFileSystem();
-        final long filesOffset = FatUtils.getFilesOffset(fs.getBootSector());
+        final long filesOffset;
+
+        try {
+            filesOffset = FatUtils.getFilesOffset(fs.getBootSector());
+        } catch (IOException ex) {
+            throw new FileSystemException(fs, ex);
+        }
         return filesOffset + clusterOffset +
                 ((cluster - FatUtils.FIRST_CLUSTER) * clusterSize);
     }

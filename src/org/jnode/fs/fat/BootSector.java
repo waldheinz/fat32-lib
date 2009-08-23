@@ -49,11 +49,12 @@ public class BootSector extends Sector {
         System.arraycopy(src, 0, data, 0, src.length);
         partitions = new IBMPartitionTableEntry[4];
     }
-
-    public FatType getFatType() {
+    
+    public FatType getFatType() throws IOException {
         if (getSectorsPerFat16() == 0) return FatType.FAT32;
-        else if (getMediumDescriptor() == 0xf8) return FatType.FAT16;
-        else return FatType.FAT12;
+        else if (getMediumDescriptor() == FatFormatter.HD_DESC) return FatType.FAT16;
+        else if (getMediumDescriptor() == FatFormatter.FLOPPY_DESC) return FatType.FAT12;
+        else throw new IOException("can not determine fat type");
     }
 
     public boolean isaValidBootSector() {
@@ -288,7 +289,7 @@ public class BootSector extends Sector {
         set8(0x15, v);
     }
     
-    public int getSectorsPerFat() {
+    public int getSectorsPerFat() throws IOException {
         if (getFatType() == FatType.FAT32) {
             final long spf = getSectorsPerFat32();
             if (spf > Integer.MAX_VALUE) throw new AssertionError();
@@ -319,13 +320,14 @@ public class BootSector extends Sector {
      * Sets the number of sectors/fat
      * 
      * @param v  the new number of sectors per fat
+     * @throws IOException 
      */
-    public void setSectorsPerFat(int v) {
+    public void setSectorsPerFat(int v) throws IOException {
         if (v == getSectorsPerFat()) return;
         
         set16(0x16, v);
     }
-
+    
     /**
      * Gets the number of sectors/track
      * 
@@ -442,9 +444,6 @@ public class BootSector extends Sector {
         res.append('\n');
         res.append("Sector per cluster = ");
         res.append(getSectorsPerCluster());
-        res.append('\n');
-        res.append("Sectors per fat = ");
-        res.append(getSectorsPerFat());
         res.append('\n');
         res.append("byte per sector = ");
         res.append(getBytesPerSector());

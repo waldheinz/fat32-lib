@@ -64,6 +64,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
         
         super(api, readOnly);
 
+        try {
             bs = new BootSector(512);
             try {
                 bs.read(getApi());
@@ -112,7 +113,9 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
             }
             
             rootEntry = new FatRootEntry(rootDir);
-
+        } catch (IOException ex) {
+            throw new FileSystemException(this, ex);
+        }
     }
 
     public FatType getFatType() {

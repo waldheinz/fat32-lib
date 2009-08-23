@@ -156,11 +156,20 @@ public class FatDirectory extends AbstractDirectory {
 
     /**
      * Flush the contents of this directory to the persistent storage
+     * 
+     * @throws FileSystemException 
      */
     public void flush() throws FileSystemException {
         if (file == null) {
             final FatFileSystem fs = (FatFileSystem) getFileSystem();
-            long offset = FatUtils.getRootDirOffset(fs.getBootSector());
+            long offset;
+            
+            try {
+                offset = FatUtils.getRootDirOffset(fs.getBootSector());
+            } catch (IOException ex) {
+                throw new FileSystemException(fs, ex);
+            }
+
             write(fs.getApi(), offset);
         } else {
             write();
