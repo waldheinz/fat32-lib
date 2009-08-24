@@ -206,8 +206,8 @@ public class LfnEntry implements FSEntry {
             /* compare names */
             return this.getName().compareTo(e.getName());
         } else {
-            if (e.isDirectory()) return -1;
-            else return 1;
+            if (e.isDirectory()) return 1;
+            else return -1;
         }
     }
 }

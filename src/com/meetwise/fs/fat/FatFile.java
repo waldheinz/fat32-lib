@@ -69,8 +69,6 @@ public final class FatFile extends FatObject implements FSFile {
         this.length = length;
         this.clusterSize = fs.getClusterSize();
         this.isDir = isDir;
-        
-        if (length > getLengthOnDisk()) throw new AssertionError();
     }
 
     public synchronized void read(long fileOffset, ByteBuffer destBuf)
