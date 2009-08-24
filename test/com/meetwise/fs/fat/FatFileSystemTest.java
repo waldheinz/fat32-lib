@@ -56,7 +56,7 @@ public class FatFileSystemTest {
         final BootSector bs = fatFs.getBootSector();
         assertEquals("mkdosfs", bs.getOemName());
         assertEquals(512, bs.getBytesPerSector());
-        assertEquals(FatType.FAT16, bs.getFatType());
+        assertEquals(FatType.FAT12, bs.getFatType());
         assertEquals(4, bs.getSectorsPerCluster());
         assertEquals(1, bs.getNrReservedSectors());
         assertEquals(2, bs.getNrFats());
@@ -73,6 +73,14 @@ public class FatFileSystemTest {
 
         final FatDirectory fatRootDir = fatFs.getRootDir();
         assertEquals(512, fatRootDir.getSize());
+
+        Iterator<FSEntry> i = fatRootDir.iterator();
+        assertTrue (i.hasNext());
+
+        while (i.hasNext()) {
+            final FSEntry e = i.next();
+            System.out.println("     - " + e);
+        }
     }
 
     /**

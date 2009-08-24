@@ -30,9 +30,22 @@ import com.meetwise.fs.partitions.IBMPartitionTableEntry;
 import com.meetwise.fs.partitions.IBMPartitionTypes;
 
 /**
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * The boot sector.
+ *
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public class BootSector extends Sector {
+public final class BootSector extends Sector {
+
+    /**
+     * The maximum number of sectors for a FAT12 file system. This is actually
+     * the number of sectors where mkdosfs stop complaining about a FAT16
+     * partition having not enough sectors, so it would be misinterpreted
+     * as FAT12 without special handling.
+     *
+     * @see #getNrLogicalSectors() 
+     */
+    public static final int MAX_FAT12_SECTORS = 8202;
 
     private final IBMPartitionTableEntry[] partitions;
 
@@ -51,9 +64,10 @@ public class BootSector extends Sector {
     
     public FatType getFatType() throws IOException {
         if (getSectorsPerFat16() == 0) return FatType.FAT32;
-        else if (getMediumDescriptor() == FatFormatter.HD_DESC) return FatType.FAT16;
-        else if (getMediumDescriptor() == FatFormatter.FLOPPY_DESC) return FatType.FAT12;
-        else throw new IOException("can not determine fat type");
+        else {
+            return (getNrLogicalSectors() <= MAX_FAT12_SECTORS) ?
+                FatType.FAT12 : FatType.FAT16;
+        }
     }
 
     public boolean isaValidBootSector() {
