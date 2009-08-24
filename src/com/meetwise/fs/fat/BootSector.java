@@ -65,7 +65,7 @@ public final class BootSector extends Sector {
     public FatType getFatType() throws IOException {
         if (getSectorsPerFat16() == 0) return FatType.FAT32;
         else {
-            return (getNrLogicalSectors() <= MAX_FAT12_SECTORS) ?
+            return (getSectorCount() <= MAX_FAT12_SECTORS) ?
                 FatType.FAT12 : FatType.FAT16;
         }
     }

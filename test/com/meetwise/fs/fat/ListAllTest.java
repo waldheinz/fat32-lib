@@ -3,9 +3,11 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSFile;
 import com.meetwise.fs.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -37,8 +39,24 @@ public class ListAllTest {
                 System.out.println(ident + "- " + e.getName());
                 listDirectories(e.getDirectory(), ident + "   ");
             } else {
-                System.out.println(ident + "+ " + e.getName());
+                checkFile(e, ident);
             }
         }
+    }
+
+    private void checkFile(FSEntry fe, String ident) throws IOException {
+        System.out.print(ident + " + " + fe.getName());
+        final FSFile f = fe.getFile();
+        
+        System.out.println(" [size=" + f.getLength() + "]");
+
+        final ByteBuffer bb = ByteBuffer.allocate((int) f.getLength());
+        f.read(0, bb);
+    }
+    
+    public static void main(String[] args) throws Exception {
+        ListAllTest lat = new ListAllTest();
+        
+        lat.testListComplex();
     }
 }
