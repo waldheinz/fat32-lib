@@ -553,4 +553,14 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
     public FSDirectory getParent() {
         return parent;
     }
+
+    public int compareTo(FSEntry e) {
+        if (e.isDirectory() == this.isDirectory()) {
+            /* compare names */
+            return this.getName().compareTo(e.getName());
+        } else {
+            if (e.isDirectory()) return -1;
+            else return 1;
+        }
+    }
 }

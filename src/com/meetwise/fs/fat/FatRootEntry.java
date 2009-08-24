@@ -105,10 +105,20 @@ public class FatRootEntry extends FatObject implements FSEntry {
     
     /**
      * Indicate if the entry has been modified in memory (ie need to be saved)
+     * 
      * @return true if the entry need to be saved
-     * @throws IOException
      */
-    public boolean isDirty() throws IOException {
+    public boolean isDirty() {
         return true;
+    }
+
+    public int compareTo(FSEntry e) {
+        if (e.isDirectory() == this.isDirectory()) {
+            /* compare names */
+            return this.getName().compareTo(e.getName());
+        } else {
+            if (e.isDirectory()) return -1;
+            else return 1;
+        }
     }
 }

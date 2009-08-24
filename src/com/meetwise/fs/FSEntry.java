@@ -23,22 +23,24 @@ package com.meetwise.fs;
 import java.io.IOException;
 
 /**
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
- */
-/**
  * Entry of an FSDirectory.
  * 
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public interface FSEntry extends FSObject {
+public interface FSEntry extends FSObject, Comparable<FSEntry> {
 
     /**
      * Gets the name of this entry.
+     *
+     * @return this entrys name
      */
     public String getName();
 
     /**
      * Gets the directory this entry is a part of.
+     * 
+     * @return the parent directory of this entry, or {@code null}
      */
     public FSDirectory getParent();
 
@@ -53,31 +55,40 @@ public interface FSEntry extends FSObject {
 
     /**
      * Is this entry refering to a file?
+     * 
+     * @return if this entry refers to a file
      */
     public boolean isFile();
 
     /**
      * Is this entry refering to a (sub-)directory?
+     *
+     * @return if this entry refers to a directory
      */
     public boolean isDirectory();
 
     /**
      * Sets the name of this entry.
+     * 
+     * @param newName the new name of this entry
+     * @throws IOException on error setting the new name
      */
     public void setName(String newName) throws IOException;
 
     /**
      * Gets the last modification time of this entry.
      * 
-     * @throws IOException
+     * @param lastModified the new last modification time of this entry
+     * @throws IOException on write error
      */
     public void setLastModified(long lastModified) throws IOException;
 
     /**
      * Gets the file this entry refers to. This method can only be called if
-     * <code>isFile</code> returns true.
+     * {@code isFile} returns {@code true}.
      * 
-     * @return The file described by this entry
+     * @return the file described by this entry
+     * @throws IOException on error accessing the file
      */
     public FSFile getFile() throws IOException;
 
@@ -93,8 +104,7 @@ public interface FSEntry extends FSObject {
     /**
      * Indicate if the entry has been modified in memory (ie need to be saved)
      * 
-     * @return true if the entry need to be saved
-     * @throws IOException
+     * @return true if the entry needs to be saved
      */
-    public boolean isDirty() throws IOException;
+    public boolean isDirty();
 }
