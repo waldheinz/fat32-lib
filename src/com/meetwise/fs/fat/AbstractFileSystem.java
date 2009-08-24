@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
 import com.meetwise.fs.FileSystem;
 import com.meetwise.fs.FileSystemException;
@@ -42,11 +42,11 @@ public abstract class AbstractFileSystem implements FileSystem {
     private final BlockDevice api;
     private boolean closed;
 
-    // cache of FSFile (key: FSEntry)
-    private HashMap<FSEntry, FSFile> files = new HashMap<FSEntry, FSFile>();
+    // cache of FSFile (key: FSDirectoryEntry)
+    private HashMap<FSDirectoryEntry, FSFile> files = new HashMap<FSDirectoryEntry, FSFile>();
 
-    // cache of FSDirectory (key: FSEntry)
-    private HashMap<FSEntry, FSDirectory> directories = new HashMap<FSEntry, FSDirectory>();
+    // cache of FSDirectory (key: FSDirectoryEntry)
+    private HashMap<FSDirectoryEntry, FSDirectory> directories = new HashMap<FSDirectoryEntry, FSDirectory>();
 
     /**
      * Construct an AbstractFileSystem in specified readOnly mode
@@ -130,7 +130,7 @@ public abstract class AbstractFileSystem implements FileSystem {
      * @return the FSFile object associated with entry
      * @throws IOException
      */
-    public final synchronized FSFile getFile(FSEntry entry) throws IOException {
+    public final synchronized FSFile getFile(FSDirectoryEntry entry) throws IOException {
         if (isClosed())
             throw new IOException("FileSystem is closed");
 
@@ -149,7 +149,7 @@ public abstract class AbstractFileSystem implements FileSystem {
      * @return a new created FSFile
      * @throws IOException
      */
-    protected abstract FSFile createFile(FSEntry entry) throws IOException;
+    protected abstract FSFile createFile(FSDirectoryEntry entry) throws IOException;
 
     /**
      * Flush all unsaved FSFile in our cache
@@ -172,7 +172,7 @@ public abstract class AbstractFileSystem implements FileSystem {
      * @return the FSDirectory object associated with this entry
      * @throws IOException
      */
-    public final synchronized FSDirectory getDirectory(FSEntry entry) throws IOException {
+    public final synchronized FSDirectory getDirectory(FSDirectoryEntry entry) throws IOException {
         if (isClosed())
             throw new IOException("FileSystem is closed");
 
@@ -191,7 +191,7 @@ public abstract class AbstractFileSystem implements FileSystem {
      * @return the new created FSDirectory
      * @throws IOException
      */
-    protected abstract FSDirectory createDirectory(FSEntry entry) throws IOException;
+    protected abstract FSDirectory createDirectory(FSDirectoryEntry entry) throws IOException;
 
     /**
      * Flush all unsaved FSDirectory in our cache

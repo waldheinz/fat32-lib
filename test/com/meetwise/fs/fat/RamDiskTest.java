@@ -1,7 +1,7 @@
 
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.RamDisk;
+import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.Test;

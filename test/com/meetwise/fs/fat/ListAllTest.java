@@ -2,9 +2,9 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
-import com.meetwise.fs.RamDisk;
+import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -32,10 +32,10 @@ public class ListAllTest {
     
     private void listDirectories(FSDirectory dir, String ident) throws IOException {
 
-        final Iterator<FSEntry> i = dir.iterator();
+        final Iterator<FSDirectoryEntry> i = dir.iterator();
         
         while (i.hasNext()) {
-            final FSEntry e = i.next();
+            final FSDirectoryEntry e = i.next();
             
             if (e.isDirectory()) {
                 System.out.println(ident + "- " + e.getName());
@@ -46,7 +46,7 @@ public class ListAllTest {
         }
     }
 
-    private void checkFile(FSEntry fe, String ident) throws IOException {
+    private void checkFile(FSDirectoryEntry fe, String ident) throws IOException {
         System.out.print(ident + " + " + fe.getName());
         final FSFile f = fe.getFile();
         

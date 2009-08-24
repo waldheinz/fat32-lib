@@ -34,7 +34,7 @@ public interface FSObject {
      * filesystem. All invocations on methods (exception this method) of invalid
      * objects must throw an IOException.
      * 
-     * @return 
+     * @return if this {@code FSObject} is still valid
      */
     public boolean isValid();
 

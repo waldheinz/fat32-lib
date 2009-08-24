@@ -4,8 +4,8 @@ package com.meetwise.fs.fat;
 import com.meetwise.fs.BlockDevice;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import com.meetwise.fs.FSEntry;
-import com.meetwise.fs.RamDisk;
+import com.meetwise.fs.FSDirectoryEntry;
+import com.meetwise.fs.util.RamDisk;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -61,7 +61,7 @@ public class FatFormatterTest {
         assertEquals("TestVol", fs.getVolumeLabel());
         
         final FatLfnDirectory root = fs.getRoot();
-        final Iterator<FSEntry> i = root.iterator();
+        final Iterator<FSDirectoryEntry> i = root.iterator();
 
         assertFalse(i.hasNext());
     }

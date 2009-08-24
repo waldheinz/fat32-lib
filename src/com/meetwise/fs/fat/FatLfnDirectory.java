@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
 import com.meetwise.fs.ReadOnlyFileSystemException;
 
@@ -81,7 +81,7 @@ public class FatLfnDirectory extends FatDirectory {
     }
 
     @Override
-    public FSEntry addDirectory(String name) throws IOException {
+    public FSDirectoryEntry addDirectory(String name) throws IOException {
         if (getFileSystem().isReadOnly()) {
             throw new ReadOnlyFileSystemException(this.getFatFileSystem(),
                     "addDirectory in readonly filesystem"); //NOI18N
@@ -123,9 +123,9 @@ public class FatLfnDirectory extends FatDirectory {
     }
 
     @Override
-    public FSEntry getEntry(String name) {
+    public FSDirectoryEntry getEntry(String name) {
         name = name.trim();
-        FSEntry entry;
+        FSDirectoryEntry entry;
         
         // try first as a long file name
         entry = longFileNameIndex.get(name);
@@ -231,15 +231,15 @@ public class FatLfnDirectory extends FatDirectory {
     }
 
     @Override
-    public Iterator<FSEntry> iterator() {
-        return new Iterator<FSEntry>() {
+    public Iterator<FSDirectoryEntry> iterator() {
+        return new Iterator<FSDirectoryEntry>() {
             Iterator<LfnEntry> it = shortNameIndex.values().iterator();
 
             public boolean hasNext() {
                 return it.hasNext();
             }
 
-            public FSEntry next() {
+            public FSDirectoryEntry next() {
                 return it.next();
             }
 

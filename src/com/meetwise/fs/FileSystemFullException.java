@@ -20,12 +20,21 @@
  
 package com.meetwise.fs;
 
-import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.FileSystem;
-
+/**
+ * Gets thrown when a file system can not store the additional data that
+ * is tried to be written.
+ * 
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
+ */
 public class FileSystemFullException extends FileSystemException {
     private final static long serialVersionUID = 1;
     
+    /**
+     * Creates a new instance of {@code FileSystemFullException}.
+     *
+     * @param fs the {@link FileSystem} on which this exception was generated
+     * @param message a message describing futher details, may be {@code null}
+     */
     public FileSystemFullException(FileSystem fs, String message) {
         super(fs, message);
     }

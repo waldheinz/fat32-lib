@@ -24,7 +24,7 @@ import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
 
 /**
@@ -189,7 +189,7 @@ public class FatDirectory extends AbstractDirectory {
         }
 
         if (label != null) {
-            Iterator<FSEntry> i = iterator();
+            Iterator<FSDirectoryEntry> i = iterator();
             FatDirEntry current;
             while (labelEntry == null && i.hasNext()) {
                 current = (FatDirEntry) i.next();

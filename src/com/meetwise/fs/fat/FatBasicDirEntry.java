@@ -25,7 +25,7 @@ package com.meetwise.fs.fat;
  */
 public class FatBasicDirEntry extends FatObject implements FatConstants {
 
-    protected byte[] rawData = new byte[32];
+    protected final byte[] rawData = new byte[32];
 
     public FatBasicDirEntry(AbstractDirectory dir) {
         super(dir.getFatFileSystem());
@@ -33,6 +33,7 @@ public class FatBasicDirEntry extends FatObject implements FatConstants {
 
     public FatBasicDirEntry(AbstractDirectory dir, byte[] src, int offset) {
         super(dir.getFatFileSystem());
+        
         System.arraycopy(src, offset, rawData, 0, 32);
     }
 

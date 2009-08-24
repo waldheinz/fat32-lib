@@ -5,9 +5,9 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
-import com.meetwise.fs.RamDisk;
+import com.meetwise.fs.util.RamDisk;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -74,11 +74,11 @@ public class FatFileSystemTest {
         final FatDirectory fatRootDir = fatFs.getRoot();
         assertEquals(512, fatRootDir.getSize());
 
-        Iterator<FSEntry> i = fatRootDir.iterator();
+        Iterator<FSDirectoryEntry> i = fatRootDir.iterator();
         assertTrue (i.hasNext());
 
         while (i.hasNext()) {
-            final FSEntry e = i.next();
+            final FSDirectoryEntry e = i.next();
             System.out.println("     - " + e);
         }
     }
@@ -120,7 +120,7 @@ public class FatFileSystemTest {
         final FatDirectory fatRootDir = fatFs.getRoot();
         assertEquals(512, fatRootDir.getSize());
         
-        FSEntry entry = fatRootDir.getEntry("testFile");
+        FSDirectoryEntry entry = fatRootDir.getEntry("testFile");
         assertTrue(entry.isFile());
         assertFalse(entry.isDirectory());
 
@@ -130,11 +130,11 @@ public class FatFileSystemTest {
         final FSDirectory rootDir = fatFs.getRoot();
         System.out.println("   rootDir = " + rootDir);
 
-        Iterator<FSEntry> i = rootDir.iterator();
+        Iterator<FSDirectoryEntry> i = rootDir.iterator();
         assertTrue (i.hasNext());
         
         while (i.hasNext()) {
-            final FSEntry e = i.next();
+            final FSDirectoryEntry e = i.next();
             System.out.println("     - " + e);
         }
 
@@ -149,7 +149,7 @@ public class FatFileSystemTest {
         i = testDir.iterator();
         
         while (i.hasNext()) {
-            final FSEntry e = i.next();
+            final FSDirectoryEntry e = i.next();
             System.out.println("     - " + e);
         }
         
@@ -188,15 +188,15 @@ public class FatFileSystemTest {
         System.out.println("   rootDir = " + rootDir);
         assertTrue(rootDir.isRoot());
         
-        Iterator<FSEntry> i = rootDir.iterator();
+        Iterator<FSDirectoryEntry> i = rootDir.iterator();
         assertTrue(i.hasNext());
         
         while (i.hasNext()) {
-            final FSEntry e = i.next();
+            final FSDirectoryEntry e = i.next();
             System.out.println("     - " + e);
         }
 
-        FSEntry e = rootDir.getEntry("TestDir");
+        FSDirectoryEntry e = rootDir.getEntry("TestDir");
         assertTrue(e.isDirectory());
         assertFalse(e.isFile());
 

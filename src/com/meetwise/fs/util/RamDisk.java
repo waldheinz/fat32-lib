@@ -1,6 +1,7 @@
 
-package com.meetwise.fs;
+package com.meetwise.fs.util;
 
+import com.meetwise.fs.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

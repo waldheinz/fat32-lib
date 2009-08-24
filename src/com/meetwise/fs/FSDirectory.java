@@ -24,58 +24,59 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
+ * Base class for all {@link FileSystem} directories.
+ *
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte
  */
-public interface FSDirectory extends FSObject, Iterable<FSEntry> {
+public interface FSDirectory extends FSObject, Iterable<FSDirectoryEntry> {
 
     /**
-     * Gets an iterator used to iterate over all the entries of this directory.
-     * All elements returned by the iterator must be instanceof FSEntry.
+     * Gets an iterator to iterate over the entries of this directory.
      *
-     * @return 
+     * @return the directory iterator
      */
-    public Iterator<FSEntry> iterator();
+    public Iterator<FSDirectoryEntry> iterator();
 
     /**
      * Gets the entry with the given name.
      * 
-     * @param name
-     * @return 
-     * @throws IOException
+     * @param name the name of the entry to get
+     * @return the entry, if it existed
+     * @throws IOException on error retrieving the entry
      */
-    public FSEntry getEntry(String name) throws IOException;
+    public FSDirectoryEntry getEntry(String name) throws IOException;
 
     /**
      * Add a new file with a given name to this directory.
      * 
-     * @param name
-     * @return 
-     * @throws IOException
+     * @param name the name of the file to add
+     * @return the entry pointing to the new file
+     * @throws IOException on error creating the file
      */
-    public FSEntry addFile(String name) throws IOException;
+    public FSDirectoryEntry addFile(String name) throws IOException;
 
     /**
      * Add a new (sub-)directory with a given name to this directory.
      * 
-     * @param name
-     * @return 
-     * @throws IOException
+     * @param name the name of the sub-directory to add
+     * @return the entry pointing to the new directory
+     * @throws IOException on error creating the directory
      */
-    public FSEntry addDirectory(String name) throws IOException;
+    public FSDirectoryEntry addDirectory(String name) throws IOException;
 
     /**
      * Remove the entry with the given name from this directory.
      * 
-     * @param name
-     * @throws IOException
+     * @param name name of the entry to remove
+     * @throws IOException on error deleting the entry
      */
     public void remove(String name) throws IOException;
 
     /**
-     * Save all dirty (unsaved) data to the device
+     * Save all dirty (unsaved) data to the device.
      * 
-     * @throws IOException
+     * @throws IOException on write error
      */
     public void flush() throws IOException;
 }

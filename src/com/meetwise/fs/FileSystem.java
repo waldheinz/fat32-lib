@@ -22,9 +22,8 @@ package com.meetwise.fs;
 
 import java.io.IOException;
 
-
 /**
- * 
+ * The interface common to all file system implementations.
  *
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
@@ -41,9 +40,9 @@ public interface FileSystem {
     public FSDirectory getRoot() throws IOException;
 
     /**
-     * Is the file system. mounted in read-only mode ?
+     * Returns if this {@code FileSystem} is in read-only mode.
      *
-     * @return 
+     * @return if this {@code FileSystem} is read-only
      */
     public boolean isReadOnly();
 
@@ -52,19 +51,21 @@ public interface FileSystem {
      * file system. or objects created by this file system. will throw an
      * IOException.
      * 
-     * @throws IOException
+     * @throws IOException on error closing the file system
      */
     public void close() throws IOException;
 
     /**
-     * Is this file system. closed.
+     * Returns {@code true} if this file system is closed. If the file system
+     * is closed, no more operations may be performed on it.
      * 
-     * @return 
+     * @return if this file system is closed
      */
     public boolean isClosed();
 
     /**
      * The total size of this file system.
+     *
      * @return if -1 this feature is unsupported
      * @throws IOException if an I/O error occurs
      */
@@ -72,6 +73,7 @@ public interface FileSystem {
 
     /**
      * The free space of this file system.
+     *
      * @return if -1 this feature is unsupported
      * @throws IOException if an I/O error occurs
      */
@@ -79,11 +81,16 @@ public interface FileSystem {
 
     /**
      * The usable space of this file system.
+     *
      * @return if -1 this feature is unsupported
      * @throws IOException if an I/O error occurs
      */
     public long getUsableSpace() throws IOException;
 
-    
+    /**
+     * Flushes any modified file system structures to the underlying storage.
+     *
+     * @throws IOException
+     */
     public void flush() throws IOException;
 }

@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
 import com.meetwise.fs.util.DosUtils;
 import com.meetwise.fs.util.LittleEndian;
@@ -32,7 +32,7 @@ import com.meetwise.fs.util.LittleEndian;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
+public class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
 
     /** Name of this entry */
     private String name;
@@ -67,7 +67,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
     /** Has this entry been changed and not yet flushed to disk? */
     private boolean _dirty;
     
-    /** Directory this entry is a part of */
+    /** FSDirectory this entry is a part of */
     private final AbstractDirectory parent;
 
     public static FatBasicDirEntry create(
@@ -402,7 +402,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
      * Does this entry refer to a file?
      * 
      * @return 
-     * @see org.jnode.fs.FSEntry#isFile()
+     * @see org.jnode.fs.FSDirectoryEntry#isFile()
      */
     public boolean isFile() {
         return (!(isDirectory() || isLabel()));
@@ -412,7 +412,7 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
      * Does this entry refer to a directory?
      * 
      * @return 
-     * @see org.jnode.fs.FSEntry#isDirectory()
+     * @see org.jnode.fs.FSDirectoryEntry#isDirectory()
      */
     public boolean isDirectory() {
         return ((flags & F_DIRECTORY) != 0);
@@ -552,15 +552,5 @@ public class FatDirEntry extends FatBasicDirEntry implements FSEntry {
      */
     public FSDirectory getParent() {
         return parent;
-    }
-
-    public int compareTo(FSEntry e) {
-        if (e.isDirectory() == this.isDirectory()) {
-            /* compare names */
-            return this.getName().compareTo(e.getName());
-        } else {
-            if (e.isDirectory()) return 1;
-            else return -1;
-        }
     }
 }

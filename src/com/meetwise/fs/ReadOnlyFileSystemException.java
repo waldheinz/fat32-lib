@@ -20,45 +20,32 @@
  
 package com.meetwise.fs;
 
-import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.FileSystem;
-
 /**
- * @author Fabien DUMINY
+ * Exception allowing to handle cases where a FileSystem is mounted readOnly.
  * 
- * New exception allowing to handle cases where a FileSystem is mounted readOnly
+ * @author Fabien Duminy
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
+ * @see FileSystem#isReadOnly() 
  */
 public class ReadOnlyFileSystemException extends FileSystemException {
 
     private final static long serialVersionUID = 1;
-
+    
+    /**
+     * Creates a new instance of {@code ReadOnlyFileSystemException}.
+     *
+     * @param fs the {@code FileSystem} that generated this exception
+     */
     public ReadOnlyFileSystemException(FileSystem fs) {
         super(fs, "read-only file system");
     }
-    /**
-     * @param fs 
-     * @param message
-     * @param cause
-     */
-    public ReadOnlyFileSystemException(FileSystem fs, String message, Throwable cause) {
-        super(fs, message);
-        
-        initCause(cause);
-    }
 
     /**
-     * @param fs 
-     * @param cause
-     */
-    public ReadOnlyFileSystemException(FileSystem fs, Throwable cause) {
-        super(fs);
-        
-        initCause(cause);
-    }
-
-    /**
-     * @param fs 
-     * @param message
+     * Creates a new instance of {@code ReadOnlyFileSystemException} using
+     * the specified detail message.
+     *
+     * @param fs the {@code FileSystem} that generated this exception
+     * @param message the detail message describing why this exception occured
      */
     public ReadOnlyFileSystemException(FileSystem fs, String message) {
         super(fs, message);

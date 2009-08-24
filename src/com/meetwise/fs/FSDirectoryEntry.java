@@ -1,5 +1,5 @@
 /*
- * $Id: FSEntry.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: FSDirectoryEntry.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -21,15 +21,34 @@
 package com.meetwise.fs;
 
 import java.io.IOException;
+import java.util.Comparator;
 
 /**
- * Entry of an FSDirectory.
+ * Represents one entry in a {@link FSDirectory}.
  * 
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public interface FSEntry extends FSObject, Comparable<FSEntry> {
+public interface FSDirectoryEntry extends FSObject {
 
+    /**
+     * Compares directory entries alphabetically, with all directories coming
+     * before all files.
+     */
+    public final static Comparator<FSDirectoryEntry> DIRECTORY_ENTRY_COMPARATOR =
+            new Comparator<FSDirectoryEntry>() {
+
+        public int compare(FSDirectoryEntry e1, FSDirectoryEntry e2) {
+            if (e2.isDirectory() == e1.isDirectory()) {
+                /* compare names */
+                return e1.getName().compareTo(e2.getName());
+            } else {
+                if (e2.isDirectory()) return 1;
+                else return -1;
+            }
+        }
+    };
+    
     /**
      * Gets the name of this entry.
      *
@@ -47,9 +66,10 @@ public interface FSEntry extends FSObject, Comparable<FSEntry> {
     /**
      * Gets the last modification time of this entry.
      *
-     * @return the last modification time of the entry as milliseconds since 1970, or {@code 0}
-     *         if this filesystem does not support getting the last modified time.
-     * @throws IOException if an error occurs retrieving the timestamp.
+     * @return the last modification time of the entry as milliseconds
+     *      since 1970, or {@code 0} if this filesystem does not support
+     *      getting the last modification time
+     * @throws IOException if an error occurs retrieving the timestamp
      */
     public long getLastModified() throws IOException;
 

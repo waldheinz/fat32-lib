@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
 import com.meetwise.fs.FileSystem;
 
@@ -32,7 +32,7 @@ import com.meetwise.fs.FileSystem;
  * 
  * @author gbin
  */
-public class LfnEntry implements FSEntry {
+public class LfnEntry implements FSDirectoryEntry {
     // decompacted LFN entry
     private String fileName;
     // TODO: Make them available
@@ -200,17 +200,7 @@ public class LfnEntry implements FSEntry {
     public boolean isDirty() {
         return true;
     }
-
-    public int compareTo(FSEntry e) {
-        if (e.isDirectory() == this.isDirectory()) {
-            /* compare names */
-            return this.getName().compareTo(e.getName());
-        } else {
-            if (e.isDirectory()) return 1;
-            else return -1;
-        }
-    }
-
+    
     boolean isDotDir() {
         if (getName().equals(".")) return true;
         if (getName().equals("..")) return true;

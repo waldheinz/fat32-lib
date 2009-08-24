@@ -24,7 +24,7 @@ import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.util.HashMap;
 import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
 import com.meetwise.fs.FileSystemException;
 
@@ -221,7 +221,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     /**
      *
      */
-    protected FSFile createFile(FSEntry entry) throws IOException {
+    protected FSFile createFile(FSDirectoryEntry entry) throws IOException {
 
         // TODO Auto-generated method stub
         return null;
@@ -230,7 +230,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     /**
      *
      */
-    protected FSDirectory createDirectory(FSEntry entry) throws IOException {
+    protected FSDirectory createDirectory(FSDirectoryEntry entry) throws IOException {
         // TODO Auto-generated method stub
         return null;
     }

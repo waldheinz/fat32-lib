@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
 
 import java.util.Vector;
 import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
 import com.meetwise.fs.ReadOnlyFileSystemException;
 
@@ -38,7 +38,7 @@ import com.meetwise.fs.ReadOnlyFileSystemException;
  */
 public abstract class AbstractDirectory
         extends FatObject
-        implements FSDirectory, Iterable<FSEntry> {
+        implements FSDirectory, Iterable<FSDirectoryEntry> {
 
     protected Vector<FatBasicDirEntry> entries =
             new Vector<FatBasicDirEntry>();
@@ -69,7 +69,7 @@ public abstract class AbstractDirectory
      * 
      * @return Iterator
      */
-    public Iterator<FSEntry> iterator() {
+    public Iterator<FSDirectoryEntry> iterator() {
         return new DirIterator();
     }
     
@@ -123,7 +123,7 @@ public abstract class AbstractDirectory
      * @return 
      * @throws IOException
      */
-    public FSEntry addFile(String name) throws IOException {
+    public FSDirectoryEntry addFile(String name) throws IOException {
         return addFatFile(name);
     }
 
@@ -165,7 +165,7 @@ public abstract class AbstractDirectory
      * @return 
      * @throws IOException
      */
-    public FSEntry addDirectory(String name) throws IOException {
+    public FSDirectoryEntry addDirectory(String name) throws IOException {
         if (getFileSystem().isReadOnly()) throw new
                 ReadOnlyFileSystemException(this.getFatFileSystem(),
                 "readonly filesystem"); //NOI18N
@@ -225,7 +225,7 @@ public abstract class AbstractDirectory
      * @return 
      * @throws IOException
      */
-    public FSEntry getEntry(String name) throws IOException {
+    public FSDirectoryEntry getEntry(String name) throws IOException {
         final FatDirEntry entry = getFatEntry(name);
         if (entry == null) {
             throw new FileNotFoundException(name);
@@ -277,7 +277,7 @@ public abstract class AbstractDirectory
         out.println("Unused entries " + freeCount);
     }
 
-    private class DirIterator implements Iterator<FSEntry> {
+    private class DirIterator implements Iterator<FSDirectoryEntry> {
 
         private int offset = 0;
 
@@ -305,7 +305,7 @@ public abstract class AbstractDirectory
         /**
          * @see java.util.Iterator#next()
          */
-        public FSEntry next() {
+        public FSDirectoryEntry next() {
             
             while (offset < entries.size()) {
                 FatBasicDirEntry e = entries.get(offset);
@@ -315,8 +315,8 @@ public abstract class AbstractDirectory
                         !((FatDirEntry) e).getName().equals("..")) {
 
                     offset++;
-                    System.out.println("    " + ((FSEntry)e).getName());
-                    return (FSEntry) e;
+                    System.out.println("    " + ((FSDirectoryEntry)e).getName());
+                    return (FSDirectoryEntry) e;
                 } else {
                     offset++;
                 }
