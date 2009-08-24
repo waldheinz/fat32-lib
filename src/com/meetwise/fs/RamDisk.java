@@ -85,12 +85,12 @@ public final class RamDisk implements BlockDevice {
         this.data = ByteBuffer.allocate(size);
     }
     
-    public long getLength() {
+    public long getSize() {
         return this.size;
     }
 
     public void read(long devOffset, ByteBuffer dest) throws IOException {
-        if (devOffset > getLength()) throw new IllegalArgumentException();
+        if (devOffset > getSize()) throw new IllegalArgumentException();
         
         data.limit((int) (devOffset + dest.remaining()));
         data.position((int) devOffset);
@@ -99,8 +99,8 @@ public final class RamDisk implements BlockDevice {
     }
 
     public void write(long devOffset, ByteBuffer src) throws IOException {
-        if (devOffset > getLength()) throw new IllegalArgumentException(
-                "offset=" + devOffset + ", length=" + getLength());
+        if (devOffset > getSize()) throw new IllegalArgumentException(
+                "offset=" + devOffset + ", length=" + getSize());
 
         data.limit((int) (devOffset + src.remaining()));
         data.position((int) devOffset);
@@ -113,7 +113,7 @@ public final class RamDisk implements BlockDevice {
         /* not needed */
     }
     
-    public int getSectorSize() throws IOException {
+    public int getSectorSize() {
         return this.sectorSize;
     }
 }

@@ -20,6 +20,8 @@ public class ListAllTest {
     
     @Test
     public void testListComplex() throws Exception {
+        System.out.println("testListComplex");
+
         final InputStream is = getClass().getResourceAsStream(
                 "/data/complex.img.gz");
 

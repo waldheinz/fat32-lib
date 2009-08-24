@@ -22,6 +22,6 @@ public class RamDiskTest {
 
         final RamDisk rd = RamDisk.readGzipped(is);
         assertEquals(512, rd.getSectorSize());
-        assertEquals(10240000, rd.getLength());
+        assertEquals(10240000, rd.getSize());
     }
 }

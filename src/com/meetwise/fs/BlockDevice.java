@@ -24,49 +24,51 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * <description>
+ * This is the abstraction used for a device that can hold a {@link FileSystem}.
  *
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public interface BlockDevice {
 
     /**
-     * Gets the total length in bytes
+     * Gets the total length of this device in bytes.
      *
-     * @return long
+     * @return the total number of bytes on this device
      */
-    public abstract long getLength();
+    public abstract long getSize();
 
     /**
-     * Read a block of data
+     * Read a block of data from this device.
      *
-     * @param devOffset
-     * @param dest
-     * @throws IOException
+     * @param devOffset the byte offset where to read the data from
+     * @param dest the destination buffer where to store the data read
+     * @throws IOException on read error
      */
-    public abstract void read(long devOffset, ByteBuffer dest) throws IOException;
+    public abstract void read(long devOffset, ByteBuffer dest)
+            throws IOException;
 
     /**
-     * Write a block of data
+     * Writes a block of data to this device.
      *
-     * @param devOffset
-     * @param src
-     * @throws IOException
+     * @param devOffset the byte offset where to store the data
+     * @param src the source {@code ByteBuffer} to write to the device
+     * @throws IOException on write error
      */
-    public abstract void write(long devOffset, ByteBuffer src) throws IOException;
+    public abstract void write(long devOffset, ByteBuffer src)
+            throws IOException;
 
     /**
-     * flush data in caches to the block device
+     * Flushes data in caches to the actual storage.
      *
-     * @throws IOException
+     * @throws IOException on write error
      */
     public abstract void flush() throws IOException;
 
     /**
-     * Gets the sector size for this device.
+     * Returns the sector size for this device.
      *
-     * @return The sector size in bytes
-     * @throws IOException
+     * @return the sector size in bytes
      */
-    int getSectorSize() throws IOException;
+    public int getSectorSize();
 }

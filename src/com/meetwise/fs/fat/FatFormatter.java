@@ -60,7 +60,7 @@ public final class FatFormatter {
      */
     public static FatFormatter superFloppyFormatter(BlockDevice d) throws IOException {
         final BootSector bs = new BootSector(SF_BS);
-        final int totalSectors = (int)(d.getLength() / d.getSectorSize());
+        final int totalSectors = (int)(d.getSize() / d.getSectorSize());
         final FatType fatSize = defaultFatSize(d);
         final int spc = defaultSectorsPerCluster(
                 d.getSectorSize(), totalSectors);
@@ -93,7 +93,7 @@ public final class FatFormatter {
     }
     
     private static FatType defaultFatSize(BlockDevice d) {
-        final long len = d.getLength();
+        final long len = d.getSize();
 
         if (len < 1024 * 1024 * 1024) return FatType.FAT16;
         else return FatType.FAT32;
