@@ -42,6 +42,39 @@ public class FatFileSystemTest {
         }
     }
     
+    @Test
+    public void testFat12Read() throws Exception {
+        System.out.println("testFat12Read");
+
+        final InputStream is = getClass().getResourceAsStream(
+                "/data/fat12-test.img.gz");
+
+        final RamDisk rd = RamDisk.readGzipped(is);
+        final FatFileSystem fatFs = new FatFileSystem(rd, false);
+        assertEquals(2048, fatFs.getClusterSize());
+
+        final BootSector bs = fatFs.getBootSector();
+        assertEquals("mkdosfs", bs.getOemName());
+        assertEquals(512, bs.getBytesPerSector());
+        assertEquals(FatType.FAT16, bs.getFatType());
+        assertEquals(4, bs.getSectorsPerCluster());
+        assertEquals(1, bs.getNrReservedSectors());
+        assertEquals(2, bs.getNrFats());
+        assertEquals(512, bs.getNrRootDirEntries());
+        assertEquals(2048, bs.getSectorCount());
+        assertEquals(0xf8, bs.getMediumDescriptor());
+        assertEquals(2, bs.getSectorsPerFat());
+        assertEquals(32, bs.getSectorsPerTrack());
+        assertEquals(64, bs.getNrHeads());
+        assertEquals(0, bs.getNrHiddenSectors());
+        assertEquals(512, FatUtils.getFatOffset(bs, 0));
+        assertEquals(1536, FatUtils.getFatOffset(bs, 1));
+        assertEquals(2560, FatUtils.getRootDirOffset(bs));
+
+        final FatDirectory fatRootDir = fatFs.getRootDir();
+        assertEquals(512, fatRootDir.getSize());
+    }
+
     /**
      * $ cat fat16-test.img.gz | gunzip | hexdump -C
      *
@@ -78,7 +111,7 @@ public class FatFileSystemTest {
         
         final FatDirectory fatRootDir = fatFs.getRootDir();
         assertEquals(512, fatRootDir.getSize());
-
+        
         FSEntry entry = fatRootDir.getEntry("testFile");
         assertTrue(entry.isFile());
         assertFalse(entry.isDirectory());
