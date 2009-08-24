@@ -20,7 +20,6 @@
  
 package com.meetwise.fs;
 
-import org.jnode.fs.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 

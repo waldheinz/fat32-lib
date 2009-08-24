@@ -1,5 +1,5 @@
 /*
- * $Id: FSObject.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: PartitionTableType.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -18,31 +18,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package com.meetwise.fs;
+package com.meetwise.fs.partitions;
+
+import com.meetwise.fs.BlockDevice;
 
 /**
- * This interface is the base interface for objects that are part of a FileSystem.
- * 
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Ewout Prangsma (epr@users.sourceforge.net)
  */
-public interface FSObject {
+public interface PartitionTableType {
 
     /**
-     * Is this object still valid.
+     * Gets the unique name of this partition table type.
      * 
-     * An object is not valid anymore if it has been removed from the
-     * filesystem. All invocations on methods (exception this method) of invalid
-     * objects must throw an IOException.
-     * 
-     * @return 
+     * @return
      */
-    public boolean isValid();
+    public String getName();
 
     /**
-     * Gets the filesystem to which this object belongs.
+     * Can this partition table type be used on the given first sector of a
+     * blockdevice?
      * 
+     * @param firstSector 
+     * @param devApi
      * @return 
      */
-    public FileSystem getFileSystem();
+    public boolean supports(byte[] firstSector, BlockDevice devApi);
+
+    /**
+     * Create a partition table for a given device.
+     * 
+     * @param firstSector
+     * @param device
+     * @return
+     * @throws PartitionTableException
+     */
+    public PartitionTable<?> create(byte[] firstSector, BlockDevice device) throws PartitionTableException;
 
 }

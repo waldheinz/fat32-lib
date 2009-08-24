@@ -1,5 +1,5 @@
 /*
- * $Id: FSEntry.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: FatRootEntry.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -18,83 +18,97 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package com.meetwise.fs;
+package com.meetwise.fs.fat;
 
 import java.io.IOException;
 
+import com.meetwise.fs.FSDirectory;
+import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSFile;
+
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-/**
- * Entry of an FSDirectory.
- * 
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
- */
-public interface FSEntry extends FSObject {
+public class FatRootEntry extends FatObject implements FSEntry {
+
+    /** The actual root directory */
+    private final FatDirectory rootDir;
+
+    public FatRootEntry(FatDirectory rootDir) {
+        super(rootDir.getFatFileSystem());
+        this.rootDir = rootDir;
+    }
 
     /**
      * Gets the name of this entry.
      */
-    public String getName();
+    public String getName() {
+        return "";
+    }
 
     /**
      * Gets the directory this entry is a part of.
      */
-    public FSDirectory getParent();
+    public FSDirectory getParent() {
+        return null;
+    }
 
-    /**
-     * Gets the last modification time of this entry.
-     *
-     * @return the last modification time of the entry as milliseconds since 1970, or {@code 0}
-     *         if this filesystem does not support getting the last modified time.
-     * @throws IOException if an error occurs retrieving the timestamp.
-     */
-    public long getLastModified() throws IOException;
+    public long getLastModified() {
+        return 0;
+    }
 
     /**
      * Is this entry refering to a file?
      */
-    public boolean isFile();
+    public boolean isFile() {
+        return false;
+    }
 
     /**
      * Is this entry refering to a (sub-)directory?
      */
-    public boolean isDirectory();
+    public boolean isDirectory() {
+        return true;
+    }
 
     /**
      * Sets the name of this entry.
      */
-    public void setName(String newName) throws IOException;
+    public void setName(String newName) throws IOException {
+        throw new IOException("Cannot change name of root directory");
+    }
 
     /**
-     * Gets the last modification time of this entry.
+     * Sets the last modification time of this entry.
      * 
      * @throws IOException
      */
-    public void setLastModified(long lastModified) throws IOException;
+    public void setLastModified(long lastModified) throws IOException {
+        throw new IOException("Cannot change last modified of root directory");
+    }
 
     /**
      * Gets the file this entry refers to. This method can only be called if
      * <code>isFile</code> returns true.
-     * 
-     * @return The file described by this entry
      */
-    public FSFile getFile() throws IOException;
+    public FSFile getFile() throws IOException {
+        throw new IOException("Not a file");
+    }
 
     /**
      * Gets the directory this entry refers to. This method can only be called
      * if <code>isDirectory</code> returns true.
-     * 
-     * @return The directory described by this entry
-     * @throws IOException on read error
      */
-    public FSDirectory getDirectory() throws IOException;
+    public FSDirectory getDirectory() {
+        return rootDir;
+    }
     
     /**
      * Indicate if the entry has been modified in memory (ie need to be saved)
-     * 
      * @return true if the entry need to be saved
      * @throws IOException
      */
-    public boolean isDirty() throws IOException;
+    public boolean isDirty() throws IOException {
+        return true;
+    }
 }

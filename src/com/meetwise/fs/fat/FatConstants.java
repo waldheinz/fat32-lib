@@ -1,5 +1,5 @@
 /*
- * $Id: FSObject.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: FatConstants.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -18,31 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package com.meetwise.fs;
+package com.meetwise.fs.fat;
 
 /**
- * This interface is the base interface for objects that are part of a FileSystem.
- * 
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public interface FSObject {
-
-    /**
-     * Is this object still valid.
-     * 
-     * An object is not valid anymore if it has been removed from the
-     * filesystem. All invocations on methods (exception this method) of invalid
-     * objects must throw an IOException.
-     * 
-     * @return 
-     */
-    public boolean isValid();
-
-    /**
-     * Gets the filesystem to which this object belongs.
-     * 
-     * @return 
-     */
-    public FileSystem getFileSystem();
-
+public interface FatConstants {
+    public static final int F_READONLY = 0x01;
+    public static final int F_HIDDEN = 0x02;
+    public static final int F_SYSTEM = 0x04;
+    public static final int F_LABEL = 0x08;
+    public static final int F_DIRECTORY = 0x10;
+    public static final int F_ARCHIVE = 0x20;
 }

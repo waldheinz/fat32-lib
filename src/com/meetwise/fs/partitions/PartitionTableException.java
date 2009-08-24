@@ -1,5 +1,5 @@
 /*
- * $Id: FSObject.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: PartitionTableException.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -18,31 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package com.meetwise.fs;
+package com.meetwise.fs.partitions;
 
 /**
- * This interface is the base interface for objects that are part of a FileSystem.
- * 
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Ewout Prangsma (epr@users.sourceforge.net)
  */
-public interface FSObject {
+public class PartitionTableException extends Exception {
 
-    /**
-     * Is this object still valid.
-     * 
-     * An object is not valid anymore if it has been removed from the
-     * filesystem. All invocations on methods (exception this method) of invalid
-     * objects must throw an IOException.
-     * 
-     * @return 
-     */
-    public boolean isValid();
+    public PartitionTableException() {
+        super();
+    }
 
-    /**
-     * Gets the filesystem to which this object belongs.
-     * 
-     * @return 
-     */
-    public FileSystem getFileSystem();
+    public PartitionTableException(String s, Throwable cause) {
+        super(s, cause);
+    }
+
+    public PartitionTableException(String s) {
+        super(s);
+    }
+
+    public PartitionTableException(Throwable cause) {
+        super(cause);
+    }
 
 }

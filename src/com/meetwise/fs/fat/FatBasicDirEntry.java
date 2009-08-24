@@ -1,5 +1,5 @@
 /*
- * $Id: FSObject.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: FatBasicDirEntry.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -18,31 +18,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package com.meetwise.fs;
+package com.meetwise.fs.fat;
 
 /**
- * This interface is the base interface for objects that are part of a FileSystem.
- * 
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author gbin
  */
-public interface FSObject {
+public class FatBasicDirEntry extends FatObject implements FatConstants {
 
-    /**
-     * Is this object still valid.
-     * 
-     * An object is not valid anymore if it has been removed from the
-     * filesystem. All invocations on methods (exception this method) of invalid
-     * objects must throw an IOException.
-     * 
-     * @return 
-     */
-    public boolean isValid();
+    protected byte[] rawData = new byte[32];
 
-    /**
-     * Gets the filesystem to which this object belongs.
-     * 
-     * @return 
-     */
-    public FileSystem getFileSystem();
+    public FatBasicDirEntry(AbstractDirectory dir) {
+        super(dir.getFatFileSystem());
+    }
 
+    public FatBasicDirEntry(AbstractDirectory dir, byte[] src, int offset) {
+        super(dir.getFatFileSystem());
+        System.arraycopy(src, offset, rawData, 0, 32);
+    }
+
+    public void write(byte[] dest, int offset) {
+        System.arraycopy(rawData, 0, dest, offset, 32);
+    }
 }
