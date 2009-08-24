@@ -1,16 +1,6 @@
 
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.fat.FatFileSystem;
-import com.meetwise.fs.fat.BootSector;
-import com.meetwise.fs.fat.LfnEntry;
-import com.meetwise.fs.fat.FatLfnDirectory;
-import com.meetwise.fs.fat.RootDirectoryFullException;
-import com.meetwise.fs.fat.FatUtils;
-import com.meetwise.fs.fat.FatFormatter;
-import com.meetwise.fs.fat.FatType;
-import com.meetwise.fs.fat.FatRootEntry;
-import com.meetwise.fs.fat.FatDirectory;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;

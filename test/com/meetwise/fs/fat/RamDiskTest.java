@@ -1,9 +1,9 @@
 
-package com.meetwise.fat32;
+package com.meetwise.fs.fat;
 
+import com.meetwise.fs.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
-import com.meetwise.fat32.api.RamDisk;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

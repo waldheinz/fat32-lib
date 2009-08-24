@@ -1,5 +1,5 @@
 
-package com.meetwise.fat32;
+package com.meetwise.fs.fat;
 
 import java.io.FileInputStream;
 
