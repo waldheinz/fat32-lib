@@ -1,18 +1,18 @@
 
 package com.meetwise.fs.fat;
 
-import java.io.IOException;
-import com.meetwise.fs.FileSystem;
-import com.meetwise.fs.FileSystemException;
+import com.meetwise.fs.FileSystemFullException;
 
 /**
+ * Gets thrown when the root directory of a FAT12/FAT16 file system becomes
+ * full and can not hold the additional entry. 
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public class RootDirectoryFullException extends FileSystemException {
+public final class RootDirectoryFullException extends FileSystemFullException {
     private final static long serialVersionUID = 1;
-
-    public RootDirectoryFullException(FileSystem fs) {
+    
+    RootDirectoryFullException(FatFileSystem fs) {
         super(fs, "root directory is full");
     }
     

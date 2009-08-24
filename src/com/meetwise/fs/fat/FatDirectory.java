@@ -30,7 +30,7 @@ import com.meetwise.fs.FileSystemException;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public class FatDirectory extends AbstractDirectory {
+class FatDirectory extends AbstractDirectory {
 
     private final boolean root;
 

@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  * @see http://en.wikipedia.org/wiki/File_Allocation_Table#FS_Information_Sector
  */
-public class FsInfoSector extends Sector {
+class FsInfoSector extends Sector {
 
     public static final int FREE_CLUSTERS_OFFSET = 0x1e8;
 

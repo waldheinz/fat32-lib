@@ -34,7 +34,7 @@ import com.meetwise.fs.ReadOnlyFileSystemException;
 /**
  * @author gbin
  */
-public class FatLfnDirectory extends FatDirectory {
+class FatLfnDirectory extends FatDirectory {
 
     private final HashMap<String, LfnEntry> shortNameIndex =
             new HashMap<String, LfnEntry>();

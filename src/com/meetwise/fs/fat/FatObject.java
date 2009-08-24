@@ -26,7 +26,7 @@ import com.meetwise.fs.FileSystem;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public abstract class FatObject implements FSObject {
+abstract class FatObject implements FSObject {
 
     /** 
      * The filesystem I'm a part of

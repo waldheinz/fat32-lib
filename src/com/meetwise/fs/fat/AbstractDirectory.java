@@ -36,7 +36,7 @@ import com.meetwise.fs.ReadOnlyFileSystemException;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public abstract class AbstractDirectory
+abstract class AbstractDirectory
         extends FatObject
         implements FSDirectory, Iterable<FSDirectoryEntry> {
 

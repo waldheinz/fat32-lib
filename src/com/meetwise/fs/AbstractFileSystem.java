@@ -18,17 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package com.meetwise.fs.fat;
+package com.meetwise.fs;
 
-import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FSFile;
-import com.meetwise.fs.FileSystem;
-import com.meetwise.fs.FileSystemException;
 
 /**
  * Abstract class with common things in different FileSystem implementations
@@ -37,16 +31,20 @@ import com.meetwise.fs.FileSystemException;
  */
 public abstract class AbstractFileSystem implements FileSystem {
 
-    private static final Logger log = Logger.getLogger(AbstractFileSystem.class.getName());
-    private boolean readOnly;
+    private static final Logger log =
+            Logger.getLogger(AbstractFileSystem.class.getName());
+
+    private final boolean readOnly;
     private final BlockDevice api;
     private boolean closed;
 
     // cache of FSFile (key: FSDirectoryEntry)
-    private HashMap<FSDirectoryEntry, FSFile> files = new HashMap<FSDirectoryEntry, FSFile>();
+    private HashMap<FSDirectoryEntry, FSFile> files =
+            new HashMap<FSDirectoryEntry, FSFile>();
 
     // cache of FSDirectory (key: FSDirectoryEntry)
-    private HashMap<FSDirectoryEntry, FSDirectory> directories = new HashMap<FSDirectoryEntry, FSDirectory>();
+    private HashMap<FSDirectoryEntry, FSDirectory> directories =
+            new HashMap<FSDirectoryEntry, FSDirectory>();
 
     /**
      * Construct an AbstractFileSystem in specified readOnly mode
@@ -55,7 +53,9 @@ public abstract class AbstractFileSystem implements FileSystem {
      * @param readOnly
      * @throws FileSystemException
      */
-    public AbstractFileSystem(BlockDevice api, boolean readOnly) throws FileSystemException {
+    public AbstractFileSystem(BlockDevice api, boolean readOnly)
+            throws FileSystemException {
+        
         this.api = api;
         this.closed = false;
         this.readOnly = readOnly;
@@ -118,11 +118,7 @@ public abstract class AbstractFileSystem implements FileSystem {
     public final boolean isReadOnly() {
         return readOnly;
     }
-
-    protected final void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
-    }
-
+    
     /**
      * Gets the file for the given entry.
      * 

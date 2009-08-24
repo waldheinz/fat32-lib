@@ -34,7 +34,7 @@ import com.meetwise.fs.FileSystemFullException;
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte
  */
-public final class Fat {
+final class Fat {
 
     private final long[] entries;
 

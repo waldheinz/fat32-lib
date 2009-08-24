@@ -21,7 +21,8 @@
 package com.meetwise.fs.fat;
 
 /**
- * 
+ * The different entry sizes of 12, 16 and 32 bits per entry for the different
+ * FAT implementations.
  *
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;

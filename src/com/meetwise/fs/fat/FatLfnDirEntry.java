@@ -25,7 +25,7 @@ import com.meetwise.fs.util.LittleEndian;
 /**
  * @author gbin
  */
-public class FatLfnDirEntry extends FatBasicDirEntry {
+class FatLfnDirEntry extends FatBasicDirEntry {
     /**
      * @param dir
      */
@@ -107,6 +107,7 @@ public class FatLfnDirEntry extends FatBasicDirEntry {
         return new String(unicodechar).substring(0, index);
     }
 
+    @Override
     public String toString() {
         return "LFN ordinal " + getOrdinal() + " subString = " + getSubstring() + "CheckSum = " +
                 getCheckSum();

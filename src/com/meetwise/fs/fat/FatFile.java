@@ -49,7 +49,7 @@ public final class FatFile extends FatObject implements FSFile {
      * @param fs
      * @param startCluster
      */
-    public FatFile(FatFileSystem fs, long startCluster) {
+    FatFile(FatFileSystem fs, long startCluster) {
         super(fs);
 
         this.myEntry = null;
@@ -59,7 +59,7 @@ public final class FatFile extends FatObject implements FSFile {
         this.isDir = true;
     }
 
-    public FatFile(FatFileSystem fs, FatDirEntry myEntry,
+    FatFile(FatFileSystem fs, FatDirEntry myEntry,
             long startCluster, long length, boolean isDir) {
         
         super(fs);

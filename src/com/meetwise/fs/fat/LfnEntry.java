@@ -32,7 +32,7 @@ import com.meetwise.fs.FileSystem;
  * 
  * @author gbin
  */
-public class LfnEntry implements FSDirectoryEntry {
+class LfnEntry implements FSDirectoryEntry {
     // decompacted LFN entry
     private String fileName;
     // TODO: Make them available

@@ -20,6 +20,7 @@
  
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.AbstractFileSystem;
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.util.HashMap;
@@ -122,7 +123,7 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @return the volume label
      */
     public String getVolumeLabel() {
-        return getRoot().getLabel();
+        return rootDir.getLabel();
     }
 
     /**
@@ -132,7 +133,7 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @throws IOException on write error
      */
     public void setVolumeLabel(String label) throws IOException {
-        getRoot().setLabel(label);
+        rootDir.setLabel(label);
     }
 
     /**
@@ -174,17 +175,17 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @return 
      */
     @Override
-    public FatLfnDirectory getRoot() {
+    public FSDirectory getRoot() {
         return rootDir;
     }
-
+    
     /**
      * Gets the file for the given entry.
      * 
      * @param entry
      * @return 
      */
-    public synchronized FatFile getFile(FatDirEntry entry) {
+    synchronized FatFile getFile(FatDirEntry entry) {
         FatFile file = files.get(entry);
         
         if (file == null) {
@@ -205,7 +206,7 @@ public final class FatFileSystem extends AbstractFileSystem {
      * 
      * @return Fat
      */
-    public Fat getFat() {
+    Fat getFat() {
         return fat;
     }
 

@@ -32,7 +32,7 @@ import com.meetwise.fs.util.LittleEndian;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
+class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
 
     /** Name of this entry */
     private String name;

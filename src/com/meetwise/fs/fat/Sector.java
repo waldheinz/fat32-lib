@@ -7,7 +7,7 @@ import com.meetwise.fs.util.LittleEndian;
  * 
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public class Sector {
+class Sector {
 
     protected final byte[] data;
     protected boolean dirty;

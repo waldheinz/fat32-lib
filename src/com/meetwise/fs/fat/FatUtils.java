@@ -29,7 +29,7 @@ import com.meetwise.fs.util.LittleEndian;
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Fabien DUMINY
  */
-public class FatUtils {
+class FatUtils {
 
     public static final int FIRST_CLUSTER = 2;
 
