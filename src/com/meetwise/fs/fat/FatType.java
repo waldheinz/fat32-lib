@@ -31,7 +31,7 @@ public enum FatType {
     /**
      * For a 12-bit file allocation table.
      */
-    FAT12(0xFFFL, 1.5f) {
+    FAT12(0xFFFL, 1.5f, "FAT12   ") {
         public long readEntry(byte[] data, int index) {
             final int idx = (int) (index * 1.5);
             final int b1 = data[idx] & 0xFF;
@@ -61,7 +61,7 @@ public enum FatType {
     /**
      * For a 16-bit file allocation table.
      */
-    FAT16(0xFFFFL, 2.0f) {
+    FAT16(0xFFFFL, 2.0f, "FAT16   ") {
         public long readEntry(byte[] data, int index) {
             final int idx = index * 2;
             final int b1 = data[idx] & 0xFF;
@@ -79,7 +79,7 @@ public enum FatType {
     /**
      * For a 32-bit file allocation table.
      */
-    FAT32(0xFFFFFFFFL, 4.0f) {
+    FAT32(0xFFFFFFFFL, 4.0f, "FAT32   ") {
         public long readEntry(byte[] data, int index) {
             final int idx = index * 4;
             final long l1 = data[idx] & 0xFF;
@@ -102,33 +102,39 @@ public enum FatType {
     private final long maxReservedEntry;
     private final long eofCluster;
     private final long eofMarker;
+    private final String label;
     private final float entrySize;
 
-    private FatType(long bitMask, float entrySize) {
+    private FatType(long bitMask, float entrySize, String label) {
         this.minReservedEntry = (0xFFFFFF0L & bitMask);
         this.maxReservedEntry = (0xFFFFFF6L & bitMask);
         this.eofCluster = (0xFFFFFF8L & bitMask);
         this.eofMarker = (0xFFFFFFFL & bitMask);
         this.entrySize = entrySize;
+        this.label = label;
     }
 
     abstract long readEntry(byte[] data, int index);
 
     abstract void writeEntry(byte[] data, int index, long entry);
 
-    final boolean isReservedCluster(long entry) {
+    String getLabel() {
+        return this.label;
+    }
+
+    boolean isReservedCluster(long entry) {
         return ((entry >= minReservedEntry) && (entry <= maxReservedEntry));
     }
 
-    final boolean isEofCluster(long entry) {
+    boolean isEofCluster(long entry) {
         return (entry >= eofCluster);
     }
 
-    final long getEofMarker() {
+    long getEofMarker() {
         return eofMarker;
     }
 
-    final float getEntrySize() {
+    float getEntrySize() {
         return entrySize;
     }
 }

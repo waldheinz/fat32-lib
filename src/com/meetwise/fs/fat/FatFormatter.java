@@ -73,7 +73,8 @@ public final class FatFormatter {
         bs.setOemName("fat32lib");
         bs.setSectorCount(totalSectors);
         bs.setSectorsPerCluster(spc);
-        
+        bs.setFatType(fatSize);
+
         if (fatSize == FatType.FAT32) {
             bs.setSectorsPerFat32(1009);
             bs.setNrReservedSectors(32);

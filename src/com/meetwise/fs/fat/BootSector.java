@@ -115,6 +115,26 @@ public final class BootSector extends Sector {
     }
 
     /**
+     * Sets the FAT type for this boot sector. This method updates the string
+     * found at offset 0x36 in the boot sector.
+     *
+     * @param type the new FAT type
+     */
+    public void setFatType(FatType type) {
+        
+        for (int i = 0; i < 8; i++) {
+            char ch;
+            if (i < type.getLabel().length()) {
+                ch = type.getLabel().charAt(i);
+            } else {
+                ch = (char) 0;
+            }
+            
+            set8(0x36 + i, ch);
+        }
+    }
+
+    /**
      * Sets the OEM name, must be at most 8 characters long.
      * 
      * @param name the new OEM name
@@ -129,6 +149,7 @@ public final class BootSector extends Sector {
             } else {
                 ch = (char) 0;
             }
+            
             set8(0x3 + i, ch);
         }
     }
