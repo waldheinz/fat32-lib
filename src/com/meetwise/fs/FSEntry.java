@@ -18,8 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package org.jnode.fs;
+package com.meetwise.fs;
 
+import org.jnode.fs.*;
+import com.meetwise.fs.FSDirectory;
 import java.io.IOException;
 
 /**

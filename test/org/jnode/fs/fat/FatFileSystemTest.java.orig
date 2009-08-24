@@ -4,10 +4,10 @@ package org.jnode.fs.fat;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
-import com.meetwise.fs.FSFile;
-import com.meetwise.fs.RamDisk;
+import com.meetwise.fat32.api.RamDisk;
+import org.jnode.fs.FSDirectory;
+import org.jnode.fs.FSEntry;
+import org.jnode.fs.FSFile;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

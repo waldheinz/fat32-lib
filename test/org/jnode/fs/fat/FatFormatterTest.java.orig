@@ -2,11 +2,11 @@
 package org.jnode.fs.fat;
 
 import com.meetwise.fat32.Utils;
-import com.meetwise.fs.BlockDevice;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import com.meetwise.fs.FSEntry;
-import com.meetwise.fs.RamDisk;
+import com.meetwise.fat32.api.BlockDevice;
+import com.meetwise.fat32.api.RamDisk;
+import org.jnode.fs.FSEntry;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

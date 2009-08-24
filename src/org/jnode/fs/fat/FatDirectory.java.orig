@@ -20,12 +20,13 @@
  
 package org.jnode.fs.fat;
 
-import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import com.meetwise.fs.FSEntry;
-import com.meetwise.fs.FileSystemException;
+
+import com.meetwise.fat32.api.BlockDevice;
+import org.jnode.fs.FSEntry;
+import org.jnode.fs.FileSystemException;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;

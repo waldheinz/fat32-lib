@@ -2,8 +2,8 @@
 package org.jnode.fs.fat;
 
 import java.io.IOException;
-import org.jnode.fs.FileSystem;
-import org.jnode.fs.FileSystemException;
+import com.meetwise.fs.FileSystem;
+import com.meetwise.fs.FileSystemException;
 
 /**
  *

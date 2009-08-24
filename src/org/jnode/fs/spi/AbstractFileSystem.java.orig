@@ -20,15 +20,16 @@
  
 package org.jnode.fs.spi;
 
-import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.util.HashMap;
+
 import java.util.logging.Logger;
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
-import com.meetwise.fs.FSFile;
-import com.meetwise.fs.FileSystem;
-import com.meetwise.fs.FileSystemException;
+import com.meetwise.fat32.api.BlockDevice;
+import org.jnode.fs.FSDirectory;
+import org.jnode.fs.FSEntry;
+import org.jnode.fs.FSFile;
+import org.jnode.fs.FileSystem;
+import org.jnode.fs.FileSystemException;
 
 /**
  * Abstract class with common things in different FileSystem implementations

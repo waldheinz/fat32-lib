@@ -20,11 +20,12 @@
  
 package org.jnode.fs.fat;
 
-import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import org.jnode.driver.block.Geometry;
-import org.jnode.driver.block.Geometry.GeometryException;
+
+import com.meetwise.fat32.api.BlockDevice;
+import com.meetwise.fat32.api.Geometry;
+import com.meetwise.fat32.api.Geometry.GeometryException;
 import org.jnode.partitions.ibm.IBMPartitionTable;
 import org.jnode.partitions.ibm.IBMPartitionTableEntry;
 import org.jnode.partitions.ibm.IBMPartitionTypes;

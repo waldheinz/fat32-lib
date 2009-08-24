@@ -22,9 +22,9 @@ package org.jnode.fs.fat;
 
 import java.io.IOException;
 
-import org.jnode.fs.FSDirectory;
-import org.jnode.fs.FSEntry;
-import org.jnode.fs.FSFile;
+import com.meetwise.fs.FSDirectory;
+import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSFile;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;

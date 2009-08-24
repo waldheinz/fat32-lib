@@ -18,7 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package org.jnode.fs;
+package com.meetwise.fs;
+
+import com.meetwise.fs.FileSystemException;
+import com.meetwise.fs.FileSystem;
 
 public class FileSystemFullException extends FileSystemException {
     private final static long serialVersionUID = 1;

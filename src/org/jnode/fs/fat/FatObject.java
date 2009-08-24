@@ -20,8 +20,8 @@
  
 package org.jnode.fs.fat;
 
-import org.jnode.fs.FSObject;
-import org.jnode.fs.FileSystem;
+import com.meetwise.fs.FSObject;
+import com.meetwise.fs.FileSystem;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;

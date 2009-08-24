@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.jnode.fs.FSEntry;
-import org.jnode.fs.FileSystemException;
-import org.jnode.fs.ReadOnlyFileSystemException;
+import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FileSystemException;
+import com.meetwise.fs.ReadOnlyFileSystemException;
 
 /**
  * @author gbin

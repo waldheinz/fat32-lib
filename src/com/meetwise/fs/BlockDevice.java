@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package org.jnode.driver.block;
+package com.meetwise.fs;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

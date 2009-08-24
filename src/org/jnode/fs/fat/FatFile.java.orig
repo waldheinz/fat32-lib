@@ -20,12 +20,13 @@
  
 package org.jnode.fs.fat;
 
-import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import com.meetwise.fs.FSFile;
-import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.ReadOnlyFileSystemException;
+
+import com.meetwise.fat32.api.BlockDevice;
+import org.jnode.fs.FSFile;
+import org.jnode.fs.FileSystemException;
+import org.jnode.fs.ReadOnlyFileSystemException;
 
 /**
  * A File instance is the in-memory representation of a single file (chain of

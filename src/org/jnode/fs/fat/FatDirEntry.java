@@ -23,9 +23,9 @@ package org.jnode.fs.fat;
 import java.io.IOException;
 import java.util.Date;
 
-import org.jnode.fs.FSDirectory;
-import org.jnode.fs.FSEntry;
-import org.jnode.fs.FSFile;
+import com.meetwise.fs.FSDirectory;
+import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSFile;
 import org.jnode.fs.util.DosUtils;
 import org.jnode.util.LittleEndian;
 

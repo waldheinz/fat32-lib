@@ -28,10 +28,10 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import java.util.Vector;
-import org.jnode.fs.FSDirectory;
-import org.jnode.fs.FSEntry;
-import org.jnode.fs.FileSystemException;
-import org.jnode.fs.ReadOnlyFileSystemException;
+import com.meetwise.fs.FSDirectory;
+import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FileSystemException;
+import com.meetwise.fs.ReadOnlyFileSystemException;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;

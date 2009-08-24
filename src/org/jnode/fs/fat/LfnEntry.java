@@ -23,10 +23,10 @@ package org.jnode.fs.fat;
 import java.io.IOException;
 import java.util.List;
 
-import org.jnode.fs.FSDirectory;
-import org.jnode.fs.FSEntry;
-import org.jnode.fs.FSFile;
-import org.jnode.fs.FileSystem;
+import com.meetwise.fs.FSDirectory;
+import com.meetwise.fs.FSEntry;
+import com.meetwise.fs.FSFile;
+import com.meetwise.fs.FileSystem;
 
 /**
  * @author gbin

@@ -20,8 +20,9 @@
  
 package org.jnode.fs.fat;
 
-import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
+
+import com.meetwise.fat32.api.BlockDevice;
 
 /**
  * 

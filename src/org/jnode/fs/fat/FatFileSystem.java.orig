@@ -20,13 +20,14 @@
  
 package org.jnode.fs.fat;
 
-import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.util.HashMap;
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSEntry;
-import com.meetwise.fs.FSFile;
-import com.meetwise.fs.FileSystemException;
+
+import com.meetwise.fat32.api.BlockDevice;
+import org.jnode.fs.FSDirectory;
+import org.jnode.fs.FSEntry;
+import org.jnode.fs.FSFile;
+import org.jnode.fs.FileSystemException;
 import org.jnode.fs.spi.AbstractFileSystem;
 
 /**
@@ -65,7 +66,11 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
 
         try {
             bs = new BootSector(512);
-            bs.read(getApi());
+            try {
+                bs.read(getApi());
+            } catch (IOException ex) {
+                throw new FileSystemException(this, ex);
+            }
 
             //this.fsInfo = new FsInfoSector(bs, getApi());
             this.fsInfo = null;
