@@ -289,7 +289,9 @@ public abstract class AbstractDirectory
             while (offset < entries.size()) {
                 FatBasicDirEntry e = entries.get(offset);
                 if ((e != null) && e instanceof FatDirEntry && 
-                        !((FatDirEntry) e).isDeleted()) {
+                        !((FatDirEntry) e).isDeleted() &&
+                        !((FatDirEntry) e).getName().equals(".") &&
+                        !((FatDirEntry) e).getName().equals("..")) {
 
                     return true;
                 } else {
@@ -307,8 +309,13 @@ public abstract class AbstractDirectory
             
             while (offset < entries.size()) {
                 FatBasicDirEntry e = entries.get(offset);
-                if ((e != null) && (e instanceof FatDirEntry) && !((FatDirEntry) e).isDeleted()) {
+                if ((e != null) && (e instanceof FatDirEntry) &&
+                        !((FatDirEntry) e).isDeleted() &&
+                        !((FatDirEntry) e).getName().equals(".") &&
+                        !((FatDirEntry) e).getName().equals("..")) {
+
                     offset++;
+                    System.out.println("    " + ((FSEntry)e).getName());
                     return (FSEntry) e;
                 } else {
                     offset++;

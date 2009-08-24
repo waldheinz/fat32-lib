@@ -20,7 +20,6 @@
  
 package com.meetwise.fs;
 
-import com.meetwise.fs.FSEntry;
 import java.io.IOException;
 
 

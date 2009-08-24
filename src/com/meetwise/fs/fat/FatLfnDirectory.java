@@ -124,9 +124,9 @@ public class FatLfnDirectory extends FatDirectory {
 
     @Override
     public FSEntry getEntry(String name) {
-        // System.out.println("Search : " + name);
         name = name.trim();
         FSEntry entry;
+        
         // try first as a long file name
         entry = longFileNameIndex.get(name);
         if (entry == null)
@@ -175,7 +175,7 @@ public class FatLfnDirectory extends FatDirectory {
             
             LfnEntry current = new LfnEntry(this, entries, offset, i - offset);
 
-            if (!current.isDeleted() && current.isValid()) {
+            if (!current.isDeleted() && current.isValid() && !current.isDotDir()) {
                 shortNameIndex.put(current.getRealEntry().getName(), current);
                 longFileNameIndex.put(current.getName(), current);
             }

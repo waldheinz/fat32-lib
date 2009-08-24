@@ -210,4 +210,11 @@ public class LfnEntry implements FSEntry {
             else return -1;
         }
     }
+
+    boolean isDotDir() {
+        if (getName().equals(".")) return true;
+        if (getName().equals("..")) return true;
+        
+        return false;
+    }
 }

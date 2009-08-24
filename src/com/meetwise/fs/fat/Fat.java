@@ -386,7 +386,8 @@ public final class Fat {
 
     protected void testCluster(long cluster) throws IllegalArgumentException {
         if ((cluster < 2) || (cluster >= entries.length)) {
-            throw new IllegalArgumentException("Invalid cluster value");
+            throw new IllegalArgumentException(
+                    "invalid cluster value " + cluster);
         }
     }
 
