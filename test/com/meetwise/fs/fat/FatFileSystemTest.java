@@ -25,7 +25,7 @@ public class FatFileSystemTest {
         final FatFormatter ff = FatFormatter.superFloppyFormatter(d);
         ff.format(d, null);
         final FatFileSystem fs = new FatFileSystem(d, false);
-        final FatLfnDirectory root = fs.getRootDir();
+        final FatLfnDirectory root = fs.getRoot();
         
         /* divide by 2 because we use LFNs which take entries, too */
         final int max = fs.getBootSector().getNrRootDirEntries() / 2;
@@ -71,7 +71,7 @@ public class FatFileSystemTest {
         assertEquals(1536, FatUtils.getFatOffset(bs, 1));
         assertEquals(2560, FatUtils.getRootDirOffset(bs));
 
-        final FatDirectory fatRootDir = fatFs.getRootDir();
+        final FatDirectory fatRootDir = fatFs.getRoot();
         assertEquals(512, fatRootDir.getSize());
 
         Iterator<FSEntry> i = fatRootDir.iterator();
@@ -117,7 +117,7 @@ public class FatFileSystemTest {
         assertEquals(0x2a00, FatUtils.getFatOffset(bs, 1));
         assertEquals(0x5200, FatUtils.getRootDirOffset(bs));
         
-        final FatDirectory fatRootDir = fatFs.getRootDir();
+        final FatDirectory fatRootDir = fatFs.getRoot();
         assertEquals(512, fatRootDir.getSize());
         
         FSEntry entry = fatRootDir.getEntry("testFile");
@@ -127,11 +127,7 @@ public class FatFileSystemTest {
         FSFile file = entry.getFile();
         assertEquals(8, file.getLength());
         
-        final FatRootEntry rootEnt = fatFs.getRootEntry();
-        assertTrue(rootEnt.isDirectory());
-        assertNull(rootEnt.getParent());
-
-        final FSDirectory rootDir = rootEnt.getDirectory();
+        final FSDirectory rootDir = fatFs.getRoot();
         System.out.println("   rootDir = " + rootDir);
 
         Iterator<FSEntry> i = rootDir.iterator();
@@ -188,7 +184,7 @@ public class FatFileSystemTest {
         assertEquals(16384 + 1539 * bs.getBytesPerSector(),
                 FatUtils.getFatOffset(bs, 1));
         
-        final FatLfnDirectory rootDir = fatFs.getRootDir();
+        final FatLfnDirectory rootDir = fatFs.getRoot();
         System.out.println("   rootDir = " + rootDir);
         assertTrue(rootDir.isRoot());
         
@@ -223,7 +219,7 @@ public class FatFileSystemTest {
 
         final RamDisk rd = RamDisk.readGzipped(is);
         FatFileSystem fatFs = new FatFileSystem(rd, false);
-        FatLfnDirectory rootDir = fatFs.getRootDir();
+        FatLfnDirectory rootDir = fatFs.getRoot();
 
         for (int i=0; i < 1024; i++) {
             final LfnEntry e = rootDir.addFile("f-" + i);
@@ -237,7 +233,7 @@ public class FatFileSystemTest {
         fatFs.close();
 
         fatFs = new FatFileSystem(rd, false);
-        rootDir = fatFs.getRootDir();
+        rootDir = fatFs.getRoot();
         
         for (int i=0; i < 1024; i++) {
             assertNotNull(rootDir.getEntry("f-" + i));

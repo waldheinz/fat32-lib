@@ -27,7 +27,7 @@ public class ListAllTest {
 
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fs = new FatFileSystem(rd, true);
-        listDirectories(fs.getRootDir(), "");
+        listDirectories(fs.getRoot(), "");
     }
     
     private void listDirectories(FSDirectory dir, String ident) throws IOException {

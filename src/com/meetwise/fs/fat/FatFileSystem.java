@@ -29,16 +29,17 @@ import com.meetwise.fs.FSFile;
 import com.meetwise.fs.FileSystemException;
 
 /**
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
- * @author Matthias Treydte
+ * 
+ *
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
+public final class FatFileSystem extends AbstractFileSystem {
     
     private final Fat fat;
     private final FsInfoSector fsInfo;
     private final BootSector bs;
     private final FatLfnDirectory rootDir;
-    private final FatRootEntry rootEntry;
     private final HashMap<FatDirEntry, FatFile> files =
             new HashMap<FatDirEntry, FatFile>();
     private final FatType bitSize;
@@ -106,7 +107,6 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
                 rootDir.read(getApi(), FatUtils.getRootDirOffset(bs));
             }
             
-            rootEntry = new FatRootEntry(rootDir);
         } catch (IOException ex) {
             throw new FileSystemException(this, ex);
         }
@@ -122,7 +122,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
      * @return the volume label
      */
     public String getVolumeLabel() {
-        return getRootDir().getLabel();
+        return getRoot().getLabel();
     }
 
     /**
@@ -132,7 +132,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
      * @throws IOException on write error
      */
     public void setVolumeLabel(String label) throws IOException {
-        getRootDir().setLabel(label);
+        getRoot().setLabel(label);
     }
 
     /**
@@ -174,8 +174,8 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
      * @return 
      */
     @Override
-    public FatRootEntry getRootEntry() {
-        return rootEntry;
+    public FatLfnDirectory getRoot() {
+        return rootDir;
     }
 
     /**
@@ -217,16 +217,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
     public BootSector getBootSector() {
         return bs;
     }
-
-    /**
-     * Returns the rootDir.
-     *
-     * @return RootDirectory
-     */
-    public FatLfnDirectory getRootDir() {
-        return rootDir;
-    }
-
+    
     /**
      *
      */
@@ -243,15 +234,7 @@ public class FatFileSystem extends AbstractFileSystem<FatRootEntry> {
         // TODO Auto-generated method stub
         return null;
     }
-
-    /**
-     *
-     */
-    protected FatRootEntry createRootEntry() throws IOException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    
     public long getFreeSpace() {
         // TODO implement me
         return -1;

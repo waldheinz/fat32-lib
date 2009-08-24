@@ -33,16 +33,14 @@ import com.meetwise.fs.FileSystemException;
 /**
  * Abstract class with common things in different FileSystem implementations
  * 
- * @param <T> 
  * @author Fabien DUMINY
  */
-public abstract class AbstractFileSystem<T extends FSEntry> implements FileSystem {
+public abstract class AbstractFileSystem implements FileSystem {
 
     private static final Logger log = Logger.getLogger(AbstractFileSystem.class.getName());
     private boolean readOnly;
     private final BlockDevice api;
     private boolean closed;
-    private T rootEntry;
 
     // cache of FSFile (key: FSEntry)
     private HashMap<FSEntry, FSFile> files = new HashMap<FSEntry, FSFile>();
@@ -62,20 +60,7 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
         this.closed = false;
         this.readOnly = readOnly;
     }
-
-    /**
-     * @see org.jnode.fs.FileSystem#getRootEntry()
-     */
-    public T getRootEntry() throws IOException {
-        if (isClosed())
-            throw new IOException("FileSystem is closed");
-
-        if (rootEntry == null) {
-            rootEntry = createRootEntry();
-        }
-        return rootEntry;
-    }
-
+    
     /**
      * @see org.jnode.fs.FileSystem#close()
      */
@@ -90,7 +75,6 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
             files.clear();
             directories.clear();
             
-            rootEntry = null;
             files = null;
             directories = null;
             closed = true;
@@ -223,11 +207,4 @@ public abstract class AbstractFileSystem<T extends FSEntry> implements FileSyste
             d.flush();
         }
     }
-
-    /**
-     * Abstract method to create a new root entry
-     * @return the new created root entry
-     * @throws IOException
-     */
-    protected abstract T createRootEntry() throws IOException;
 }

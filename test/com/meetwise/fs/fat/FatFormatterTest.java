@@ -60,7 +60,7 @@ public class FatFormatterTest {
         
         assertEquals("TestVol", fs.getVolumeLabel());
         
-        final FatLfnDirectory root = fs.getRootDir();
+        final FatLfnDirectory root = fs.getRoot();
         final Iterator<FSEntry> i = root.iterator();
 
         assertFalse(i.hasNext());

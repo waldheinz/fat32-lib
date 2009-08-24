@@ -24,8 +24,10 @@ import java.io.IOException;
 
 
 /**
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
- * @author Matthias Treydte
+ * 
+ *
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public interface FileSystem {
     
@@ -33,10 +35,10 @@ public interface FileSystem {
      * Gets the root entry of this filesystem. This is usually a directory, but
      * this is not required.
      * 
-     * @return
+     * @return the file system's root entry
      * @throws IOException on read error
      */
-    public FSEntry getRootEntry() throws IOException;
+    public FSDirectory getRoot() throws IOException;
 
     /**
      * Is the file system. mounted in read-only mode ?
