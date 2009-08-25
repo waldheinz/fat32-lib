@@ -18,16 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package com.meetwise.fs.fat;
+package com.meetwise.fs;
 
-import com.meetwise.fs.BlockDevice;
+import com.meetwise.fs.fat.FatType;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import com.meetwise.fs.util.Geometry;
-import com.meetwise.fs.util.Geometry.GeometryException;
-import com.meetwise.fs.partitions.IBMPartitionTable;
-import com.meetwise.fs.partitions.IBMPartitionTableEntry;
-import com.meetwise.fs.partitions.IBMPartitionTypes;
 
 /**
  * The boot sector.
@@ -46,20 +41,15 @@ public final class BootSector extends Sector {
      * @see #getNrLogicalSectors() 
      */
     public static final int MAX_FAT12_SECTORS = 8202;
-
-    private final IBMPartitionTableEntry[] partitions;
-
+    
     public BootSector(int size) {
         super(size);
-        
-        partitions = new IBMPartitionTableEntry[4];
     }
 
     public BootSector(byte[] src) {
         super(src.length);
         
         System.arraycopy(src, 0, data, 0, src.length);
-        partitions = new IBMPartitionTableEntry[4];
     }
     
     public FatType getFatType() throws IOException {
@@ -71,7 +61,7 @@ public final class BootSector extends Sector {
     }
 
     public boolean isaValidBootSector() {
-        return IBMPartitionTable.containsPartitionTable(data);
+        return true;
     }
 
     /**
@@ -430,36 +420,7 @@ public final class BootSector extends Sector {
     public boolean isDirty() {
         return dirty;
     }
-
-    public int getNbPartitions() {
-        return partitions.length;
-    }
-
-    public IBMPartitionTableEntry initPartitions(Geometry geom, IBMPartitionTypes firstPartitionType)
-        throws GeometryException {
-        getPartition(0).clear();
-        getPartition(1).clear();
-        getPartition(2).clear();
-        getPartition(3).clear();
-
-        IBMPartitionTableEntry entry = getPartition(0);
-        entry.setBootIndicator(true);
-        entry.setStartLba(1);
-        entry.setNrSectors(geom.getTotalSectors() - 1);
-        entry.setSystemIndicator(firstPartitionType);
-        entry.setStartCHS(geom.getCHS(entry.getStartLba()));
-        entry.setEndCHS(geom.getCHS(entry.getStartLba() + entry.getNrSectors() - 1));
-
-        return entry;
-    }
-
-    public synchronized IBMPartitionTableEntry getPartition(int partNr) {
-        if (partitions[partNr] == null) {
-            partitions[partNr] = new IBMPartitionTableEntry(null, data, partNr);
-        }
-        return partitions[partNr];
-    }
-
+    
     @Override
     public String toString() {
         StringBuilder res = new StringBuilder(1024);

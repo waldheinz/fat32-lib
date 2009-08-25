@@ -20,6 +20,7 @@
  
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BootSector;
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 
@@ -52,13 +53,16 @@ public final class FatFormatter {
     private final FatDirectory rootDir;
 
     /**
-     * 
+     * Creates a new instance of {@code FatFormatter} that is suitable for
+     * formatting a FAT "super floppy" device. 
      *
-     * @param d
-     * @return
-     * @throws IOException
+     * @param d the device to format
+     * @return the new formatter for the device
+     * @throws IOException on error creating the formatter
      */
-    public static FatFormatter superFloppyFormatter(BlockDevice d) throws IOException {
+    public static FatFormatter superFloppyFormatter(BlockDevice d)
+            throws IOException {
+
         final BootSector bs = new BootSector(SF_BS);
         final int totalSectors = (int)(d.getSize() / d.getSectorSize());
         final FatType fatSize = defaultFatSize(d);

@@ -1,6 +1,7 @@
 
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BootSector;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;

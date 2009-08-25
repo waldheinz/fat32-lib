@@ -61,9 +61,6 @@ public abstract class AbstractFileSystem implements FileSystem {
         this.readOnly = readOnly;
     }
     
-    /**
-     * @see org.jnode.fs.FileSystem#close()
-     */
     public void close() throws IOException {
         if (!isClosed()) {
             // if readOnly, nothing to do

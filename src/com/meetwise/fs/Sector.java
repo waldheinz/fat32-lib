@@ -1,5 +1,5 @@
 
-package com.meetwise.fs.fat;
+package com.meetwise.fs;
 
 import com.meetwise.fs.util.LittleEndian;
 
@@ -7,7 +7,7 @@ import com.meetwise.fs.util.LittleEndian;
  * 
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class Sector {
+public class Sector {
 
     protected final byte[] data;
     protected boolean dirty;

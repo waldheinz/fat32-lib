@@ -1,6 +1,8 @@
 
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BootSector;
+import com.meetwise.fs.Sector;
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.nio.ByteBuffer;

@@ -119,7 +119,13 @@ public enum FatType {
 
     abstract void writeEntry(byte[] data, int index, long entry);
 
-    String getLabel() {
+    /**
+     * Returns the human-readable FAT name string as written to the
+     * {@link com.meetwise.fs.BootSector}.
+     *
+     * @return the boot sector label for this FAT type.
+     */
+    public String getLabel() {
         return this.label;
     }
 

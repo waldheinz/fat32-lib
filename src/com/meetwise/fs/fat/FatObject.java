@@ -43,14 +43,12 @@ abstract class FatObject implements FSObject {
         this.valid = true;
     }
 
-    /**
-     * Is this object still valid. 
-     * 
+    /** 
      * An object is not valid anymore if it has been removed from the filesystem.
      * All invocations on methods (exception this method) of invalid objects 
      * must throw an IOException.
      * 
-     * @return
+     * @return if this object is still valid
      */
     public final boolean isValid() {
         return valid;
@@ -65,16 +63,13 @@ abstract class FatObject implements FSObject {
 
     /**
      * Gets the filesystem I'm a part of.
-     * @return 
+     *
+     * @return the file system of this object
      */
     public final FileSystem getFileSystem() {
         return fs;
     }
 
-    /**
-     * Gets the filesystem I'm a part of.
-     * @return 
-     */
     public final FatFileSystem getFatFileSystem() {
         return fs;
     }

@@ -8,9 +8,9 @@ import com.meetwise.fs.fat.FatFileSystem;
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public class FileSystems {
+public class FileSystemFactory {
     
-    private FileSystems() { }
+    private FileSystemFactory() { }
     
     /**
      * <p>

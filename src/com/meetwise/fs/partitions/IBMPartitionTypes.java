@@ -23,7 +23,7 @@ package com.meetwise.fs.partitions;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public enum IBMPartitionTypes {
+enum IBMPartitionTypes {
     PARTTYPE_EMPTY(0x00, "empty"),
     PARTTYPE_DOS_FAT12(0x01, "DOS 12-bit FAT"),
     PARTTYPE_XENIX_ROOT(0x02, "XENIX root file system"),

@@ -41,7 +41,7 @@ public interface FSObject {
     /**
      * Gets the filesystem to which this object belongs.
      * 
-     * @return 
+     * @return the file system this object is part of
      */
     public FileSystem getFileSystem();
 

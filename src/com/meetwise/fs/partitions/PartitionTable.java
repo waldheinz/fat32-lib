@@ -29,7 +29,7 @@ public interface PartitionTable<PTE extends PartitionTableEntry> extends Iterabl
     /**
      * Gets the type of this partition table
      * 
-     * @return 
+     * @return the type of this partition table
      */
     public PartitionTableType getType();
 }

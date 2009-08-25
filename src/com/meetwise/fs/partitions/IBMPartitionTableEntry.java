@@ -26,7 +26,7 @@ import com.meetwise.fs.util.LittleEndian;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public class IBMPartitionTableEntry implements PartitionTableEntry {
+class IBMPartitionTableEntry implements PartitionTableEntry {
 
     private final byte[] bs;
     private final int ofs;
@@ -41,18 +41,11 @@ public class IBMPartitionTableEntry implements PartitionTableEntry {
     public boolean isValid() {
         return !isEmpty();
     }
-
-    /**
-     * @see org.jnode.partitions.PartitionTableEntry#getChildPartitionTable()
-     */
+    
     public IBMPartitionTable getChildPartitionTable() {
         throw new Error("Not implemented yet");
     }
-
-    /**
-     * @return 
-     * @see org.jnode.partitions.PartitionTableEntry#hasChildPartitionTable()
-     */
+    
     public boolean hasChildPartitionTable() {
         return isExtended();
     }

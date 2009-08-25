@@ -20,6 +20,7 @@
  
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BootSector;
 import java.io.IOException;
 import com.meetwise.fs.util.LittleEndian;
 

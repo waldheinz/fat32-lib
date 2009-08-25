@@ -26,11 +26,12 @@ public final class RamDisk implements BlockDevice {
     private final int size;
 
     /**
-     * 
+     * Reads a GZIP compressed disk image from the specified input stream and
+     * returns a {@code RamDisk} holding the decompressed image.
      *
-     * @param in
-     * @return
-     * @throws IOException on read error
+     * @param in the stream to read the disk image from
+     * @return the decompressed {@code RamDisk}
+     * @throws IOException on read or decompression error
      */
     public static RamDisk readGzipped(InputStream in) throws IOException {
         final GZIPInputStream zis = new GZIPInputStream(in);

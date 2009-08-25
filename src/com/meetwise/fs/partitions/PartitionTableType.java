@@ -30,7 +30,7 @@ public interface PartitionTableType {
     /**
      * Gets the unique name of this partition table type.
      * 
-     * @return
+     * @return this type's name
      */
     public String getName();
 
@@ -38,9 +38,9 @@ public interface PartitionTableType {
      * Can this partition table type be used on the given first sector of a
      * blockdevice?
      * 
-     * @param firstSector 
-     * @param devApi
-     * @return 
+     * @param firstSector the first sector
+     * @param devApi the device
+     * @return if this type is supported
      */
     public boolean supports(byte[] firstSector, BlockDevice devApi);
 
@@ -49,7 +49,7 @@ public interface PartitionTableType {
      * 
      * @param firstSector
      * @param device
-     * @return
+     * @return the new partition table
      * @throws PartitionTableException
      */
     public PartitionTable<?> create(byte[] firstSector, BlockDevice device) throws PartitionTableException;

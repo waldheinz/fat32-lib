@@ -19,19 +19,14 @@
  */
  
 package com.meetwise.fs.partitions;
-import com.meetwise.fs.partitions.IBMPartitionTableEntry;
-import com.meetwise.fs.partitions.IBMPartitionTable;
 import com.meetwise.fs.BlockDevice;
-import com.meetwise.fs.partitions.PartitionTable;
-import com.meetwise.fs.partitions.PartitionTableException;
-import com.meetwise.fs.partitions.PartitionTableType;
 
 /**
  * IBM partition table table.
  * 
  * @author Ewout Prangsma (epr@users.sourceforge.net)
  */
-public class IBMPartitionTableType implements PartitionTableType {
+class IBMPartitionTableType implements PartitionTableType {
 
     /**
      * @see org.jnode.partitions.PartitionTableType#create(org.jnode.driver.Device)
@@ -43,16 +38,10 @@ public class IBMPartitionTableType implements PartitionTableType {
         return new IBMPartitionTable(this, firstSector, device);
     }
 
-    /**
-     * @see org.jnode.partitions.PartitionTableType#getName()
-     */
     public String getName() {
         return "IBM";
     }
 
-    /**
-     * @see org.jnode.partitions.PartitionTableType#supports(org.jnode.driver.block.BlockDevice)
-     */
     public boolean supports(byte[] firstSector, BlockDevice devApi) {
         // TODO Make a suitable implementation
         return true;

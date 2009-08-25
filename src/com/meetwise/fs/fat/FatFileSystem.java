@@ -20,6 +20,7 @@
  
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BootSector;
 import com.meetwise.fs.AbstractFileSystem;
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
@@ -167,13 +168,7 @@ public final class FatFileSystem extends AbstractFileSystem {
         }
 
     }
-
-    /**
-     * Gets the root entry of this filesystem. This is usually a director, but
-     * this is not required.
-     *
-     * @return 
-     */
+    
     @Override
     public FSDirectory getRoot() {
         return rootDir;
@@ -185,7 +180,7 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @param entry
      * @return 
      */
-    synchronized FatFile getFile(FatDirEntry entry) {
+    FatFile getFile(FatDirEntry entry) {
         FatFile file = files.get(entry);
         
         if (file == null) {

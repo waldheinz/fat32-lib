@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public class IBMPartitionTable implements PartitionTable<IBMPartitionTableEntry> {
+class IBMPartitionTable implements PartitionTable<IBMPartitionTableEntry> {
     private static final int TABLE_SIZE = 4;
 
     /** The type of partition table */
