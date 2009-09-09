@@ -69,10 +69,26 @@ public interface FSDirectoryEntry extends FSObject {
      * @return the last modification time of the entry as milliseconds
      *      since 1970, or {@code 0} if this filesystem does not support
      *      getting the last modification time
-     * @throws IOException if an error occurs retrieving the timestamp
+     * @throws IOException if an error occurs retrieving the time stamp
      */
     public long getLastModified() throws IOException;
 
+    /**
+     * Returns the time when this entry was created as ms since 1970.
+     *
+     * @return the creation time, or 0 if this feature is not supported
+     * @throws IOException on error retrieving the time stamp
+     */
+    public long getCreated() throws IOException;
+
+    /**
+     * Returns the time when this entry was last accessed as ms since 1970.
+     *
+     * @return the last access time, or 0 if this feature is not supported
+     * @throws IOException on error retrieving the last access time
+     */
+    public long getLastAccessed() throws IOException;
+    
     /**
      * Is this entry refering to a file?
      * 

@@ -122,7 +122,10 @@ public class FatFileSystemTest {
         FSDirectoryEntry entry = fatRootDir.getEntry("testFile");
         assertTrue(entry.isFile());
         assertFalse(entry.isDirectory());
-
+        assertEquals(1250899772000l, entry.getCreated());
+        assertEquals(1250899772000l, entry.getLastModified());
+        assertEquals(1250892000000l, entry.getLastAccessed());
+       
         FSFile file = entry.getFile();
         assertEquals(8, file.getLength());
         
