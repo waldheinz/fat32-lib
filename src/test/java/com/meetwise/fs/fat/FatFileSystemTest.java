@@ -48,7 +48,7 @@ public class FatFileSystemTest {
         System.out.println("testFat12Read");
 
         final InputStream is = getClass().getResourceAsStream(
-                "/data/fat12-test.img.gz");
+                "/fat12-test.img.gz");
 
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fatFs = new FatFileSystem(rd, false);
@@ -93,7 +93,7 @@ public class FatFileSystemTest {
         System.out.println("testFat16Read");
 
         final InputStream is = getClass().getResourceAsStream(
-                "/data/fat16-test.img.gz");
+                "/fat16-test.img.gz");
         
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fatFs = new FatFileSystem(rd, false);
@@ -162,7 +162,7 @@ public class FatFileSystemTest {
         System.out.println("testFat32Read");
         
         final InputStream is = getClass().getResourceAsStream(
-                "/data/fat32-test.img.gz");
+                "/fat32-test.img.gz");
 
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fatFs = new FatFileSystem(rd, false);
@@ -216,7 +216,7 @@ public class FatFileSystemTest {
         System.out.println("testFat32Write");
 
         final InputStream is = getClass().getResourceAsStream(
-                "/data/fat32-test.img.gz");
+                "/fat32-test.img.gz");
 
         final RamDisk rd = RamDisk.readGzipped(is);
         FatFileSystem fatFs = new FatFileSystem(rd, false);

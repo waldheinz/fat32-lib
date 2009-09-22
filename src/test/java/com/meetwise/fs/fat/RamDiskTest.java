@@ -18,7 +18,7 @@ public class RamDiskTest {
         System.out.println("testReadGzipped");
         
         final InputStream is = getClass().getResourceAsStream(
-                "/data/fat16-test.img.gz");
+                "/fat16-test.img.gz");
 
         final RamDisk rd = RamDisk.readGzipped(is);
         assertEquals(512, rd.getSectorSize());
