@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.util.RamDisk;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -37,6 +38,7 @@ public class FatFormatterTest {
     }
 
     @Test
+    @Ignore
     public void testFat32Format() {
         System.out.println("testFat32Format");
 

@@ -9,6 +9,7 @@ import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
 import com.meetwise.fs.util.RamDisk;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -158,6 +159,7 @@ public class FatFileSystemTest {
     }
 
     @Test
+    @Ignore
     public void testFat32Read() throws Exception {
         System.out.println("testFat32Read");
         
@@ -212,6 +214,7 @@ public class FatFileSystemTest {
     }
     
     @Test
+    @Ignore
     public void testFat32Write() throws Exception {
         System.out.println("testFat32Write");
 
