@@ -27,5 +27,13 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <downloadUrl>http://192.168.2.111/maven-repo</downloadUrl>
+        <repository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>blubox</id>
+            <url>scp://192.168.2.111/var/www/maven-repo/</url>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
 </project>
-
