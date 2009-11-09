@@ -28,12 +28,13 @@
         </dependency>
     </dependencies>
     <distributionManagement>
-        <downloadUrl>http://192.168.2.111/maven-repo</downloadUrl>
-        <repository>
+        <downloadUrl>http://192.168.2.111/maven-snapshots</downloadUrl>
+        
+        <snapshotRepository>
             <uniqueVersion>true</uniqueVersion>
             <id>blubox</id>
-            <url>scp://192.168.2.111/var/www/maven-repo/</url>
+            <url>scp://192.168.2.111/var/www/maven-snapshots/</url>
             <layout>default</layout>
-        </repository>
+        </snapshotRepository>
     </distributionManagement>
 </project>
