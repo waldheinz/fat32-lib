@@ -18,31 +18,6 @@ import static org.junit.Assert.*;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public class FatFileSystemTest {
-
-    @Test
-    public void testMaxRootEntries() throws Exception {
-        System.out.println("testMaxRootEntries");
-
-        RamDisk d = new RamDisk(512 * 1024);
-        final FatFormatter ff = FatFormatter.superFloppyFormatter(d);
-        ff.format(d, null);
-        final FatFileSystem fs = new FatFileSystem(d, false);
-        final FSDirectory root = fs.getRoot();
-        
-        /* divide by 2 because we use LFNs which take entries, too */
-        final int max = fs.getBootSector().getNrRootDirEntries() / 2;
-        
-        for (int i=0; i < max; i++) {
-            root.addFile("f-" + i);
-        }
-        
-        try {
-            root.addFile("fails");
-            fail("added too many files to root directory");
-        } catch (RootDirectoryFullException ex) {
-            /* fine */
-        }
-    }
     
     @Test
     public void testFat12Read() throws Exception {
@@ -123,9 +98,9 @@ public class FatFileSystemTest {
         FSDirectoryEntry entry = fatRootDir.getEntry("testFile");
         assertTrue(entry.isFile());
         assertFalse(entry.isDirectory());
-        assertEquals(1250899772000l, entry.getCreated());
-        assertEquals(1250899772000l, entry.getLastModified());
-        assertEquals(1250892000000l, entry.getLastAccessed());
+        assertEquals(1250906972000l, entry.getCreated());
+        assertEquals(1250906972000l, entry.getLastModified());
+        assertEquals(1250899200000l, entry.getLastAccessed());
        
         FSFile file = entry.getFile();
         assertEquals(8, file.getLength());

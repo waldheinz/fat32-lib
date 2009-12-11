@@ -69,6 +69,7 @@ abstract class AbstractDirectory
      * 
      * @return Iterator
      */
+    @Override
     public Iterator<FSDirectoryEntry> iterator() {
         return new DirIterator();
     }
@@ -123,6 +124,7 @@ abstract class AbstractDirectory
      * @return 
      * @throws IOException
      */
+    @Override
     public FSDirectoryEntry addFile(String name) throws IOException {
         return addFatFile(name);
     }
@@ -165,6 +167,7 @@ abstract class AbstractDirectory
      * @return 
      * @throws IOException
      */
+    @Override
     public FSDirectoryEntry addDirectory(String name) throws IOException {
         if (getFileSystem().isReadOnly()) throw new
                 ReadOnlyFileSystemException(this.getFatFileSystem(),
@@ -225,6 +228,7 @@ abstract class AbstractDirectory
      * @return 
      * @throws IOException
      */
+    @Override
     public FSDirectoryEntry getEntry(String name) throws IOException {
         final FatDirEntry entry = getFatEntry(name);
         if (entry == null) {
@@ -239,6 +243,7 @@ abstract class AbstractDirectory
      * 
      * @param nameExt
      */
+    @Override
     public synchronized void remove(String nameExt) throws IOException {
         final FatDirEntry entry = getFatEntry(nameExt);
 
@@ -284,6 +289,7 @@ abstract class AbstractDirectory
         /**
          * @see java.util.Iterator#hasNext()
          */
+        @Override
         public boolean hasNext() {
             
             while (offset < entries.size()) {
@@ -305,6 +311,7 @@ abstract class AbstractDirectory
         /**
          * @see java.util.Iterator#next()
          */
+        @Override
         public FSDirectoryEntry next() {
             
             while (offset < entries.size()) {
@@ -328,6 +335,7 @@ abstract class AbstractDirectory
         /**
          * @see java.util.Iterator#remove()
          */
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -415,8 +423,9 @@ abstract class AbstractDirectory
     /**
      * Flush the contents of this directory to the persistent storage
      */
+    @Override
     public abstract void flush() throws IOException;
-
+    
     /**
      * Read the contents of this directory from the given byte array
      * 
