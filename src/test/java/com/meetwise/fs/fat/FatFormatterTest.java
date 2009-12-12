@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.util.RamDisk;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -20,7 +19,7 @@ public class FatFormatterTest {
     
     @Test
     public void testFat16Format() throws Exception {
-        System.out.println("testFat16Format");
+        System.out.println("fat16Format");
         
         BlockDevice d = new RamDisk(5242880);
         
@@ -38,14 +37,17 @@ public class FatFormatterTest {
     }
 
     @Test
-    @Ignore
-    public void testFat32Format() {
-        System.out.println("testFat32Format");
+    public void testFat32Format() throws Exception {
+        System.out.println("fat32Format");
 
-        BlockDevice d = new RamDisk(280 * 1024 * 1024);
+        BlockDevice d = new RamDisk(8 * 1024 * 1024);
+        FatFormatter ff = FatFormatter.superFloppyFormatter(d, FatType.FAT32);
+        ff.format(d, null);
         
+        FatFileSystem fs = new FatFileSystem(d, false);
+        final BootSector bs = fs.getBootSector();
     }
-
+    
     @Test
     public void testVolumeLabel() throws Exception {
         System.out.println("testVolumeLabel");

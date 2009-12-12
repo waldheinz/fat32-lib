@@ -32,7 +32,9 @@ public enum FatType {
     /**
      * For a 12-bit file allocation table.
      */
-    FAT12(0xFFFL, 1.5f, "FAT12   ") {
+    FAT12(4096, 0xFFFL, 1.5f, "FAT12   ") {
+
+        @Override
         public long readEntry(byte[] data, int index) {
             final int idx = (int) (index * 1.5);
             final int b1 = data[idx] & 0xFF;
@@ -46,6 +48,7 @@ public enum FatType {
             }
         }
 
+        @Override
         public void writeEntry(byte[] data, int index, long entry) {
             final int idx = (int) (index * 1.5);
             
@@ -62,7 +65,9 @@ public enum FatType {
     /**
      * For a 16-bit file allocation table.
      */
-    FAT16(0xFFFFL, 2.0f, "FAT16   ") {
+    FAT16(65527, 0xFFFFL, 2.0f, "FAT16   ") {
+        
+        @Override
         public long readEntry(byte[] data, int index) {
             final int idx = index * 2;
             final int b1 = data[idx] & 0xFF;
@@ -70,6 +75,7 @@ public enum FatType {
             return (b2 << 8) | b1;
         }
 
+        @Override
         public void writeEntry(byte[] data, int index, long entry) {
             final int idx = index << 1;
             data[idx] = (byte) (entry & 0xFF);
@@ -80,7 +86,9 @@ public enum FatType {
     /**
      * For a 32-bit file allocation table.
      */
-    FAT32(0xFFFFFFFFL, 4.0f, "FAT32   ") {
+    FAT32(268435456, 0xFFFFFFFFL, 4.0f, "FAT32   ") {
+
+        @Override
         public long readEntry(byte[] data, int index) {
             final int idx = index * 4;
             final long l1 = data[idx] & 0xFF;
@@ -90,6 +98,7 @@ public enum FatType {
             return (l4 << 24) | (l3 << 16) | (l2 << 8) | l1;
         }
 
+        @Override
         public void writeEntry(byte[] data, int index, long entry) {
             final int idx = index << 2;
             data[idx] = (byte) (entry & 0xFF);
@@ -103,21 +112,34 @@ public enum FatType {
     private final long maxReservedEntry;
     private final long eofCluster;
     private final long eofMarker;
+    private final int maxClusters;
     private final String label;
     private final float entrySize;
 
-    private FatType(long bitMask, float entrySize, String label) {
+    private FatType(int maxClusters,
+            long bitMask, float entrySize, String label) {
+        
         this.minReservedEntry = (0xFFFFFF0L & bitMask);
         this.maxReservedEntry = (0xFFFFFF6L & bitMask);
         this.eofCluster = (0xFFFFFF8L & bitMask);
         this.eofMarker = (0xFFFFFFFL & bitMask);
         this.entrySize = entrySize;
         this.label = label;
+        this.maxClusters = maxClusters;
     }
 
     abstract long readEntry(byte[] data, int index);
 
     abstract void writeEntry(byte[] data, int index, long entry);
+
+    /**
+     * Returns the maximum number of clusters this file system can address.
+     *
+     * @return the maximum cluster count supported
+     */
+    public long maxClusters() {
+        return this.maxClusters;
+    }
 
     /**
      * Returns the human-readable FAT name string as written to the

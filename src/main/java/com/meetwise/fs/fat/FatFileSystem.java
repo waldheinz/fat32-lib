@@ -26,8 +26,6 @@ import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.util.HashMap;
 import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FSFile;
 import com.meetwise.fs.FileSystemException;
 
 /**
@@ -44,7 +42,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     private final FatLfnDirectory rootDir;
     private final HashMap<FatDirEntry, FatFile> files =
             new HashMap<FatDirEntry, FatFile>();
-    private final FatType bitSize;
+    private final FatType fatType;
 
     public FatFileSystem(BlockDevice api, boolean readOnly)
             throws FileSystemException {
@@ -71,12 +69,9 @@ public final class FatFileSystem extends AbstractFileSystem {
 
             //this.fsInfo = new FsInfoSector(bs, getApi());
             this.fsInfo = null;
-
-            if (!bs.isaValidBootSector()) throw new FileSystemException(this,
-                    "invalid boot sector"); //NOI18N
-
+            
             Fat[] fats = new Fat[bs.getNrFats()];
-            bitSize = bs.getFatType();
+            fatType = bs.getFatType();
             
             for (int i = 0; i < fats.length; i++) {
                 Fat tmpFat = new Fat(
@@ -100,7 +95,7 @@ public final class FatFileSystem extends AbstractFileSystem {
             }
             
             fat = fats[0];
-            if (bitSize == FatType.FAT32) {
+            if (fatType == FatType.FAT32) {
                 FatFile rootDirFile = new FatFile(this,
                         bs.getRootDirFirstCluster());
                 rootDir = new FatLfnDirectory(this, rootDirFile);
@@ -113,9 +108,9 @@ public final class FatFileSystem extends AbstractFileSystem {
             throw new FileSystemException(this, ex);
         }
     }
-
+    
     public FatType getFatType() {
-        return this.bitSize;
+        return this.fatType;
     }
 
     /**
@@ -212,23 +207,6 @@ public final class FatFileSystem extends AbstractFileSystem {
      */
     public BootSector getBootSector() {
         return bs;
-    }
-    
-    /**
-     *
-     */
-    protected FSFile createFile(FSDirectoryEntry entry) throws IOException {
-
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     *
-     */
-    protected FSDirectory createDirectory(FSDirectoryEntry entry) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
     }
     
     public long getFreeSpace() {

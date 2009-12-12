@@ -28,44 +28,47 @@ import java.io.IOException;
  * 
  *
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
- * @author Matthias Treydte
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public final class FatFormatter {
-
-    /**
-     * 
-     */
-    public static final int MAX_DIRECTORY = 512;
-
-    /**
-     * 
-     */
-    public static final int HD_DESC = 0xf8;
-
-    /**
-     * 
-     */
-    public static final int FLOPPY_DESC = 0xf0;
-
-
+    
+    private static final int MAX_DIRECTORY = 512;
+    private static final int HD_DESC = 0xf8;
+    private static final int FLOPPY_DESC = 0xf0;
+    
     private final BootSector bs;
     private final Fat fat;
     private final FatDirectory rootDir;
 
     /**
-     * Creates a new instance of {@code FatFormatter} that is suitable for
-     * formatting a FAT "super floppy" device. 
+     * 
      *
-     * @param d the device to format
-     * @return the new formatter for the device
-     * @throws IOException on error creating the formatter
+     * @param d
+     * @return
+     * @throws IOException
      */
     public static FatFormatter superFloppyFormatter(BlockDevice d)
             throws IOException {
 
+        final FatType fatSize = defaultFatSize(d);
+        return superFloppyFormatter(d, fatSize);
+    }
+    
+    /**
+     * Creates a new instance of {@code FatFormatter} that is suitable for
+     * formatting a FAT "super floppy" device. 
+     *
+     * @param d the device to format
+     * @param fatSize 
+     * @return the new formatter for the device
+     * @throws IOException on error creating the formatter
+     */
+    public static FatFormatter superFloppyFormatter(
+            BlockDevice d, FatType fatSize) throws IOException {
+
         final BootSector bs = new BootSector(SF_BS);
         final int totalSectors = (int)(d.getSize() / d.getSectorSize());
-        final FatType fatSize = defaultFatSize(d);
+        
         final int spc = defaultSectorsPerCluster(
                 d.getSectorSize(), totalSectors);
 
@@ -78,7 +81,7 @@ public final class FatFormatter {
         bs.setSectorCount(totalSectors);
         bs.setSectorsPerCluster(spc);
         bs.setFatType(fatSize);
-
+        
         if (fatSize == FatType.FAT32) {
             bs.setSectorsPerFat32(1009);
             bs.setNrReservedSectors(32);
@@ -176,16 +179,7 @@ public final class FatFormatter {
         }
     }
     
-    /**
-     * Returns the bs.
-     *
-     * @return BootSector
-     */
-    public BootSector getBootSector() {
-        return bs;
-    }
-
-    public final static byte[] SF_BS = {
+    private final static byte[] SF_BS = {
         (byte) 0xeb, (byte) 0x58, (byte) 0x90, (byte) 0x6d, (byte) 0x6b,
         (byte) 0x64, (byte) 0x6f, (byte) 0x73, (byte) 0x66, (byte) 0x73,
         (byte) 0x00, (byte) 0x00, (byte) 0x02, (byte) 0x01, (byte) 0x20,

@@ -59,11 +59,7 @@ public final class BootSector extends Sector {
                 FatType.FAT12 : FatType.FAT16;
         }
     }
-
-    public boolean isaValidBootSector() {
-        return true;
-    }
-
+    
     /**
      * Read the contents of this bootsector from the given device.
      * 

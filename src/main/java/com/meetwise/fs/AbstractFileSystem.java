@@ -35,7 +35,7 @@ public abstract class AbstractFileSystem implements FileSystem {
             Logger.getLogger(AbstractFileSystem.class.getName());
 
     private final boolean readOnly;
-    private final BlockDevice api;
+    private final BlockDevice blockDevice;
     private boolean closed;
 
     // cache of FSFile (key: FSDirectoryEntry)
@@ -56,19 +56,19 @@ public abstract class AbstractFileSystem implements FileSystem {
     public AbstractFileSystem(BlockDevice api, boolean readOnly)
             throws FileSystemException {
         
-        this.api = api;
+        this.blockDevice = api;
         this.closed = false;
         this.readOnly = readOnly;
     }
     
+    @Override
     public void close() throws IOException {
         if (!isClosed()) {
-            // if readOnly, nothing to do
             if (!isReadOnly()) {
                 flush();
             }
 
-            api.flush();
+            blockDevice.flush();
             files.clear();
             directories.clear();
             
@@ -77,12 +77,13 @@ public abstract class AbstractFileSystem implements FileSystem {
             closed = true;
         }
     }
-
+    
     /**
      * Save the content that have been altered but not saved in the Device
      * 
      * @throws IOException
      */
+    @Override
     public void flush() throws IOException {
         flushFiles();
         flushDirectories();
@@ -92,19 +93,20 @@ public abstract class AbstractFileSystem implements FileSystem {
      * @return Returns the api.
      */
     public final BlockDevice getApi() {
-        return api;
+        return blockDevice;
     }
 
     /**
      * @return Returns the FSApi.
      */
-    public final BlockDevice getFSApi() {
-        return api;
+    public final BlockDevice getBlockDevice() {
+        return blockDevice;
     }
-
+    
     /**
      * @return if filesystem is closed.
      */
+    @Override
     public final boolean isClosed() {
         return closed;
     }
@@ -112,38 +114,11 @@ public abstract class AbstractFileSystem implements FileSystem {
     /**
      * @return if filesystem is readOnly.
      */
+    @Override
     public final boolean isReadOnly() {
         return readOnly;
     }
     
-    /**
-     * Gets the file for the given entry.
-     * 
-     * @param entry
-     * @return the FSFile object associated with entry
-     * @throws IOException
-     */
-    public final synchronized FSFile getFile(FSDirectoryEntry entry) throws IOException {
-        if (isClosed())
-            throw new IOException("FileSystem is closed");
-
-        FSFile file = files.get(entry);
-        if (file == null) {
-            file = createFile(entry);
-            files.put(entry, file);
-        }
-        return file;
-    }
-
-    /**
-     * Abstract method to create a new FSFile from the entry
-     * 
-     * @param entry
-     * @return a new created FSFile
-     * @throws IOException
-     */
-    protected abstract FSFile createFile(FSDirectoryEntry entry) throws IOException;
-
     /**
      * Flush all unsaved FSFile in our cache
      * 
@@ -157,35 +132,7 @@ public abstract class AbstractFileSystem implements FileSystem {
             f.flush();
         }
     }
-
-    /**
-     * Gets the file for the given entry.
-     * 
-     * @param entry
-     * @return the FSDirectory object associated with this entry
-     * @throws IOException
-     */
-    public final synchronized FSDirectory getDirectory(FSDirectoryEntry entry) throws IOException {
-        if (isClosed())
-            throw new IOException("FileSystem is closed");
-
-        FSDirectory dir = directories.get(entry);
-        if (dir == null) {
-            dir = createDirectory(entry);
-            directories.put(entry, dir);
-        }
-        return dir;
-    }
-
-    /**
-     * Abstract method to create a new directory from the given entry
-     * 
-     * @param entry
-     * @return the new created FSDirectory
-     * @throws IOException
-     */
-    protected abstract FSDirectory createDirectory(FSDirectoryEntry entry) throws IOException;
-
+    
     /**
      * Flush all unsaved FSDirectory in our cache
      * 
