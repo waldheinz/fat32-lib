@@ -1,185 +1,88 @@
-/*
- * $Id: FatFormatter.java 4975 2009-02-02 08:30:52Z lsantha $
- *
- * Copyright (C) 2003-2009 JNode.org
- *
- * This library is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public 
- * License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; If not, write to the Free Software Foundation, Inc., 
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
- 
+
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.BootSector;
 import com.meetwise.fs.BlockDevice;
+import com.meetwise.fs.BootSector;
 import java.io.IOException;
 
 /**
- * 
  *
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
- * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
+ * @author Matthias Treydte &lt;matthias.treydte at meetwise.com&gt;
  */
-public final class FatFormatter {
-    
-    private static final int MAX_DIRECTORY = 512;
-    private static final int HD_DESC = 0xf8;
-    private static final int FLOPPY_DESC = 0xf0;
-    
+public final class SuperFloppyFormatter {
+
+    /**
+     * The media descriptor for hard disks.
+     */
+    private final static int HD_DESC = 0xf8;
+
+    private final BlockDevice device;
     private final BootSector bs;
-    private final Fat fat;
-    private final FatDirectory rootDir;
+    
+    private String label;
 
     /**
-     * 
+     * Creates a new {@code SuperFloppyFormatter} for the specified
+     * {@code BlockDevice}.
      *
-     * @param d
-     * @return
-     * @throws IOException
+     * @param device
      */
-    public static FatFormatter superFloppyFormatter(BlockDevice d)
-            throws IOException {
+    public SuperFloppyFormatter(BlockDevice device) {
+        this.device = device;
+        this.bs = new BootSector(SF_BS);
+    }
 
-        final FatType fatSize = defaultFatSize(d);
-        return superFloppyFormatter(d, fatSize);
+    /**
+     * Sets the label of the file system to create.
+     *
+     * @param label the new file system label, may be {@code null}
+     */
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    /**
+     * Returns the label that will be given to the new file system.
+     *
+     * @return the file system label, may be {@code null}
+     */
+    public String getLabel() {
+        return label;
     }
     
     /**
-     * Creates a new instance of {@code FatFormatter} that is suitable for
-     * formatting a FAT "super floppy" device. 
+     * Writes the boot sector and file system to the device.
      *
-     * @param d the device to format
-     * @param fatSize 
-     * @return the new formatter for the device
-     * @throws IOException on error creating the formatter
+     * @throws IOException on write error
      */
-    public static FatFormatter superFloppyFormatter(
-            BlockDevice d, FatType fatSize) throws IOException {
+    public void format() throws IOException {
+        bs.write(device);
 
-        final BootSector bs = new BootSector(SF_BS);
-        
-        final int totalSectors = (int)(d.getSize() / d.getSectorSize());
-        
-        final int spc = defaultSectorsPerCluster(
-                d.getSectorSize(), totalSectors);
-
-        bs.setNrFats(2);
-        bs.setSectorsPerTrack(32);
-        bs.setBytesPerSector(d.getSectorSize());
-        bs.setMediumDescriptor(HD_DESC);
-        bs.setNrHeads(64);
-        bs.setOemName("fat32lib");
-        bs.setSectorCount(totalSectors);
-        bs.setSectorsPerCluster(spc);
-        bs.setFatType(fatSize);
-        
-        if (fatSize == FatType.FAT32) {
-            bs.setSectorsPerFat32(1009);
-            bs.setNrReservedSectors(32);
-            
-            final FsInfoSector fsInfo = new FsInfoSector(bs, d);
-            fsInfo.init();
-        } else {
-            bs.setNrReservedSectors(1);
-            bs.setSectorsPerFat((Math.round(totalSectors / (spc *
-                (d.getSectorSize() / fatSize.getEntrySize()))) + 1));
-            bs.setNrRootDirEntries(calculateDefaultRootDirectorySize(
-                    d.getSectorSize(), totalSectors));
-        }
-        
-        return new FatFormatter(FatType.FAT32, bs);
-    }
-    
-    private static FatType defaultFatSize(BlockDevice d) {
-        final long len = d.getSize();
-
-        if (len < 1024 * 1024 * 1024) return FatType.FAT16;
-        else return FatType.FAT32;
-    }
-    
-    private FatFormatter(FatType fatSize, BootSector bs) throws IOException {
-        this.bs = bs;
-        fat = new Fat(fatSize, bs.getMediumDescriptor(),
+        final Fat fat = new Fat(bs.getFatType(), bs.getMediumDescriptor(),
                 bs.getSectorsPerFat(), bs.getBytesPerSector());
-        
-        rootDir = new FatLfnDirectory(null, bs.getNrRootDirEntries());
-    }
-
-    private static int defaultSectorsPerCluster(int bps, int sectors) {
-        // Apply the default cluster size from MS
-        final long sizeInMB = (sectors * bps) / (1024 * 1024);
-        int spc;
-
-        if (sizeInMB < 32) {
-            spc = 1;
-        } else if (sizeInMB < 64) {
-            spc = 2;
-        } else if (sizeInMB < 128) {
-            spc = 4;
-        } else if (sizeInMB < 256) {
-            spc = 8;
-        } else if (sizeInMB < 1024) {
-            spc = 32;
-        } else if (sizeInMB < 2048) {
-            spc = 64;
-        } else if (sizeInMB < 4096) {
-            spc = 128;
-        } else if (sizeInMB < 8192) {
-            spc = 256;
-        } else if (sizeInMB < 16384) {
-            spc = 512;
-        } else
-            throw new IllegalArgumentException(
-                    "Disk too large to be formatted in FAT16");
-        
-        return spc;
-    }
-
-    private static int calculateDefaultRootDirectorySize(int bps, int nbTotalSectors) {
-        int totalSize = bps * nbTotalSectors;
-        // take a default 1/5 of the size for root max
-        if (totalSize >= MAX_DIRECTORY * 5 * 32) { // ok take the max
-            return MAX_DIRECTORY;
-        } else {
-            return totalSize / (5 * 32);
-        }
-    }
-    
-    /**
-     * Format the given device, according to my settings
-     * 
-     * @param api
-     * @param label 
-     * @throws IOException
-     */
-    public void format(BlockDevice api, String label) throws IOException {
-        bs.write(api);
-        
+                
         for (int i = 0; i < bs.getNrFats(); i++) {
-            fat.write(api, FatUtils.getFatOffset(bs, i));
+            fat.write(device, FatUtils.getFatOffset(bs, i));
         }
 
-        rootDir.write(api, FatUtils.getRootDirOffset(bs));
-        api.flush();
+        final FatLfnDirectory rootDir = new FatLfnDirectory(
+                null, bs.getNrRootDirEntries());
+
+
+        rootDir.write(device, FatUtils.getRootDirOffset(bs));
 
         if (label != null) {
-            FatFileSystem fs = new FatFileSystem(api, false);
+            FatFileSystem fs = new FatFileSystem(device, false);
             fs.setVolumeLabel(label);
             fs.flush();
-            api.flush();
         }
+        
+        device.flush();
     }
-    
+
+    /**
+     * A boot sector prototype for super floppies.
+     */
     private final static byte[] SF_BS = {
         (byte) 0xeb, (byte) 0x58, (byte) 0x90, (byte) 0x6d, (byte) 0x6b,
         (byte) 0x64, (byte) 0x6f, (byte) 0x73, (byte) 0x66, (byte) 0x73,
