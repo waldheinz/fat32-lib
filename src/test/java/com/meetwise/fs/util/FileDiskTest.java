@@ -1,6 +1,7 @@
 
 package com.meetwise.fs.util;
 
+import com.meetwise.fs.ReadOnlyDeviceException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -33,11 +34,19 @@ public class FileDiskTest {
         f.delete();
     }
     
-    @Test
-    public void testIsReadOnly() {
+    @Test(expected=ReadOnlyDeviceException.class)
+    public void testIsReadOnly() throws IOException {
         System.out.println("isReadOnly");
 
         assertFalse(fd.isReadOnly());
+
+        fd.close();
+
+        fd = new FileDisk(f, true);
+
+        assertTrue(fd.isReadOnly());
+
+        fd.write(0, ByteBuffer.allocate(1000));
     }
 
     @Test(expected=IllegalStateException.class)
