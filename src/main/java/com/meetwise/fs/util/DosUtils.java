@@ -30,6 +30,8 @@ import java.util.Calendar;
  */
 public class DosUtils {
 
+    private DosUtils() { /* no instances */ }
+
     /**
      * Decode a 16-bit encoded DOS date/time into a java date/time.
      * 

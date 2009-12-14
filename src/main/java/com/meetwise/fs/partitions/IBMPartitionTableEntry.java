@@ -20,7 +20,6 @@
  
 package com.meetwise.fs.partitions;
 
-import com.meetwise.fs.util.CHS;
 import com.meetwise.fs.util.LittleEndian;
 
 /**
@@ -38,14 +37,17 @@ class IBMPartitionTableEntry implements PartitionTableEntry {
         this.ofs = 446 + (partNr * 16);
     }
 
+    @Override
     public boolean isValid() {
         return !isEmpty();
     }
     
+    @Override
     public IBMPartitionTable getChildPartitionTable() {
         throw new Error("Not implemented yet");
     }
     
+    @Override
     public boolean hasChildPartitionTable() {
         return isExtended();
     }

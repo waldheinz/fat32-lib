@@ -18,12 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package com.meetwise.fs.util;
+package com.meetwise.fs.partitions;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public class CHS {
+final class CHS {
 
     private final int cylinder;
     private final int head;
@@ -76,6 +76,7 @@ public class CHS {
      * @return boolean
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object obj) {
         if ((obj != null) && (obj instanceof CHS)) {
             CHS o = (CHS) obj;
@@ -85,10 +86,20 @@ public class CHS {
         }
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 13 * hash + this.cylinder;
+        hash = 13 * hash + this.head;
+        hash = 13 * hash + this.sector;
+        return hash;
+    }
+
     /**
      * @return String
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         return "" + cylinder + "/" + head + "/" + sector;
     }
