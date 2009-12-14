@@ -24,15 +24,19 @@ package com.meetwise.fs.util;
 /**
  * Little endian (LSB first) conversion methods.
  *
- * @author Ewout Prangsma (epr@users.sourceforge.net)
+ * @author Ewout Prangsma &lt;epr at users.sourceforge.net&gt;
  */
 public class LittleEndian {
 
+    private LittleEndian() { /* no instances */ }
+    
     /**
-     * Gets an 8-bit unsigned integer from the given byte array at the given offset.
+     * Gets an 8-bit unsigned integer from the given byte array at
+     * the given offset.
      *
-     * @param src
-     * @param offset
+     * @param src the byte offset where to read the value from
+     * @param offset the byte array to extract the value from
+     * @return the integer that was read
      */
     public static int getUInt8(byte[] src, int offset) {
         return src[offset] & 0xFF;
