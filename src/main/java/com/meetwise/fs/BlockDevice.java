@@ -54,10 +54,12 @@ public interface BlockDevice {
      *
      * @param devOffset the byte offset where to store the data
      * @param src the source {@code ByteBuffer} to write to the device
+     * @throws ReadOnlyDeviceException if this {@code BlockDevice} is read-only
      * @throws IOException on write error
+     * @see #isReadOnly() 
      */
     public abstract void write(long devOffset, ByteBuffer src)
-            throws IOException;
+            throws ReadOnlyDeviceException, IOException;
 
     /**
      * Flushes data in caches to the actual storage.
