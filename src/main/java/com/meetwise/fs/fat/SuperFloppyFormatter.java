@@ -12,9 +12,29 @@ import java.io.IOException;
 public final class SuperFloppyFormatter {
 
     /**
-     * The media descriptor for hard disks.
+     * The media descriptor used (hard disk).
      */
-    private final static int HD_DESC = 0xf8;
+    public final static int MEDIUM_DESCRIPTOR_HD = 0xf8;
+
+    /**
+     * The default number of FATs.
+     */
+    public final static int DEFAULT_FAT_COUNT = 2;
+
+    /**
+     * The default number of sectors per track.
+     */
+    public final static int DEFAULT_SECTORS_PER_TRACK = 63;
+
+    /**
+     * The default number of heads.
+     */
+    public final static int DEFULT_HEADS = 255;
+
+    /**
+     * The minimum number of clusters for FAT32.
+     */
+    public final static int FAT32_MIN_CLUSTERS = 65529;
 
     private final BlockDevice device;
     private final BootSector bs;
@@ -30,6 +50,13 @@ public final class SuperFloppyFormatter {
     public SuperFloppyFormatter(BlockDevice device) {
         this.device = device;
         this.bs = new BootSector(SF_BS);
+
+        bs.setNrFats(DEFAULT_FAT_COUNT);
+        bs.setMediumDescriptor(MEDIUM_DESCRIPTOR_HD);
+        bs.setSectorsPerTrack(DEFAULT_SECTORS_PER_TRACK);
+        bs.setNrHeads(DEFULT_HEADS);
+
+        setFatType(defaultFatType());
     }
 
     /**
@@ -78,6 +105,19 @@ public final class SuperFloppyFormatter {
         }
         
         device.flush();
+    }
+    
+    private void setFatType(FatType fatType) {
+        /* parameter check */
+
+        
+    }
+
+    private FatType defaultFatType() {
+        final long len = device.getSize();
+
+        if (len < 1024 * 1024 * 1024) return FatType.FAT16;
+        else return FatType.FAT32;
     }
 
     /**

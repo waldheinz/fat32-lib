@@ -32,7 +32,7 @@ public enum FatType {
     /**
      * For a 12-bit file allocation table.
      */
-    FAT12(4096, 0xFFFL, 1.5f, "FAT12   ") {
+    FAT12((1 << 12) - 16, 0xFFFL, 1.5f, "FAT12   ") {
 
         @Override
         public long readEntry(byte[] data, int index) {
@@ -65,7 +65,7 @@ public enum FatType {
     /**
      * For a 16-bit file allocation table.
      */
-    FAT16(65527, 0xFFFFL, 2.0f, "FAT16   ") {
+    FAT16((1 << 16) - 16, 0xFFFFL, 2.0f, "FAT16   ") {
         
         @Override
         public long readEntry(byte[] data, int index) {
@@ -82,11 +82,11 @@ public enum FatType {
             data[idx + 1] = (byte) ((entry >> 8) & 0xFF);
         }
     },
-
+    
     /**
      * For a 32-bit file allocation table.
      */
-    FAT32(268435456, 0xFFFFFFFFL, 4.0f, "FAT32   ") {
+    FAT32((1 << 28) - 16, 0xFFFFFFFFL, 4.0f, "FAT32   ") {
 
         @Override
         public long readEntry(byte[] data, int index) {
@@ -140,7 +140,7 @@ public enum FatType {
     public long maxClusters() {
         return this.maxClusters;
     }
-
+    
     /**
      * Returns the human-readable FAT name string as written to the
      * {@link com.meetwise.fs.BootSector}.
