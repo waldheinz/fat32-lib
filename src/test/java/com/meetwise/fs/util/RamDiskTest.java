@@ -1,7 +1,6 @@
 
-package com.meetwise.fs.fat;
+package com.meetwise.fs.util;
 
-import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.Test;
@@ -24,4 +23,14 @@ public class RamDiskTest {
         assertEquals(512, rd.getSectorSize());
         assertEquals(10240000, rd.getSize());
     }
+
+    @Test(expected=IllegalStateException.class)
+    public void testClose() throws IOException {
+        System.out.println("close");
+        
+        final RamDisk d = new RamDisk(4096);
+        d.close();
+        d.flush();
+    }
+    
 }

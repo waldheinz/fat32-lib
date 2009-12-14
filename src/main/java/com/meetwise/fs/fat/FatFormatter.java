@@ -100,7 +100,7 @@ public final class FatFormatter {
         return new FatFormatter(FatType.FAT32, bs);
     }
     
-    private static FatType defaultFatSize(BlockDevice d) {
+    private static FatType defaultFatSize(BlockDevice d) throws IOException {
         final long len = d.getSize();
 
         if (len < 1024 * 1024 * 1024) return FatType.FAT16;

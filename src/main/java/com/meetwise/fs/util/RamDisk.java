@@ -24,6 +24,7 @@ public final class RamDisk implements BlockDevice {
     private final int sectorSize;
     private final ByteBuffer data;
     private final int size;
+    private boolean closed;
 
     /**
      * Reads a GZIP compressed disk image from the specified input stream and
@@ -59,6 +60,7 @@ public final class RamDisk implements BlockDevice {
         this.size = buffer.limit();
         this.sectorSize = sectorSize;
         this.data = buffer;
+        this.closed = false;
     }
 
     /**
@@ -87,11 +89,15 @@ public final class RamDisk implements BlockDevice {
         this.data = ByteBuffer.allocate(size);
     }
     
+    @Override
     public long getSize() {
+        checkClosed();
         return this.size;
     }
 
+    @Override
     public void read(long devOffset, ByteBuffer dest) throws IOException {
+        checkClosed();
         if (devOffset > getSize()) throw new IllegalArgumentException();
         
         data.limit((int) (devOffset + dest.remaining()));
@@ -100,7 +106,9 @@ public final class RamDisk implements BlockDevice {
         dest.put(data);
     }
 
+    @Override
     public void write(long devOffset, ByteBuffer src) throws IOException {
+        checkClosed();
         if (devOffset > getSize()) throw new IllegalArgumentException(
                 "offset=" + devOffset + ", length=" + getSize());
 
@@ -111,11 +119,29 @@ public final class RamDisk implements BlockDevice {
         data.put(src);
     }
     
+    @Override
     public void flush() throws IOException {
-        /* not needed */
+        checkClosed();
     }
     
+    @Override
     public int getSectorSize() {
+        checkClosed();
         return this.sectorSize;
     }
+
+    @Override
+    public void close() throws IOException {
+        this.closed = true;
+    }
+
+    @Override
+    public boolean isClosed() {
+        return this.closed;
+    }
+
+    private void checkClosed() {
+        if (closed) throw new IllegalStateException("device already closed");
+    }
+    
 }

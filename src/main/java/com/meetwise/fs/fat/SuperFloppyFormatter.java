@@ -46,8 +46,9 @@ public final class SuperFloppyFormatter {
      * {@code BlockDevice}.
      *
      * @param device
+     * @throws IOException on error accessing the specified {@code device}
      */
-    public SuperFloppyFormatter(BlockDevice device) {
+    public SuperFloppyFormatter(BlockDevice device) throws IOException {
         this.device = device;
         this.bs = new BootSector(SF_BS);
 
@@ -113,7 +114,7 @@ public final class SuperFloppyFormatter {
         
     }
 
-    private FatType defaultFatType() {
+    private FatType defaultFatType() throws IOException {
         final long len = device.getSize();
 
         if (len < 1024 * 1024 * 1024) return FatType.FAT16;

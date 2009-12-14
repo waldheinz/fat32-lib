@@ -35,8 +35,9 @@ public interface BlockDevice {
      * Gets the total length of this device in bytes.
      *
      * @return the total number of bytes on this device
+     * @throws IOException on error getting the size of this device
      */
-    public abstract long getSize();
+    public abstract long getSize() throws IOException;
 
     /**
      * Read a block of data from this device.
@@ -66,9 +67,28 @@ public interface BlockDevice {
     public abstract void flush() throws IOException;
 
     /**
-     * Returns the sector size for this device.
+     * Returns the size of a sector on this device.
      *
      * @return the sector size in bytes
+     * @throws IOException on error determining the sector size
      */
-    public int getSectorSize();
+    public int getSectorSize() throws IOException;
+
+    /**
+     * Closes this {@code BlockDevice}. No methods of this device may be
+     * accesses after this method was called.
+     *
+     * @throws IOException on error closing this device
+     * @see #isClosed() 
+     */
+    public void close() throws IOException;
+
+    /**
+     * Checks if this device was already closed. No methods may be called
+     * on a closed device (except this method).
+     *
+     * @return if this device is closed
+     */
+    public boolean isClosed();
+
 }
