@@ -36,10 +36,16 @@ public final class SuperFloppyFormatter {
      */
     public final static int FAT32_MIN_CLUSTERS = 65529;
 
+    /**
+     * The default OEM name for file systems created by this class.
+     */
+    public final static String DEFAULT_OEM_NAME = "fat32lib";
+
     private final BlockDevice device;
     private final BootSector bs;
     
     private String label;
+    private FatType fatType;
 
     /**
      * Creates a new {@code SuperFloppyFormatter} for the specified
@@ -56,8 +62,28 @@ public final class SuperFloppyFormatter {
         bs.setMediumDescriptor(MEDIUM_DESCRIPTOR_HD);
         bs.setSectorsPerTrack(DEFAULT_SECTORS_PER_TRACK);
         bs.setNrHeads(DEFULT_HEADS);
+        bs.setOemName(DEFAULT_OEM_NAME); //NOI18N
 
         setFatType(defaultFatType());
+    }
+
+    /**
+     * Returns the OEM name that will be written to the {@link BootSector}.
+     *
+     * @return the OEM name of the new file system
+     */
+    public String getOemName() {
+        return bs.getOemName();
+    }
+    
+    /**
+     * Sets the OEM name of the boot sector.
+     *
+     * @param oemName the new OEM name
+     * @see BootSector#setOemName(java.lang.String) 
+     */
+    public void setOemName(String oemName) {
+        this.bs.setOemName(oemName);
     }
 
     /**
@@ -86,7 +112,7 @@ public final class SuperFloppyFormatter {
     public void format() throws IOException {
         bs.write(device);
 
-        final Fat fat = new Fat(bs.getFatType(), bs.getMediumDescriptor(),
+        final Fat fat = new Fat(this.fatType, bs.getMediumDescriptor(),
                 bs.getSectorsPerFat(), bs.getBytesPerSector());
                 
         for (int i = 0; i < bs.getNrFats(); i++) {
@@ -107,11 +133,29 @@ public final class SuperFloppyFormatter {
         
         device.flush();
     }
-    
-    private void setFatType(FatType fatType) {
+
+    /**
+     * Sets the type of FAT file system that will be created by this formatter.
+     *
+     * @param fatType the new FAT type
+     */
+    public void setFatType(FatType fatType) {
         /* parameter check */
+        if (this.fatType == fatType) return;
 
         
+
+        this.fatType = fatType;
+        bs.setFatType(fatType);
+    }
+
+    /**
+     * Returns the exact type of FAT the will be created by this formatter.
+     *
+     * @return the FAT type
+     */
+    public FatType getFatType() {
+        return this.fatType;
     }
 
     private FatType defaultFatType() throws IOException {

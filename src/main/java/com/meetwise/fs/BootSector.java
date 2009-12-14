@@ -126,7 +126,8 @@ public final class BootSector extends Sector {
      * @param name the new OEM name
      */
     public void setOemName(String name) {
-        if (name.length() > 8) throw new IllegalArgumentException();
+        if (name.length() > 8) throw new IllegalArgumentException(
+                "only 8 characters are allowed");
         
         for (int i = 0; i < 8; i++) {
             char ch;
