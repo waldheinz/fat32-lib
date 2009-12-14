@@ -71,6 +71,7 @@ public final class FatFile extends FatObject implements FSFile {
         this.isDir = isDir;
     }
 
+    @Override
     public synchronized void read(long fileOffset, ByteBuffer destBuf)
             throws FileSystemException {
 
@@ -84,7 +85,7 @@ public final class FatFile extends FatObject implements FSFile {
 
         final FatFileSystem fs = getFatFileSystem();
         final long[] chain = fs.getFat().getChain(startCluster);
-        final BlockDevice api = fs.getApi();
+        final BlockDevice api = fs.getBlockDevice();
 
         int chainIdx = (int) (fileOffset / clusterSize);
         if (fileOffset % clusterSize != 0) {
@@ -119,6 +120,7 @@ public final class FatFile extends FatObject implements FSFile {
         }
     }
 
+    @Override
     public synchronized void write(long fileOffset, ByteBuffer srcBuf)
             throws FileSystemException {
         
@@ -137,7 +139,7 @@ public final class FatFile extends FatObject implements FSFile {
 
         final FatFileSystem fs = getFatFileSystem();
         final long[] chain = fs.getFat().getChain(getStartCluster());
-        final BlockDevice api = fs.getApi();
+        final BlockDevice api = fs.getBlockDevice();
 
         int chainIdx = (int) (fileOffset / clusterSize);
         if (fileOffset % clusterSize != 0) {
@@ -177,6 +179,7 @@ public final class FatFile extends FatObject implements FSFile {
      * 
      * @param length The length to set
      */
+    @Override
     public synchronized void setLength(long length) throws FileSystemException {
 
         if (getFileSystem().isReadOnly()) throw new 
@@ -224,6 +227,7 @@ public final class FatFile extends FatObject implements FSFile {
      * 
      * @return long
      */
+    @Override
     public long getLength() {
         return length;
     }
@@ -256,7 +260,7 @@ public final class FatFile extends FatObject implements FSFile {
      * @return Directory
      * @throws IOException on read error
      */
-    public synchronized FatDirectory getDirectory() throws IOException {
+    synchronized FatDirectory getDirectory() throws IOException {
         if (!isDir) throw new UnsupportedOperationException();
         
         if (dir == null) {
@@ -293,6 +297,7 @@ public final class FatFile extends FatObject implements FSFile {
      * Flush any changes in this file to persistent storage
      * @throws IOException
      */
+    @Override
     public void flush() throws IOException {
         if (dir != null) {
             dir.flush();

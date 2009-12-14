@@ -22,41 +22,42 @@ package com.meetwise.fs;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 /**
- * Abstract class with common things in different FileSystem implementations
+ * Abstract class with common things in different FileSystem implementations.
  * 
  * @author Fabien DUMINY
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public abstract class AbstractFileSystem implements FileSystem {
-
-    private static final Logger log =
-            Logger.getLogger(AbstractFileSystem.class.getName());
-
     private final boolean readOnly;
     private final BlockDevice blockDevice;
     private boolean closed;
 
-    // cache of FSFile (key: FSDirectoryEntry)
-    private HashMap<FSDirectoryEntry, FSFile> files =
+    private final HashMap<FSDirectoryEntry, FSFile> files =
             new HashMap<FSDirectoryEntry, FSFile>();
-
-    // cache of FSDirectory (key: FSDirectoryEntry)
-    private HashMap<FSDirectoryEntry, FSDirectory> directories =
+            
+    private final HashMap<FSDirectoryEntry, FSDirectory> directories =
             new HashMap<FSDirectoryEntry, FSDirectory>();
 
     /**
-     * Construct an AbstractFileSystem in specified readOnly mode
+     * Constructs an {@code AbstractFileSystem} in specified readOnly mode. If
+     * the specified {@code device} is read-only, only a read-only file system
+     * can be created on top of it.
      * 
-     * @param api 
-     * @param readOnly
-     * @throws FileSystemException
+     * @param device the {@code BlockDevice} holding the file system
+     * @param readOnly if the file system should be read-only.
+     * @throws IllegalArgumentException if the specified device is
+     *      {@link BlockDevice#isReadOnly() read-only}, but a the
+     *      {@code readOnly} parameter was {@code false}
      */
-    public AbstractFileSystem(BlockDevice api, boolean readOnly)
-            throws FileSystemException {
+    public AbstractFileSystem(BlockDevice device, boolean readOnly)
+            throws IllegalArgumentException {
         
-        this.blockDevice = api;
+        if (!readOnly && device.isReadOnly()) throw
+                new IllegalArgumentException("the device is read-only");
+        
+        this.blockDevice = device;
         this.closed = false;
         this.readOnly = readOnly;
     }
@@ -72,8 +73,6 @@ public abstract class AbstractFileSystem implements FileSystem {
             files.clear();
             directories.clear();
             
-            files = null;
-            directories = null;
             closed = true;
         }
     }
@@ -88,14 +87,7 @@ public abstract class AbstractFileSystem implements FileSystem {
         flushFiles();
         flushDirectories();
     }
-
-    /**
-     * @return Returns the api.
-     */
-    public final BlockDevice getApi() {
-        return blockDevice;
-    }
-
+    
     /**
      * @return Returns the FSApi.
      */
@@ -125,10 +117,7 @@ public abstract class AbstractFileSystem implements FileSystem {
      * @throws IOException
      */
     private final void flushFiles() throws IOException {
-        log.info("flushing files ...");
         for (FSFile f : files.values()) {
-            log.finer("flush: flushing file " + f);
-
             f.flush();
         }
     }
@@ -139,11 +128,7 @@ public abstract class AbstractFileSystem implements FileSystem {
      * @throws IOException
      */
     private final void flushDirectories() throws IOException {
-        log.info("flushing directories ...");
-        
         for (FSDirectory d : directories.values()) {
-            log.finer("flush: flushing directory " + d);
-            
             d.flush();
         }
     }

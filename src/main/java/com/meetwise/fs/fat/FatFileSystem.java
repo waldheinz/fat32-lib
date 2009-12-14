@@ -65,7 +65,7 @@ public final class FatFileSystem extends AbstractFileSystem {
 
         try {
             bs = new BootSector(512);
-            bs.read(getApi());
+            bs.read(getBlockDevice());
 
             //this.fsInfo = new FsInfoSector(bs, getApi());
             this.fsInfo = null;
@@ -80,7 +80,7 @@ public final class FatFileSystem extends AbstractFileSystem {
                 fats[i] = tmpFat;
 
                 try {
-                    tmpFat.read(getApi(), FatUtils.getFatOffset(bs, i));
+                    tmpFat.read(getBlockDevice(), FatUtils.getFatOffset(bs, i));
                 } catch (IOException ex) {
                     throw new FileSystemException(this, ex);
                 }
@@ -101,7 +101,7 @@ public final class FatFileSystem extends AbstractFileSystem {
                 rootDir = new FatLfnDirectory(this, rootDirFile);
             } else {
                 rootDir = new FatLfnDirectory(this, bs.getNrRootDirEntries());
-                rootDir.read(getApi(), FatUtils.getRootDirOffset(bs));
+                rootDir.read(getBlockDevice(), FatUtils.getRootDirOffset(bs));
             }
             
         } catch (IOException ex) {
@@ -140,7 +140,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     @Override
     public void flush() throws IOException {
 
-        final BlockDevice api = getApi();
+        final BlockDevice api = getBlockDevice();
 
         if (bs.isDirty()) {
             bs.write(api);
@@ -209,16 +209,19 @@ public final class FatFileSystem extends AbstractFileSystem {
         return bs;
     }
     
+    @Override
     public long getFreeSpace() {
         // TODO implement me
         return -1;
     }
 
+    @Override
     public long getTotalSpace() {
         // TODO implement me
         return -1;
     }
 
+    @Override
     public long getUsableSpace() {
         // TODO implement me
         return -1;

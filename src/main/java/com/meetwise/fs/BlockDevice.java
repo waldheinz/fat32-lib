@@ -91,4 +91,11 @@ public interface BlockDevice {
      */
     public boolean isClosed();
 
+    /**
+     * Checks if this {@code BlockDevice} is read-only.
+     *
+     * @return if this {@code BlockDevice} is read-only
+     */
+    public boolean isReadOnly();
+    
 }

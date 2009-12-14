@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
+ * This is a {@code BlockDevice} that uses a {@link File} as it's backing store.
  *
  * @author Matthias Treydte &lt;matthias.treydte at meetwise.com&gt;
  */
@@ -22,32 +23,39 @@ public final class FileDisk implements BlockDevice {
 
     private final RandomAccessFile raf;
     private final FileChannel fc;
+    private final boolean readOnly;
     private boolean closed;
 
     /**
-     * 
+     * Creates a new instance of {@code FileDisk} for the specified
+     * {@code File}.
      *
-     * @param file
-     * @param readOnly
+     * @param file the file that holds the disk contents
+     * @param readOnly if the file should be opened in read-only mode, which
+     *      will result in a read-only {@code FileDisk} instance
      * @throws FileNotFoundException if the specified file does not exist
+     * @see #isReadOnly() 
      */
     public FileDisk(File file, boolean readOnly) throws FileNotFoundException {
         if (!file.exists()) throw new FileNotFoundException();
-        
+
+        this.readOnly = readOnly;
         this.closed = false;
         final String modeString = readOnly ? "r" : "rw"; //NOI18N
         this.raf = new RandomAccessFile(file, modeString);
         this.fc = raf.getChannel();
     }
 
-    private FileDisk(RandomAccessFile raf) {
+    private FileDisk(RandomAccessFile raf, boolean readOnly) {
         this.closed = false;
         this.raf = raf;
         this.fc = raf.getChannel();
+        this.readOnly = readOnly;
     }
 
     /**
-     * Creates a new {@code FileDisk} of the specified size.
+     * Creates a new {@code FileDisk} of the specified size. The
+     * {@code FileDisk} returned by this method will be writable.
      *
      * @param file the file to hold the {@code FileDisk} contents
      * @param size the size of the new {@code FileDisk}
@@ -60,7 +68,7 @@ public final class FileDisk implements BlockDevice {
                     new RandomAccessFile(file, "rw"); //NOI18N
             raf.setLength(size);
             
-            return new FileDisk(raf);
+            return new FileDisk(raf, false);
         } catch (FileNotFoundException ex) {
             throw new IOException(ex);
         }
@@ -135,6 +143,13 @@ public final class FileDisk implements BlockDevice {
 
     private void checkClosed() {
         if (closed) throw new IllegalStateException("device already closed");
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        checkClosed();
+        
+        return this.readOnly;
     }
 
 }

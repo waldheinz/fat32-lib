@@ -33,6 +33,13 @@ public class FileDiskTest {
         f.delete();
     }
     
+    @Test
+    public void testIsReadOnly() {
+        System.out.println("isReadOnly");
+
+        assertFalse(fd.isReadOnly());
+    }
+
     @Test(expected=IllegalStateException.class)
     public void testClose() throws IOException {
         System.out.println("close");

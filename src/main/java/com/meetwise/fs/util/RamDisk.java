@@ -10,7 +10,7 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * A {@link BlockDevice} that lives entirely in heap memory. This is basically
- * a RAM disk.
+ * a RAM disk. A {@code RamDisk} is always writable.
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
@@ -142,6 +142,18 @@ public final class RamDisk implements BlockDevice {
 
     private void checkClosed() {
         if (closed) throw new IllegalStateException("device already closed");
+    }
+
+    /**
+     * Returns always {@code false}, as a {@code RamDisk} is always writable.
+     *
+     * @return always {@code false}
+     */
+    @Override
+    public boolean isReadOnly() {
+        checkClosed();
+        
+        return false;
     }
     
 }

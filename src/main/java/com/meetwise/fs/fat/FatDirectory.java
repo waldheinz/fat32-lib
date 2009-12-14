@@ -158,6 +158,7 @@ class FatDirectory extends AbstractDirectory {
      * 
      * @throws FileSystemException 
      */
+    @Override
     public void flush() throws FileSystemException {
         if (file == null) {
             final FatFileSystem fs = (FatFileSystem) getFileSystem();
@@ -169,7 +170,7 @@ class FatDirectory extends AbstractDirectory {
                 throw new FileSystemException(fs, ex);
             }
 
-            write(fs.getApi(), offset);
+            write(fs.getBlockDevice(), offset);
         } else {
             write();
         }
@@ -178,6 +179,7 @@ class FatDirectory extends AbstractDirectory {
     /**
      * @see org.jnode.fs.fat.AbstractDirectory#canChangeSize(int)
      */
+    @Override
     protected boolean canChangeSize(int newSize) {
         return (file != null);
     }
