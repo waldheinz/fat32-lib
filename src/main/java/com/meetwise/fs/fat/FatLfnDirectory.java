@@ -235,10 +235,12 @@ class FatLfnDirectory extends FatDirectory {
         return new Iterator<FSDirectoryEntry>() {
             Iterator<LfnEntry> it = shortNameIndex.values().iterator();
 
+            @Override
             public boolean hasNext() {
                 return it.hasNext();
             }
 
+            @Override
             public FSDirectoryEntry next() {
                 return it.next();
             }
@@ -246,6 +248,7 @@ class FatLfnDirectory extends FatDirectory {
             /**
              * @see java.util.Iterator#remove()
              */
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -257,7 +260,18 @@ class FatLfnDirectory extends FatDirectory {
      * 
      * Unvalid: spaces/periods,
      */
+    public static boolean validChar(char toTest) {
+        if (toTest >= 'A' && toTest <= 'Z') return true;
+        if (toTest >= '0' && toTest <= '9') return true;
+        if (toTest == '_' || toTest == '^' || toTest == '$' || toTest == '~' ||
+                toTest == '!' || toTest == '#' || toTest == '%' || toTest == '&' ||
+                toTest == '-' || toTest == '{' || toTest == '}' || toTest == '(' ||
+                toTest == ')' || toTest == '@' || toTest == '\'' || toTest == '`')
+            return true;
 
+        return false;
+    }
+    
     public String generateShortNameFor(String longFullName) {
         int dotIndex = longFullName.lastIndexOf('.');
 
@@ -281,39 +295,24 @@ class FatLfnDirectory extends FatDirectory {
         if (shortExt.length() > 3) {
             shortExt = shortExt.substring(0, 3);
         }
-
-        // make the ~n name short
-        if (shortName.length() > 8) {
-            // trim it
-            char[] shortNameChar = shortName.substring(0, 7).toUpperCase().toCharArray();
-
-            // epurate it from alien characters
-        loop: 
-            for (int i = 0; i < shortNameChar.length; i++) {
-                char toTest = shortNameChar[i];
-            valid: 
-                {
-                    if (toTest > 255)
-                        break valid;
-                    if (toTest == ' ')
-                        break valid;
-                    if (toTest >= 'A' && toTest <= 'Z')
-                        continue loop;
-                    if (toTest >= '0' && toTest <= '9')
-                        continue loop;
-                    if (toTest == '_' || toTest == '^' || toTest == '$' || toTest == '~' ||
-                            toTest == '!' || toTest == '#' || toTest == '%' || toTest == '&' ||
-                            toTest == '-' || toTest == '{' || toTest == '}' || toTest == '(' ||
-                            toTest == ')' || toTest == '@' || toTest == '\'' || toTest == '`')
-                        continue loop;
-
-                }
+        
+        char[] shortNameChar = shortName.length() > 8 ?
+            shortName.substring(0, 7).toUpperCase().toCharArray() :
+            shortName.toCharArray();
+            
+        /* epurate it from alien characters */
+        for (int i = 0; i < shortNameChar.length; i++) {
+            char toTest = shortNameChar[i];
+            
+            if (!validChar(toTest))
                 shortNameChar[i] = '_';
+        }
 
-            }
+        shortName = new String(shortNameChar);
 
+        if (shortNameIndex.containsKey(shortName + "." + shortExt)) {
             // name range from "nnnnnn~1" to "~9999999"
-            for (int i = 1; i <= 99999999; i++) {
+            for (int i = 1; i <= 9999999; i++) {
                 String tildeStuff = "~" + i;
                 int tildeStuffLength = tildeStuff.length();
                 System.arraycopy(tildeStuff.toCharArray(), 0, shortNameChar, 7 - tildeStuffLength,

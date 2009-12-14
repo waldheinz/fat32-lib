@@ -17,6 +17,12 @@ public class ConformanceTest {
     private FSDirectory root;
     private FatFileSystem fs;
 
+    public static void main(String[] args) throws Exception {
+        final ConformanceTest ct = new ConformanceTest();
+        ct.setUp();
+        ct.testAcceptedFileNames();
+    }
+    
     @Before
     public void setUp() throws Exception {
         RamDisk d = new RamDisk(512 * 1024);
@@ -30,8 +36,8 @@ public class ConformanceTest {
     @Test
     public void testAcceptedFileNames() throws Exception {
         System.out.println("acceptedFileNames");
-
-        root.addFile("IOUtils.1.4.0-SNAPSHOT.jar");
+        
+        root.addFile("jdom-1.0.jar");
         final FSDirectoryEntry dir = root.addDirectory("testDir.test");
         dir.getDirectory().addFile("this.should.work.toooo");
     }
