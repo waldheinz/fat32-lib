@@ -134,9 +134,8 @@ public class FatFileSystemTest {
     }
 
     @Test
-    @Ignore
     public void testFat32Read() throws Exception {
-        System.out.println("testFat32Read");
+        System.out.println("fat32Read");
         
         final InputStream is = getClass().getResourceAsStream(
                 "/fat32-test.img.gz");
@@ -153,14 +152,14 @@ public class FatFileSystemTest {
         assertEquals(32, bs.getNrReservedSectors());
         assertEquals(2, bs.getNrFats());
         assertEquals(0, bs.getNrRootDirEntries());
-        assertEquals(200000, bs.getSectorCount());
+        assertEquals(80000, bs.getSectorCount());
         assertEquals(0xf8, bs.getMediumDescriptor());
-        assertEquals(1539, bs.getSectorsPerFat());
+        assertEquals(616, bs.getSectorsPerFat());
         assertEquals(32, bs.getSectorsPerTrack());
         assertEquals(64, bs.getNrHeads());
         assertEquals(0, bs.getNrHiddenSectors());
         assertEquals(16384, FatUtils.getFatOffset(bs, 0));
-        assertEquals(16384 + 1539 * bs.getBytesPerSector(),
+        assertEquals(16384 + bs.getSectorsPerFat() * bs.getBytesPerSector(),
                 FatUtils.getFatOffset(bs, 1));
         
         final FSDirectory rootDir = fatFs.getRoot();
@@ -174,7 +173,7 @@ public class FatFileSystemTest {
             System.out.println("     - " + e);
         }
 
-        FSDirectoryEntry e = rootDir.getEntry("TestDir");
+        FSDirectoryEntry e = rootDir.getEntry("Langer Verzeichnisname");
         assertTrue(e.isDirectory());
         assertFalse(e.isFile());
 
