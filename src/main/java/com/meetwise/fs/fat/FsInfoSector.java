@@ -1,7 +1,6 @@
 
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.BootSector;
 import com.meetwise.fs.Sector;
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
@@ -18,38 +17,29 @@ class FsInfoSector extends Sector {
     public static final int FREE_CLUSTERS_OFFSET = 0x1e8;
 
     public static final int LAST_ALLOCATED_OFFSET = 0x1ec;
-
-    private final BootSector bs;
-    private final BlockDevice api;
-
+    
     /**
      *
      * @param bs
-     * @param api
+     * @param device
      * @throws IOException on read error
      */
-    public FsInfoSector(BootSector bs, BlockDevice api) throws IOException {
-        super(bs.getBytesPerSector());
-        
-        this.bs = bs;
-        this.api = api;
-        
-        if (bs.getBytesPerSector() != 512) throw new IllegalArgumentException();
-        api.read(offset(), ByteBuffer.wrap(data));
+    public FsInfoSector(byte[] bytes) throws IOException {
+        super(bytes);
     }
 
-    public int offset() {
-        return bs.getFsInfoSectorOffset() * bs.getBytesPerSector();
+    public static int offset(Fat32BootSector bs) {
+        return bs.getFsInfoSectorNr() * bs.getBytesPerSector();
     }
-
+    
     boolean isDirty() {
         return dirty;
     }
-
-    void write() throws IOException {
-        api.write(offset(), ByteBuffer.wrap(data));
+    
+    void write(BlockDevice device, long offset) throws IOException {
+        device.write(offset, ByteBuffer.wrap(data));
     }
-
+    
     public void setNrFreeClusters(long value) {
         super.set32(FREE_CLUSTERS_OFFSET, value);
     }
@@ -84,5 +74,7 @@ class FsInfoSector extends Sector {
         
         data[0x1fe] = 0x55;
         data[0x1ff] = (byte) 0xaa;
+
+        dirty = true;
     }
 }

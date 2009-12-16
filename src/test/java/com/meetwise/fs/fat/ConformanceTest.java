@@ -26,13 +26,12 @@ public class ConformanceTest {
     @Before
     public void setUp() throws Exception {
         RamDisk d = new RamDisk(512 * 1024);
-        final FatFormatter ff = FatFormatter.superFloppyFormatter(d);
-        ff.format(d, null);
+        final SuperFloppyFormatter ff = new SuperFloppyFormatter(d);
+        ff.format();
         fs = new FatFileSystem(d, false);
         root = fs.getRoot();
     }
-
-
+    
     @Test
     public void testAcceptedFileNames() throws Exception {
         System.out.println("acceptedFileNames");
@@ -47,7 +46,7 @@ public class ConformanceTest {
         System.out.println("testMaxRootEntries");
         
         /* divide by 2 because we use LFNs which take entries, too */
-        final int max = fs.getBootSector().getNrRootDirEntries() / 2;
+        final int max = fs.getBootSector().getRootDirEntryCount() / 2;
 
         for (int i=0; i < max; i++) {
             root.addFile("f-" + i);

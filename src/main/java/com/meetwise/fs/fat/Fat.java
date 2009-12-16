@@ -65,9 +65,10 @@ final class Fat {
      * @param sectors
      * @param sectorSize
      */
-    public Fat(FatFileSystem fs, int mediumDescriptor, int sectors, int sectorSize) {
+    public Fat(FatFileSystem fs, int mediumDescriptor, long sectors, int sectorSize) {
         this.fatType = fs.getFatType();
-        this.nrSectors = sectors;
+        if (sectors > Integer.MAX_VALUE) throw new IllegalArgumentException("FAT too large");
+        this.nrSectors = (int) sectors;
         this.sectorSize = sectorSize;
         this.dirty = false;
         this.fs = fs;
@@ -77,16 +78,27 @@ final class Fat {
         
     }
 
-    Fat(FatType fatType, int mediumDescriptor, int sectors, int sectorSize) {
-        this.fatType = fatType;
-        this.nrSectors = sectors;
-        this.sectorSize = sectorSize;
+    Fat(BootSector bs) throws IOException {
+        this.fatType = bs.getFatType();
+        if (bs.getSectorsPerFat() > Integer.MAX_VALUE)
+            throw new IllegalArgumentException("FAT too large");
+
+        if (bs.getSectorsPerFat() <= 0) throw new IOException(
+                "boot sector says there are " + bs.getSectorsPerFat() +
+                " sectors per FAT");
+
+        if (bs.getBytesPerSector() <= 0) throw new IOException(
+                "boot sector says there are " + bs.getBytesPerSector() +
+                " bytes per sector");
+
+        this.nrSectors = (int) bs.getSectorsPerFat();
+        this.sectorSize = bs.getBytesPerSector();
         this.dirty = false;
         this.fs = null;
         
-        entries = new long[(int) ((sectors * sectorSize) /
-                this.fatType.getEntrySize())];
-        entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
+        entries = new long[(int) ((nrSectors * sectorSize) /
+                fatType.getEntrySize())];
+        entries[0] = (bs.getMediumDescriptor() & 0xFF) | 0xFFFFF00L;
     }
 
     /**

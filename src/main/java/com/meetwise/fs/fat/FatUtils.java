@@ -20,7 +20,6 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.BootSector;
 import java.io.IOException;
 import com.meetwise.fs.util.LittleEndian;
 
@@ -83,8 +82,8 @@ class FatUtils {
      */
     public static long getFilesOffset(BootSector bs) throws IOException {
         long offset = getRootDirOffset(bs);
-
-        offset += bs.getNrRootDirEntries() * 32;
+        
+        offset += bs.getRootDirEntryCount() * 32;
 
         return offset;
     }

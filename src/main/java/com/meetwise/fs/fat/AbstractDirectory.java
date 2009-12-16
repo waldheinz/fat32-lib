@@ -322,7 +322,7 @@ abstract class AbstractDirectory
                         !((FatDirEntry) e).getName().equals("..")) {
 
                     offset++;
-                    System.out.println("    " + ((FSDirectoryEntry)e).getName());
+                    
                     return (FSDirectoryEntry) e;
                 } else {
                     offset++;

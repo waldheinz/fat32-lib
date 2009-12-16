@@ -20,7 +20,6 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.BootSector;
 import com.meetwise.fs.AbstractFileSystem;
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
@@ -45,7 +44,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     private final FatType fatType;
 
     public FatFileSystem(BlockDevice api, boolean readOnly)
-            throws FileSystemException {
+            throws IOException {
 
         this(api, readOnly, false);
     }
@@ -55,58 +54,57 @@ public final class FatFileSystem extends AbstractFileSystem {
      * 
      * @param api the BlockDevice holding the file system
      * @param readOnly if this FS should be read-lonly
-     * @param ignoreFatDifferences 
-     * @throws FileSystemException on error
+     * @param ignoreFatDifferences
+     * @throws IOException on read error
      */
     public FatFileSystem(BlockDevice api, boolean readOnly, boolean ignoreFatDifferences)
-            throws FileSystemException {
+            throws IOException {
         
         super(api, readOnly);
+        
+        this.bs = BootSector.read(api);
+        
+        if (bs.getNrFats() <= 0) throw new IOException(
+                "boot sector says there are no FATs");
 
-        try {
-            bs = new BootSector(512);
-            bs.read(getBlockDevice());
+        //this.fsInfo = new FsInfoSector(bs, getApi());
+        this.fsInfo = null;
 
-            //this.fsInfo = new FsInfoSector(bs, getApi());
-            this.fsInfo = null;
-            
-            Fat[] fats = new Fat[bs.getNrFats()];
-            fatType = bs.getFatType();
-            
-            for (int i = 0; i < fats.length; i++) {
-                Fat tmpFat = new Fat(
-                        this, bs.getMediumDescriptor(), bs.getSectorsPerFat(),
-                        bs.getBytesPerSector());
-                fats[i] = tmpFat;
+        Fat[] fats = new Fat[bs.getNrFats()];
+        fatType = bs.getFatType();
 
-                try {
-                    tmpFat.read(getBlockDevice(), FatUtils.getFatOffset(bs, i));
-                } catch (IOException ex) {
-                    throw new FileSystemException(this, ex);
-                }
+        for (int i = 0; i < fats.length; i++) {
+            Fat tmpFat = new Fat(
+                    this, bs.getMediumDescriptor(), bs.getSectorsPerFat(),
+                    bs.getBytesPerSector());
+            fats[i] = tmpFat;
+
+            try {
+                tmpFat.read(getBlockDevice(), FatUtils.getFatOffset(bs, i));
+            } catch (IOException ex) {
+                throw new FileSystemException(this, ex);
             }
-
-
-            if (!ignoreFatDifferences) for (int i = 1; i < fats.length; i++) {
-                if (!fats[0].equals(fats[i])) {
-                        throw new FileSystemException(this,
-                            "FAT " + i + " differs from FAT 0");
-                }
-            }
-            
-            fat = fats[0];
-            if (fatType == FatType.FAT32) {
-                FatFile rootDirFile = new FatFile(this,
-                        bs.getRootDirFirstCluster());
-                rootDir = new FatLfnDirectory(this, rootDirFile);
-            } else {
-                rootDir = new FatLfnDirectory(this, bs.getNrRootDirEntries());
-                rootDir.read(getBlockDevice(), FatUtils.getRootDirOffset(bs));
-            }
-            
-        } catch (IOException ex) {
-            throw new FileSystemException(this, ex);
         }
+
+
+        if (!ignoreFatDifferences) for (int i = 1; i < fats.length; i++) {
+            if (!fats[0].equals(fats[i])) {
+                    throw new FileSystemException(this,
+                        "FAT " + i + " differs from FAT 0");
+            }
+        }
+
+        fat = fats[0];
+        if (fatType == FatType.FAT32) {
+            FatFile rootDirFile = new FatFile(this,
+                    bs.getRootDirFirstCluster());
+            rootDir = new FatLfnDirectory(this, rootDirFile);
+        } else {
+            rootDir = new FatLfnDirectory(this,
+                    ((Fat16BootSector)bs).getRootDirEntryCount());
+            rootDir.read(getBlockDevice(), FatUtils.getRootDirOffset(bs));
+        }
+            
     }
     
     public FatType getFatType() {
@@ -145,8 +143,10 @@ public final class FatFileSystem extends AbstractFileSystem {
         if (bs.isDirty()) {
             bs.write(api);
         }
-
-        if (fsInfo != null && fsInfo.isDirty()) fsInfo.write();
+        
+//        if (fsInfo != null && fsInfo.isDirty()) {
+//            fsInfo.write(api, bs.getF);
+//        }
         
         for (FatFile f : files.values()) {
             f.flush();

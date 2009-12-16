@@ -1,7 +1,6 @@
 
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.BootSector;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
@@ -37,7 +36,7 @@ public class FatFileSystemTest {
         assertEquals(4, bs.getSectorsPerCluster());
         assertEquals(1, bs.getNrReservedSectors());
         assertEquals(2, bs.getNrFats());
-        assertEquals(512, bs.getNrRootDirEntries());
+        assertEquals(512, bs.getRootDirEntryCount());
         assertEquals(2048, bs.getSectorCount());
         assertEquals(0xf8, bs.getMediumDescriptor());
         assertEquals(2, bs.getSectorsPerFat());
@@ -82,7 +81,7 @@ public class FatFileSystemTest {
         assertEquals(4, bs.getSectorsPerCluster());
         assertEquals(1, bs.getNrReservedSectors());
         assertEquals(2, bs.getNrFats());
-        assertEquals(512, bs.getNrRootDirEntries());
+        assertEquals(512, bs.getRootDirEntryCount());
         assertEquals(20000, bs.getSectorCount());
         assertEquals(0xf8, bs.getMediumDescriptor());
         assertEquals(20, bs.getSectorsPerFat());
@@ -151,7 +150,7 @@ public class FatFileSystemTest {
         assertEquals(1, bs.getSectorsPerCluster());
         assertEquals(32, bs.getNrReservedSectors());
         assertEquals(2, bs.getNrFats());
-        assertEquals(0, bs.getNrRootDirEntries());
+        assertEquals(0, bs.getRootDirEntryCount());
         assertEquals(80000, bs.getSectorCount());
         assertEquals(0xf8, bs.getMediumDescriptor());
         assertEquals(616, bs.getSectorsPerFat());

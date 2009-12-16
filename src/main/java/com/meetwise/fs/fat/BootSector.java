@@ -18,9 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package com.meetwise.fs;
+package com.meetwise.fs.fat;
 
-import com.meetwise.fs.fat.FatType;
+import com.meetwise.fs.BlockDevice;
+import com.meetwise.fs.Sector;
+import com.meetwise.fs.util.LittleEndian;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -30,46 +32,53 @@ import java.nio.ByteBuffer;
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public final class BootSector extends Sector {
+public abstract class BootSector extends Sector {
 
     /**
-     * The maximum number of sectors for a FAT12 file system. This is actually
-     * the number of sectors where mkdosfs stop complaining about a FAT16
-     * partition having not enough sectors, so it would be misinterpreted
-     * as FAT12 without special handling.
-     *
-     * @see #getNrLogicalSectors() 
+     * The size of a boot sector in bytes.
      */
-    public static final int MAX_FAT12_SECTORS = 8202;
+    public final static int SIZE = 512;
     
-    public BootSector(int size) {
-        super(size);
-    }
-
-    public BootSector(byte[] src) {
-        super(src.length);
+    protected BootSector(byte[] src) {
+        super(src);
         
-        System.arraycopy(src, 0, data, 0, src.length);
+        if (src.length != SIZE) throw new IllegalArgumentException(
+                "boot sector must be " + SIZE + " bytes");
     }
     
-    public FatType getFatType() throws IOException {
-        if (getSectorsPerFat16() == 0) return FatType.FAT32;
-        else {
-            return (getSectorCount() <= MAX_FAT12_SECTORS) ?
-                FatType.FAT12 : FatType.FAT16;
-        }
+    public static BootSector read(BlockDevice device) throws IOException {
+        final byte[] bytes = Sector.readBytes(device, 0, SIZE);
+        
+        final int sectorsPerFat = LittleEndian.getUInt16(bytes, 0x16);
+        if (sectorsPerFat == 0) return new Fat32BootSector(bytes);
+        else return new Fat16BootSector(bytes);
     }
+
+    public abstract FatType getFatType();
+    
     
     /**
-     * Read the contents of this bootsector from the given device.
+     * Gets the number of sectors/fat for FAT 12/16.
      * 
-     * @param device
-     * @throws IOException on read error
+     * @return int
      */
-    public synchronized void read(BlockDevice device) throws IOException {
-        device.read(0, ByteBuffer.wrap(data));
+    public abstract long getSectorsPerFat();
+    
+    /**
+     * Sets the number of sectors/fat
+     * 
+     * @param v  the new number of sectors per fat
+     */
+    public abstract void setSectorsPerFat(long v);
 
-        dirty = false;
+    public abstract void setSectorCount(long count);
+
+    public abstract int getRootDirEntryCount();
+    
+    public abstract long getSectorCount();
+
+    public void init() {
+        
     }
 
     /**
@@ -82,7 +91,7 @@ public final class BootSector extends Sector {
         device.write(0, ByteBuffer.wrap(data));
         dirty = false;
     }
-
+    
     /**
      * Gets the OEM name
      * 
@@ -98,6 +107,28 @@ public final class BootSector extends Sector {
         }
         
         return b.toString();
+    }
+
+
+    /**
+     * Sets the OEM name, must be at most 8 characters long.
+     *
+     * @param name the new OEM name
+     */
+    public void setOemName(String name) {
+        if (name.length() > 8) throw new IllegalArgumentException(
+                "only 8 characters are allowed");
+
+        for (int i = 0; i < 8; i++) {
+            char ch;
+            if (i < name.length()) {
+                ch = name.charAt(i);
+            } else {
+                ch = (char) 0;
+            }
+
+            set8(0x3 + i, ch);
+        }
     }
 
     /**
@@ -121,27 +152,6 @@ public final class BootSector extends Sector {
     }
 
     /**
-     * Sets the OEM name, must be at most 8 characters long.
-     * 
-     * @param name the new OEM name
-     */
-    public void setOemName(String name) {
-        if (name.length() > 8) throw new IllegalArgumentException(
-                "only 8 characters are allowed");
-        
-        for (int i = 0; i < 8; i++) {
-            char ch;
-            if (i < name.length()) {
-                ch = name.charAt(i);
-            } else {
-                ch = (char) 0;
-            }
-            
-            set8(0x3 + i, ch);
-        }
-    }
-
-    /**
      * Gets the number of bytes/sector
      * 
      * @return int
@@ -157,8 +167,19 @@ public final class BootSector extends Sector {
      */
     public void setBytesPerSector(int v) {
         if (v == getBytesPerSector()) return;
-        
-        set16(0x0b, v);
+
+        switch (v) {
+            case 512: case 1024: case 2048: case 4096:
+                set16(0x0b, v);
+                break;
+                
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+    private static boolean isPowerOfTwo(int n) {
+        return ((n!=0) && (n&(n-1))==0);
     }
 
     /**
@@ -177,6 +198,8 @@ public final class BootSector extends Sector {
      */
     public void setSectorsPerCluster(int v) {
         if (v == getSectorsPerCluster()) return;
+        if (!isPowerOfTwo(v)) throw new IllegalArgumentException(
+                "value must be a power of two");
         
         set8(0x0d, v);
     }
@@ -197,7 +220,8 @@ public final class BootSector extends Sector {
      */
     public void setNrReservedSectors(int v) {
         if (v == getNrReservedSectors()) return;
-        
+        if (v < 1) throw new IllegalArgumentException(
+                "there must be >= 1 reserved sectors");
         set16(0xe, v);
     }
 
@@ -221,25 +245,6 @@ public final class BootSector extends Sector {
         set8(0x10, v);
     }
 
-    /**
-     * Gets the number of entries in the root directory
-     * 
-     * @return int
-     */
-    public int getNrRootDirEntries() {
-        return get16(0x11);
-    }
-
-    /**
-     * Sets the number of entries in the root directory
-     * 
-     * @param v the new number of entries in the root directory
-     */
-    public void setNrRootDirEntries(int v) {
-        if (v == getNrRootDirEntries()) return;
-        
-        set16(0x11, v);
-    }
 
     public long getRootDirFirstCluster() {
         return get32(0x2c);
@@ -250,12 +255,8 @@ public final class BootSector extends Sector {
      * 
      * @return int
      */
-    private int getNrLogicalSectors() {
+    protected int getNrLogicalSectors() {
         return get16(0x13);
-    }
-
-    public int getFsInfoSectorOffset() {
-        return get16(0x30);
     }
     
     /**
@@ -263,32 +264,17 @@ public final class BootSector extends Sector {
      * 
      * @param v the new number of logical sectors
      */
-    private void setNrLogicalSectors(int v) {
+    protected void setNrLogicalSectors(int v) {
         if (v == getNrLogicalSectors()) return;
         
         set16(0x13, v);
     }
-
-    public void setSectorCount(long count) {
-        if (count > 65535) {
-            setNrLogicalSectors(0);
-            setNrTotalSectors(count);
-        } else {
-            setNrLogicalSectors((int) count);
-            setNrTotalSectors(count);
-        }
-    }
     
-    public long getSectorCount() {
-        if (getNrLogicalSectors() == 0) return getNrTotalSectors();
-        else return getNrLogicalSectors();
-    }
-    
-    private void setNrTotalSectors(long v) {
+    protected void setNrTotalSectors(long v) {
         set32(0x20, v);
     }
     
-    private long getNrTotalSectors() {
+    protected long getNrTotalSectors() {
         return get32(0x20);
     }
 
@@ -308,45 +294,6 @@ public final class BootSector extends Sector {
      */
     public void setMediumDescriptor(int v) {
         set8(0x15, v);
-    }
-    
-    public int getSectorsPerFat() throws IOException {
-        if (getFatType() == FatType.FAT32) {
-            final long spf = getSectorsPerFat32();
-            if (spf > Integer.MAX_VALUE) throw new AssertionError();
-            return (int) spf;
-        } else {
-            return getSectorsPerFat16();
-        }
-    }
-
-    /**
-     * Gets the number of sectors/fat for FAT 12/16.
-     * 
-     * @return int
-     */
-    public int getSectorsPerFat16() {
-        return get16(0x16);
-    }
-    
-    public void setSectorsPerFat32(int v) {
-        set32(0x24, v);
-    }
-
-    public long getSectorsPerFat32() {
-        return get32(0x24);
-    }
-    
-    /**
-     * Sets the number of sectors/fat
-     * 
-     * @param v  the new number of sectors per fat
-     * @throws IOException 
-     */
-    public void setSectorsPerFat(int v) throws IOException {
-        if (v == getSectorsPerFat()) return;
-        
-        set16(0x16, v);
     }
     
     /**
@@ -394,8 +341,8 @@ public final class BootSector extends Sector {
      * 
      * @return int
      */
-    public int getNrHiddenSectors() {
-        return get16(0x1c);
+    public long getNrHiddenSectors() {
+        return get32(0x1c);
     }
 
     /**
@@ -403,10 +350,10 @@ public final class BootSector extends Sector {
      *
      * @param v the new number of hidden sectors
      */
-    public void setNrHiddenSectors(int v) {
+    public void setNrHiddenSectors(long v) {
         if (v == getNrHiddenSectors()) return;
         
-        set16(0x1c, v);
+        set32(0x1c, v);
     }
 
     /**
@@ -451,9 +398,6 @@ public final class BootSector extends Sector {
         res.append('\n');
         res.append("Nr reserved sector = ");
         res.append(getNrReservedSectors());
-        res.append('\n');
-        res.append("Nr Root Dir Entries = ");
-        res.append(getNrRootDirEntries());
         res.append('\n');
         
         return res.toString();

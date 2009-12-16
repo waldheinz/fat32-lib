@@ -2,6 +2,7 @@
 package com.meetwise.fs;
 
 import com.meetwise.fs.fat.FatFileSystem;
+import java.io.IOException;
 
 /**
  * Factory for {@link FileSystem} instances.
@@ -26,9 +27,10 @@ public class FileSystemFactory {
      *      not be determined
      * @throws FileSystemException if the file system type could be determined,
      *      but the attempt to create the file system failed
+     * @throws IOException on read error
      */
     public static FileSystem create(BlockDevice device, boolean readOnly)
-            throws UnknownFileSystemException, FileSystemException {
+            throws UnknownFileSystemException, FileSystemException, IOException {
             
         return new FatFileSystem(device, readOnly);
     }

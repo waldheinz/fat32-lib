@@ -2,6 +2,8 @@
 package com.meetwise.fs;
 
 import com.meetwise.fs.util.LittleEndian;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * 
@@ -11,14 +13,28 @@ public class Sector {
 
     protected final byte[] data;
     protected boolean dirty;
-
-    public Sector(int size) {
-        this (new byte[size]);
-    }
-
-    private Sector(byte[] data) {
+    
+    protected Sector(byte[] data) {
         this.data = data;
         this.dirty = false;
+    }
+
+    /**
+     * Reads the specified number of bytes starting at {@code offset} from
+     * the device and returns it as an array of bytes.
+     *
+     * @param dev the device to read from
+     * @param offset the offset where to start reading
+     * @param size the number of bytes to read
+     * @return the bytes that were read
+     * @throws IOException on read error
+     */
+    public static byte[] readBytes(BlockDevice dev,
+            long offset, int size) throws IOException {
+        
+        final byte[] result = new byte[size];
+        dev.read(offset, ByteBuffer.wrap(result));
+        return result;
     }
 
     protected int get16(int offset) {
@@ -28,7 +44,7 @@ public class Sector {
     protected long get32(int offset) {
         return LittleEndian.getUInt32(data, offset);
     }
-
+    
     protected int get8(int offset) {
         return LittleEndian.getUInt8(data, offset);
     }
