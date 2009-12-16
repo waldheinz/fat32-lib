@@ -1,6 +1,8 @@
 
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.FileSystem;
+import com.meetwise.fs.FileSystemFactory;
 import com.meetwise.fs.util.FileDisk;
 import com.meetwise.fs.util.RamDisk;
 import java.io.File;
@@ -15,11 +17,18 @@ import static org.junit.Assert.*;
 public class SuperFloppyFormatterTest {
 
     public static void main(String[] args) throws IOException {
-        final FileDisk d = FileDisk.create(new File("/tmp/testdisk.img"), 40960000);
+        final File file = new File("/tmp/testdisk.img");
+        FileDisk d = FileDisk.create(file, 40960000);
         SuperFloppyFormatter f = new SuperFloppyFormatter(d);
         f.setFatType(FatType.FAT32);
 //        f.setVolumeLabel("testdisk");
         f.format();
+        d.close();
+        
+        d = new FileDisk(new File("/tmp/fat32-test.img"), false);
+        final FileSystem fs = FileSystemFactory.create(d, false);
+        fs.getRoot().addFile("this is another looooong name");
+        fs.close();
         d.close();
     }
 

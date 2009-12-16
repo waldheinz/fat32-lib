@@ -44,9 +44,19 @@ class FatLfnDirEntry extends FatBasicDirEntry {
 
     public FatLfnDirEntry(AbstractDirectory dir, String subName, int ordinal, byte checkSum,
             boolean isLast) {
+        
         super(dir);
-        char[] unicodechar = new char[13];
+        final char[] unicodechar = new char[13];
         subName.getChars(0, subName.length(), unicodechar, 0);
+
+        for (int i=subName.length(); i < 13; i++) {
+            if (i==subName.length()) {
+                unicodechar[i] = 0x0000;
+            } else {
+                unicodechar[i] = 0xffff;
+            }
+        }
+        
         if (isLast) {
             LittleEndian.setInt8(rawData, 0, ordinal + (1 << 6)); // set the
                                                                     // 6th
