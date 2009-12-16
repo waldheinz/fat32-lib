@@ -140,8 +140,6 @@ public final class SuperFloppyFormatter {
             final Random rnd = new Random(System.currentTimeMillis());
             f32bs.setFileSystemId(rnd.nextInt());
             f32bs.setVolumeLabel(label);
-
-            /* make boot sector copy */
             
             /* create FS info sector */
             

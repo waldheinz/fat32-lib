@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import com.meetwise.fs.FSFile;
 import com.meetwise.fs.FileSystemException;
+import com.meetwise.fs.FileSystemFullException;
 import com.meetwise.fs.ReadOnlyFileSystemException;
 
 /**
@@ -192,7 +193,14 @@ public final class FatFile extends FatObject implements FSFile {
         final int nrClusters = (int) ((length + clusterSize - 1) / clusterSize);
         
         if (this.length == 0) {
-            final long[] chain = fat.allocNew(nrClusters);
+            final long[] chain;
+            
+            try {
+                chain = fat.allocNew(nrClusters);
+            } catch (IOException ex) {
+                throw new FileSystemFullException(fs, ex);
+            }
+
             this.startCluster = chain[0];
             if (myEntry != null)
                 this.myEntry.setStartCluster((int) startCluster);
@@ -204,7 +212,11 @@ public final class FatFile extends FatObject implements FSFile {
                     // Grow
                     int count = nrClusters - chain.length;
                     while (count > 0) {
-                        fat.allocAppend(getStartCluster());
+                        try {
+                            fat.allocAppend(getStartCluster());
+                        } catch (IOException ex) {
+                            throw new FileSystemFullException(fs, ex);
+                        }
                         count--;
                     }
                 } else {

@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.FileSystemFullException;
 
 /**
  * 
@@ -34,7 +32,7 @@ import com.meetwise.fs.FileSystemFullException;
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte
  */
-final class Fat {
+public final class Fat {
 
     private final long[] entries;
 
@@ -46,8 +44,6 @@ final class Fat {
     
     /** The number of bytes/sector */
     private final int sectorSize;
-
-    private final FatFileSystem fs;
 
     /**
      * If this fat needs to be written to disk.
@@ -71,11 +67,9 @@ final class Fat {
         this.nrSectors = (int) sectors;
         this.sectorSize = sectorSize;
         this.dirty = false;
-        this.fs = fs;
         entries = new long[(int) ((sectors * sectorSize) /
                 this.fatType.getEntrySize())];
         entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
-        
     }
 
     Fat(BootSector bs) throws IOException {
@@ -94,7 +88,6 @@ final class Fat {
         this.nrSectors = (int) bs.getSectorsPerFat();
         this.sectorSize = bs.getBytesPerSector();
         this.dirty = false;
-        this.fs = null;
         
         entries = new long[(int) ((nrSectors * sectorSize) /
                 fatType.getEntrySize())];
@@ -227,9 +220,9 @@ final class Fat {
      * Allocate a cluster for a new file
      * 
      * @return long the number of the newly allocated cluster
-     * @throws FileSystemFullException if there are no free clusters
+     * @throws IOException if there are no free clusters
      */
-    public long allocNew() throws FileSystemFullException {
+    public long allocNew() throws IOException {
 
         int i;
         int entryIndex = -1;
@@ -251,7 +244,7 @@ final class Fat {
         }
 
         if (entryIndex < 0) {
-            throw new FileSystemFullException(fs,
+            throw new IOException(
                     "FAT Full (" + entries.length + ", " + i + ")"); //NOI18N
         }
 
@@ -268,9 +261,9 @@ final class Fat {
      * 
      * @param nrClusters when number of clusters to allocate
      * @return long
-     * @throws FileSystemException on write error
+     * @throws IOException if there are no free clusters
      */
-    public synchronized long[] allocNew(int nrClusters) throws FileSystemException {
+    public synchronized long[] allocNew(int nrClusters) throws IOException {
 
         long rc[] = new long[nrClusters];
 
@@ -288,10 +281,10 @@ final class Fat {
      * @param cluster a cluster from a chain where the new cluster should be
      *      appended
      * @return long the newly allocated and appended cluster number
-     * @throws FileSystemFullException if there are no free clusters
+     * @throws IOException if there are no free clusters
      */
     public synchronized long allocAppend(long cluster)
-            throws FileSystemFullException {
+            throws IOException {
         
         testCluster(cluster);
         

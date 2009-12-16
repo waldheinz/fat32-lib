@@ -18,7 +18,7 @@ public class SuperFloppyFormatterTest {
         final FileDisk d = FileDisk.create(new File("/tmp/testdisk.img"), 40960000);
         SuperFloppyFormatter f = new SuperFloppyFormatter(d);
         f.setFatType(FatType.FAT32);
-        f.setVolumeLabel("testdisk");
+//        f.setVolumeLabel("testdisk");
         f.format();
         d.close();
     }

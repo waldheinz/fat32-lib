@@ -38,4 +38,15 @@ public class FileSystemFullException extends FileSystemException {
     public FileSystemFullException(FileSystem fs, String message) {
         super(fs, message);
     }
+
+    /**
+     * Creates a new instance of {@code FileSystemFullException} with the
+     * specified exception as it's cause.
+     *
+     * @param fs the file system that was full
+     * @param cause the cause of this exception
+     */
+    public FileSystemFullException(FileSystem fs, Exception cause) {
+        super(fs, cause);
+    }
 }

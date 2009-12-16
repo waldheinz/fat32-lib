@@ -50,6 +50,7 @@ abstract class FatObject implements FSObject {
      * 
      * @return if this object is still valid
      */
+    @Override
     public final boolean isValid() {
         return valid;
     }
@@ -66,6 +67,7 @@ abstract class FatObject implements FSObject {
      *
      * @return the file system of this object
      */
+    @Override
     public final FileSystem getFileSystem() {
         return fs;
     }
