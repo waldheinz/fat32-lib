@@ -1,6 +1,10 @@
 
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BlockDevice;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 /**
  * Contains the FAT32 specific parts of the boot sector.
  *
@@ -16,10 +20,10 @@ public final class Fat32BootSector extends BootSector {
     public void init() {
         super.init();
         
-        set16(0x32, 6); /* sector containing boot sector copy */
+        setBootSectorCopySector(6); /* as suggested by M$ */
 
         /* FAT version */
-
+        
         set8(0x52, 0x46); /* 'F' */
         set8(0x53, 0x41); /* 'A' */
         set8(0x54, 0x54); /* 'T' */
@@ -28,6 +32,30 @@ public final class Fat32BootSector extends BootSector {
         set8(0x57, 0x20); /* ' ' */
         set8(0x58, 0x20); /* ' ' */
         set8(0x59, 0x20); /* ' ' */
+    }
+    
+    /**
+     * Sets the sectur number that contains a copy of the boot sector.
+     *
+     * @param sectNr the sector that contains a boot sector copy
+     */
+    public void setBootSectorCopySector(int sectNr) {
+        if (getBootSectorCopySector() == sectNr) return;
+        if (sectNr < 0) throw new IllegalArgumentException(
+                "boot sector copy sector must be >= 0");
+        
+        set16(0x32, sectNr);
+        this.dirty = true;
+    }
+    
+    /**
+     * Returns the sector that contains a copy of the boot sector, or 0 if
+     * there is no copy.
+     *
+     * @return the sector number of the boot sector copy
+     */
+    public int getBootSectorCopySector() {
+        return get16(0x32);
     }
 
     /**
@@ -100,4 +128,18 @@ public final class Fat32BootSector extends BootSector {
         return (int) super.get32(0x43);
     }
 
+    /**
+     * Writes a copy of this boot sector to the specified device, if a copy
+     * is requested.
+     *
+     * @param device the device to write the boot sector copy to
+     * @throws IOException on write error
+     * @see #getBootSectorCopySector() 
+     */
+    public void writeCopy(BlockDevice device) throws IOException {
+        if (getBootSectorCopySector() > 0) {
+            final long offset = getBootSectorCopySector() * SIZE;
+            device.write(offset, ByteBuffer.wrap(data));
+        }
+    }
 }

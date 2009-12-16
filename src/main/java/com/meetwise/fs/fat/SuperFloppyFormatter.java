@@ -140,6 +140,8 @@ public final class SuperFloppyFormatter {
             final Random rnd = new Random(System.currentTimeMillis());
             f32bs.setFileSystemId(rnd.nextInt());
             f32bs.setVolumeLabel(label);
+
+            /* make boot sector copy */
             
             /* create FS info sector */
             
@@ -169,7 +171,13 @@ public final class SuperFloppyFormatter {
         bs.setBytesPerSector(device.getSectorSize());
         bs.setSectorCount(totalSectors);
         bs.write(device);
-        
+
+        if (fatType == FatType.FAT32) {
+            Fat32BootSector f32bs = (Fat32BootSector) bs;
+            /* possibly writes the boot sector copy */
+            f32bs.writeCopy(device);
+        }
+
         final Fat fat = new Fat(bs);
                 
         for (int i = 0; i < bs.getNrFats(); i++) {
