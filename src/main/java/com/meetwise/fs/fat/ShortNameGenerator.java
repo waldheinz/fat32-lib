@@ -42,6 +42,37 @@ final class ShortNameGenerator {
 
         return false;
     }
+    
+    public static boolean isSkipChar(char c) {
+        return (c == '.') || (c == ' ');
+    }
+
+    private String tidyString(String dirty) {
+        final StringBuilder result = new StringBuilder();
+
+        /* epurate it from alien characters */
+        for (int src=0; src < dirty.length(); src++) {
+            final char toTest = Character.toUpperCase(dirty.charAt(src));
+            if (isSkipChar(toTest)) continue;
+
+            if (validChar(toTest)) {
+                result.append(toTest);
+            } else {
+                result.append('_');
+            }
+        }
+
+        return result.toString();
+    }
+
+    private boolean cleanString(String s) {
+        for (int i=0; i < s.length(); i++) {
+            if (isSkipChar(s.charAt(i))) return false;
+            if (!validChar(s.charAt(i))) return false;
+        }
+
+        return true;
+    }
 
     /**
      * Generates a new unique 8.3 file name that is not already contained in
@@ -49,60 +80,57 @@ final class ShortNameGenerator {
      *
      * @param longFullName the long file name to generate the short name for
      * @return the generated 8.3 file name
+     * @throws IllegalStateException if no unused short name could be found
      */
-    public String generateShortName(String longFullName) {
-        int dotIndex = longFullName.lastIndexOf('.');
+    public String generateShortName(String longFullName)
+            throws IllegalStateException {
+        
+        final String longName;
+        final String longExt;
+        final int dotIdx = longFullName.lastIndexOf('.');
+        final boolean forceSuffix;
 
-        String longName;
-        String longExt;
-
-        if (dotIndex == -1) {
-            // No dot in the name
-            longName = longFullName;
-            longExt = ""; // so no extension
+        if (dotIdx == -1) {
+            /* no dot in the name */
+            forceSuffix = !cleanString(longFullName.toUpperCase());
+            longName = tidyString(longFullName);
+            longExt = ""; /* so no extension */
         } else {
-            // split it at the dot
-            longName = longFullName.substring(0, dotIndex);
-            longExt = longFullName.substring(dotIndex + 1);
+            /* split at the dot */
+            forceSuffix = !cleanString(longFullName.substring(
+                    0, dotIdx).toUpperCase());
+            longName = tidyString(longFullName.substring(0, dotIdx));
+            longExt = tidyString(longFullName.substring(dotIdx + 1));
         }
+        
+        final String shortExt = (longExt.length() > 3) ?
+            longExt.substring(0, 3) : longExt;
 
-        String shortName = longName;
-        String shortExt = longExt;
+        if (forceSuffix || (longName.length() > 8) ||
+                usedNames.contains(longName + "." + shortExt)) {
 
-        // make the extension short
-        if (shortExt.length() > 3) {
-            shortExt = shortExt.substring(0, 3);
-        }
+            /* we have to append the "~n" suffix */
 
-        char[] shortNameChar = shortName.length() > 8 ?
-            shortName.substring(0, 7).toUpperCase().toCharArray() :
-            shortName.toCharArray();
+            final int maxLongIdx = Math.min(longName.length(), 8);
 
-        /* epurate it from alien characters */
-        for (int i = 0; i < shortNameChar.length; i++) {
-            char toTest = shortNameChar[i];
-
-            if (!validChar(toTest))
-                shortNameChar[i] = '_';
-        }
-
-        shortName = new String(shortNameChar);
-
-        if (usedNames.contains(shortName + "." + shortExt)) {
-            // name range from "nnnnnn~1" to "~9999999"
-            for (int i = 1; i <= 9999999; i++) {
-                String tildeStuff = "~" + i;
-                int tildeStuffLength = tildeStuff.length();
-                System.arraycopy(tildeStuff.toCharArray(), 0, shortNameChar, 7 - tildeStuffLength,
-                        tildeStuffLength);
-                shortName = new String(shortNameChar);
-                if (!usedNames.contains(shortName + "." + shortExt))
-                    break;
+            for (int i=1; i < 99999; i++) {
+                final String serial = "~" + i; //NOI18N
+                final int serialLen = serial.length();
+                final String shortName = longName.substring(
+                        0, Math.min(maxLongIdx, 8-serialLen)) + serial +
+                        "." + shortExt; //NOI18N
+                
+                if (!usedNames.contains(shortName)) {
+                    return shortName;
+                }
             }
+
+            throw new IllegalStateException(
+                    "could not generate short name for \""
+                    + longFullName + "\"");
         }
 
-        String shortFullName = shortName + "." + shortExt;
-        return shortFullName.toUpperCase();
+        return longName + "." + shortExt; //NOI18N
     }
-
+    
 }
