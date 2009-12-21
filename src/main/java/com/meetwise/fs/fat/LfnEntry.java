@@ -138,7 +138,7 @@ class LfnEntry implements FSDirectoryEntry {
 
     public void setName(String newName) {
         fileName = newName;
-        realEntry.setName(parent.generateShortNameFor(newName));
+        realEntry.setName(parent.getShortNameGenerator().generateShortName(newName));
     }
 
     public void setCreated(long created) {

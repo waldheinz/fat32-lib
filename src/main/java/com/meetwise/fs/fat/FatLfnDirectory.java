@@ -41,7 +41,9 @@ class FatLfnDirectory extends FatDirectory {
     
     private final HashMap<String, LfnEntry> longFileNameIndex =
             new HashMap<String, LfnEntry>();
-            
+
+    private final ShortNameGenerator sng;
+
     /**
      * @param fs
      * @param file
@@ -49,6 +51,8 @@ class FatLfnDirectory extends FatDirectory {
      */
     public FatLfnDirectory(FatFileSystem fs, FatFile file) throws FileSystemException {
         super(fs, file);
+        
+        this.sng = new ShortNameGenerator(shortNameIndex.keySet());
         read();
     }
 
@@ -60,8 +64,14 @@ class FatLfnDirectory extends FatDirectory {
      */
     public FatLfnDirectory(FatFileSystem fs, int nrEntries) {
         super(fs, nrEntries);
+        
+        this.sng = new ShortNameGenerator(shortNameIndex.keySet());
     }
     
+    ShortNameGenerator getShortNameGenerator() {
+        return sng;
+    }
+
     @Override
     public LfnEntry addFile(String name) throws FileSystemException {
         if (getFileSystem().isReadOnly()) {
@@ -70,7 +80,7 @@ class FatLfnDirectory extends FatDirectory {
         }
 
         name = name.trim();
-        String shortName = generateShortNameFor(name);
+        String shortName = sng.generateShortName(name);
         FatDirEntry realEntry = new FatDirEntry(this, splitName(shortName), splitExt(shortName));
         LfnEntry entry = new LfnEntry(this, realEntry, name);
         shortNameIndex.put(shortName, entry);
@@ -88,7 +98,7 @@ class FatLfnDirectory extends FatDirectory {
         }
 
         name = name.trim();
-        String shortName = generateShortNameFor(name);
+        String shortName = sng.generateShortName(name);
         FatDirEntry realEntry = new FatDirEntry(this, splitName(shortName), splitExt(shortName));
 
         final long parentCluster;
@@ -254,79 +264,7 @@ class FatLfnDirectory extends FatDirectory {
             }
         };
     }
-
-    /*
-     * Its in the DOS manual!(DOS 5: page 72) Valid: A..Z 0..9 _ ^ $ ~ ! # % & - {} () @ ' `
-     * 
-     * Unvalid: spaces/periods,
-     */
-    public static boolean validChar(char toTest) {
-        if (toTest >= 'A' && toTest <= 'Z') return true;
-        if (toTest >= '0' && toTest <= '9') return true;
-        if (toTest == '_' || toTest == '^' || toTest == '$' || toTest == '~' ||
-                toTest == '!' || toTest == '#' || toTest == '%' || toTest == '&' ||
-                toTest == '-' || toTest == '{' || toTest == '}' || toTest == '(' ||
-                toTest == ')' || toTest == '@' || toTest == '\'' || toTest == '`')
-            return true;
-
-        return false;
-    }
     
-    public String generateShortNameFor(String longFullName) {
-        int dotIndex = longFullName.lastIndexOf('.');
-
-        String longName;
-        String longExt;
-
-        if (dotIndex == -1) {
-            // No dot in the name
-            longName = longFullName;
-            longExt = ""; // so no extension
-        } else {
-            // split it at the dot
-            longName = longFullName.substring(0, dotIndex);
-            longExt = longFullName.substring(dotIndex + 1);
-        }
-
-        String shortName = longName;
-        String shortExt = longExt;
-
-        // make the extension short
-        if (shortExt.length() > 3) {
-            shortExt = shortExt.substring(0, 3);
-        }
-        
-        char[] shortNameChar = shortName.length() > 8 ?
-            shortName.substring(0, 7).toUpperCase().toCharArray() :
-            shortName.toCharArray();
-            
-        /* epurate it from alien characters */
-        for (int i = 0; i < shortNameChar.length; i++) {
-            char toTest = shortNameChar[i];
-            
-            if (!validChar(toTest))
-                shortNameChar[i] = '_';
-        }
-
-        shortName = new String(shortNameChar);
-
-        if (shortNameIndex.containsKey(shortName + "." + shortExt)) {
-            // name range from "nnnnnn~1" to "~9999999"
-            for (int i = 1; i <= 9999999; i++) {
-                String tildeStuff = "~" + i;
-                int tildeStuffLength = tildeStuff.length();
-                System.arraycopy(tildeStuff.toCharArray(), 0, shortNameChar, 7 - tildeStuffLength,
-                        tildeStuffLength);
-                shortName = new String(shortNameChar);
-                if (!shortNameIndex.containsKey(shortName + "." + shortExt))
-                    break;
-            }
-        }
-
-        String shortFullName = shortName + "." + shortExt;
-        return shortFullName.toUpperCase();
-    }
-
     /**
      * Remove the entry with the given name from this directory.
      * 
