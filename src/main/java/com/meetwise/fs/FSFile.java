@@ -31,51 +31,54 @@ import java.nio.ByteBuffer;
  * possible that the system uses a single FSFile instance to create two
  * inputstream's for two different principals.
  * 
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  */
 public interface FSFile extends FSObject {
 
     /**
-     * Gets the length (in bytes) of this file
+     * Gets the length (in bytes) of this file.
      * 
-     * @return long
+     * @return the file size
      */
     public long getLength();
 
     /**
      * Sets the length of this file.
      * 
-     * @param length
-     * @throws FileSystemException 
+     * @param length the new length of this file
+     * @throws FileSystemException on error updating the file size
      */
     public void setLength(long length) throws FileSystemException;
 
     /**
-     * Read <code>len</code> bytes from the given position. The read data is
-     * read fom this file starting at offset <code>fileOffset</code> and
-     * stored in <code>dest</code> starting at offset <code>ofs</code>.
+     * Reads from this file into the specified {@code ByteBuffer}. The
+     * first byte read will be put into the buffer at it's
+     * {@link ByteBuffer#position() position}, and the number of bytes read
+     * will equal the buffer's {@link ByteBuffer#remaining() remaining} bytes.
      * 
-     * @param fileOffset
-     * @param dest
-     * @throws FileSystemException 
+     * @param offset the offset into the file where to start reading
+     * @param dest the destination buffer where to put the bytes that were read
+     * @throws FileSystemException on read error
      */
-    public void read(long fileOffset, ByteBuffer dest) throws FileSystemException;
+    public void read(long offset, ByteBuffer dest) throws FileSystemException;
 
     /**
-     * Write <code>len</code> bytes to the given position. The data is read
-     * from <code>src</code> starting at offset <code>ofs</code> and written
-     * to this file starting at offset <code>fileOffset</code>.
+     * Writes to this file taking the data to write from the specified
+     * {@code ByteBuffer}. This method will read the buffer's
+     * {@link ByteBuffer#remaining() remaining} bytes starting at it's
+     * {@link ByteBuffer#position() position}.
      * 
-     * @param fileOffset
-     * @param src
-     * @throws FileSystemException
+     * @param offset the offset into the file where the first byte will be
+     *      written
+     * @param src the source buffer to read the data from
+     * @throws FileSystemException on write error
      */
-    public void write(long fileOffset, ByteBuffer src) throws FileSystemException;
+    public void write(long offset, ByteBuffer src) throws FileSystemException;
 
     /**
-     * Flush any cached data to the disk.
+     * Flush any possibly cached data to the disk.
      * 
-     * @throws IOException
+     * @throws IOException on error flushing
      */
     public void flush() throws IOException;
 }

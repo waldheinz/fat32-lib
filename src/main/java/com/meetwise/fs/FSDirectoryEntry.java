@@ -38,6 +38,7 @@ public interface FSDirectoryEntry extends FSObject {
     public final static Comparator<FSDirectoryEntry> DIRECTORY_ENTRY_COMPARATOR =
             new Comparator<FSDirectoryEntry>() {
 
+        @Override
         public int compare(FSDirectoryEntry e1, FSDirectoryEntry e2) {
             if (e2.isDirectory() == e1.isDirectory()) {
                 /* compare names */
