@@ -31,8 +31,6 @@ import com.meetwise.fs.util.LittleEndian;
  */
 class FatUtils {
 
-    public static final int FIRST_CLUSTER = 2;
-
     /**
      * Gets the offset (in bytes) of the fat with the given index
      * 

@@ -28,14 +28,17 @@ import java.util.Arrays;
 /**
  * 
  *
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
- * @author Matthias Treydte
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public final class Fat {
 
-    private final long[] entries;
+    /**
+     * The first cluster that really holds user data in a FAT.
+     */
+    public final static int FIRST_CLUSTER = 2;
 
-    /** The type of FAT */
+    private final long[] entries;
     private final FatType fatType;
 
     /** The number of sectors this fat takes */
@@ -43,10 +46,8 @@ public final class Fat {
     
     /** The number of bytes/sector */
     private final int sectorSize;
+    private final BlockDevice device;
 
-    /**
-     * If this fat needs to be written to disk.
-     */
     private boolean dirty;
 
     /** entry index for find next free entry */
@@ -62,6 +63,7 @@ public final class Fat {
      */
     public Fat(FatFileSystem fs, int mediumDescriptor, long sectors, int sectorSize) {
         this.fatType = fs.getFatType();
+        this.device = fs.getBlockDevice();
         if (sectors > Integer.MAX_VALUE) throw new IllegalArgumentException("FAT too large");
         this.nrSectors = (int) sectors;
         this.sectorSize = sectorSize;
@@ -71,7 +73,7 @@ public final class Fat {
         entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
     }
 
-    Fat(BootSector bs) throws IOException {
+    Fat(BootSector bs, BlockDevice device) throws IOException {
         this.fatType = bs.getFatType();
         if (bs.getSectorsPerFat() > Integer.MAX_VALUE)
             throw new IllegalArgumentException("FAT too large");
@@ -86,6 +88,7 @@ public final class Fat {
 
         this.nrSectors = (int) bs.getSectorsPerFat();
         this.sectorSize = bs.getBytesPerSector();
+        this.device = device;
         this.dirty = false;
         
         entries = new long[(int) ((nrSectors * sectorSize) /
@@ -93,6 +96,10 @@ public final class Fat {
         entries[0] = (bs.getMediumDescriptor() & 0xFF) | 0xFFFFF00L;
     }
 
+    public BlockDevice getDevice() {
+        return device;
+    }
+    
     /**
      * Read the contents of this FAT from the given device at the given offset.
      * 
@@ -362,7 +369,7 @@ public final class Fat {
     }
 
     protected void testCluster(long cluster) throws IllegalArgumentException {
-        if ((cluster < 2) || (cluster >= entries.length)) {
+        if ((cluster < FIRST_CLUSTER) || (cluster >= entries.length)) {
             throw new IllegalArgumentException(
                     "invalid cluster value " + cluster);
         }

@@ -176,7 +176,7 @@ public final class SuperFloppyFormatter {
             f32bs.writeCopy(device);
         }
 
-        final Fat fat = new Fat(bs);
+        final Fat fat = new Fat(bs, device);
                 
         for (int i = 0; i < bs.getNrFats(); i++) {
             fat.write(device, FatUtils.getFatOffset(bs, i));

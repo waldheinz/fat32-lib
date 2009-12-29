@@ -3,8 +3,6 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
 import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.FileSystemFullException;
-import com.meetwise.fs.ReadOnlyFileSystemException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -13,19 +11,24 @@ import java.nio.ByteBuffer;
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public class ClusterChain extends FatObject {
+public class ClusterChain {
     private final Fat fat;
     private final BlockDevice device;
-    private long startCluster;
     private final int clusterSize;
+    private final long dataOffset;
+    
+    private long startCluster;
 
-    public ClusterChain(FatFileSystem fatFs, long startCluster) {
-        super(fatFs);
+    public ClusterChain(Fat fat, int clusterSize,
+            long dataOffset, long startCluster) {
         
-        this.fat = fatFs.getFat();
-        this.device = fatFs.getBlockDevice();
+        this.fat = fat;
+        if (startCluster != 0)
+            this.fat.testCluster(startCluster);
+        this.device = fat.getDevice();
+        this.dataOffset = dataOffset;
         this.startCluster = startCluster;
-        this.clusterSize = fatFs.getClusterSize();
+        this.clusterSize = clusterSize;
     }
 
     public Fat getFat() {
@@ -49,18 +52,17 @@ public class ClusterChain extends FatObject {
     /**
      * Calculates the device offset (0-based) for the given cluster and offset
      * within the cluster.
+     * 
      * @param cluster
      * @param clusterOffset
      * @return long
      * @throws FileSystemException
      */
-    protected long getDevOffset(long cluster, int clusterOffset)
+    private long getDevOffset(long cluster, int clusterOffset)
             throws FileSystemException {
         
-        final long filesOffset = getFileSystem().getFilesOffset();
-        
-        return filesOffset + clusterOffset +
-                ((cluster - FatUtils.FIRST_CLUSTER) * clusterSize);
+        return dataOffset + clusterOffset +
+                ((cluster - Fat.FIRST_CLUSTER) * clusterSize);
     }
 
     /**
@@ -80,38 +82,26 @@ public class ClusterChain extends FatObject {
      * Sets the length.
      *
      * @param nrClusters the new number of clusters this chain should contain
-     * @throws FileSystemException
+     * @throws IOException
      */
-    public synchronized void setChainLength(int nrClusters) throws FileSystemException {
-
-        if (getFileSystem().isReadOnly()) throw new
-                ReadOnlyFileSystemException(this.getFileSystem());
+    public synchronized void setChainLength(int nrClusters) throws IOException {
         
-        final FatFileSystem fs = getFileSystem();
-
         if (this.startCluster == 0) {
             final long[] chain;
 
-            try {
-                chain = fat.allocNew(nrClusters);
-            } catch (IOException ex) {
-                throw new FileSystemFullException(fs, ex);
-            }
+            chain = fat.allocNew(nrClusters);
 
             this.startCluster = chain[0];
         } else {
-            final long[] chain = fs.getFat().getChain(startCluster);
+            final long[] chain = fat.getChain(startCluster);
 
             if (nrClusters != chain.length) {
                 if (nrClusters > chain.length) {
                     // Grow
                     int count = nrClusters - chain.length;
+
                     while (count > 0) {
-                        try {
-                            fat.allocAppend(getStartCluster());
-                        } catch (IOException ex) {
-                            throw new FileSystemFullException(fs, ex);
-                        }
+                        fat.allocAppend(getStartCluster());
                         count--;
                     }
                 } else {
@@ -126,7 +116,7 @@ public class ClusterChain extends FatObject {
     }
     
     public synchronized void readData(long offset, ByteBuffer dest)
-            throws FileSystemException {
+            throws IOException {
 
         int len = dest.remaining();
         final long[] chain = getFat().getChain(startCluster);
@@ -139,12 +129,8 @@ public class ClusterChain extends FatObject {
                     (int) (clusterSize - (offset % clusterSize) - 1));
             dest.limit(dest.position() + size);
 
-            try {
-                dev.read(getDevOffset(chain[chainIdx], clusOfs), dest);
-            } catch (IOException ex) {
-                throw new FileSystemException(getFileSystem(), ex);
-            }
-
+            dev.read(getDevOffset(chain[chainIdx], clusOfs), dest);
+            
             offset += size;
             len -= size;
             chainIdx++;
@@ -154,11 +140,7 @@ public class ClusterChain extends FatObject {
             int size = Math.min(clusterSize, len);
             dest.limit(dest.position() + size);
 
-            try {
-                dev.read(getDevOffset(chain[chainIdx], 0), dest);
-            } catch (IOException ex) {
-                throw new FileSystemException(getFileSystem(), ex);
-            }
+            dev.read(getDevOffset(chain[chainIdx], 0), dest);
 
             len -= size;
             chainIdx++;
@@ -166,16 +148,11 @@ public class ClusterChain extends FatObject {
     }
     
     public synchronized void writeData(long offset, ByteBuffer srcBuf)
-            throws FileSystemException {
-            
-        if (getFileSystem().isReadOnly())
-            throw new ReadOnlyFileSystemException(this.getFileSystem());
-                    
+            throws IOException {
+        
         int len = srcBuf.remaining();
         
-        final FatFileSystem fs = getFileSystem();
-        final long[] chain = fs.getFat().getChain(getStartCluster());
-        final BlockDevice api = fs.getBlockDevice();
+        final long[] chain = fat.getChain(getStartCluster());
 
         int chainIdx = (int) (offset / clusterSize);
         if (offset % clusterSize != 0) {
@@ -184,12 +161,8 @@ public class ClusterChain extends FatObject {
                     (int) (clusterSize - (offset % clusterSize) - 1));
             srcBuf.limit(srcBuf.position() + size);
 
-            try {
-                api.write(getDevOffset(chain[chainIdx], clusOfs), srcBuf);
-            } catch (IOException ex) {
-                throw new FileSystemException(fs, ex);
-            }
-
+            device.write(getDevOffset(chain[chainIdx], clusOfs), srcBuf);
+            
             offset += size;
             len -= size;
             chainIdx++;
@@ -199,16 +172,11 @@ public class ClusterChain extends FatObject {
             int size = Math.min(clusterSize, len);
             srcBuf.limit(srcBuf.position() + size);
 
-            try {
-                api.write(getDevOffset(chain[chainIdx], 0), srcBuf);
-            } catch (IOException ex) {
-                throw new FileSystemException(fs, ex);
-            }
+            device.write(getDevOffset(chain[chainIdx], 0), srcBuf);
 
             len -= size;
             chainIdx++;
         }
-
         
     }
 }
