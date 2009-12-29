@@ -133,7 +133,7 @@ class FatDirectory extends AbstractDirectory {
         try {
             device.read(offset, data);
         } catch (IOException ex) {
-            throw new FileSystemException(this.getFatFileSystem(), ex);
+            throw new FileSystemException(this.getFileSystem(), ex);
         }
         
         read(data.array());
@@ -148,7 +148,7 @@ class FatDirectory extends AbstractDirectory {
         try {
             device.write(offset, data);
         } catch (IOException ex) {
-            throw new FileSystemException(this.getFatFileSystem(), ex);
+            throw new FileSystemException(this.getFileSystem(), ex);
         }
         resetDirty();
     }
@@ -161,7 +161,7 @@ class FatDirectory extends AbstractDirectory {
     @Override
     public void flush() throws FileSystemException {
         if (file == null) {
-            final FatFileSystem fs = (FatFileSystem) getFileSystem();
+            final FatFileSystem fs = getFileSystem();
             long offset;
             
             try {

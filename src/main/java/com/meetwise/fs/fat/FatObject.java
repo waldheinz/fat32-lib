@@ -21,12 +21,11 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.FSObject;
-import com.meetwise.fs.FileSystem;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-abstract class FatObject implements FSObject {
+public abstract class FatObject implements FSObject {
 
     /** 
      * The filesystem I'm a part of
@@ -68,11 +67,8 @@ abstract class FatObject implements FSObject {
      * @return the file system of this object
      */
     @Override
-    public final FileSystem getFileSystem() {
+    public final FatFileSystem getFileSystem() {
         return fs;
     }
-
-    public final FatFileSystem getFatFileSystem() {
-        return fs;
-    }
+    
 }

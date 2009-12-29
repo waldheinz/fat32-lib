@@ -59,7 +59,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
     private long lastAccessed;
 
     /** First cluster of the data of this entry */
-    private int startCluster;
+    private long startCluster;
     
     /** Length in bytes of the data of this entry */
     private long length;
@@ -226,7 +226,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * 
      * @return int
      */
-    public int getStartCluster() {
+    public long getStartCluster() {
         return startCluster;
     }
 
@@ -332,7 +332,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * @return File
      */
     public FatFile getFatFile() {
-        return getFatFileSystem().getFile(this);
+        return getFileSystem().getFile(this);
     }
 
     /**
@@ -351,7 +351,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * 
      * @param startCluster The startCluster to set
      */
-    protected void setStartCluster(int startCluster) {
+    protected void setStartCluster(long startCluster) {
         this.startCluster = startCluster;
         setDirty();
     }
@@ -484,7 +484,8 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
         LittleEndian.setInt16(dest, offset + 0x12, DosUtils.encodeDate(lastAccessed));
         LittleEndian.setInt16(dest, offset + 0x16, DosUtils.encodeTime(lastModified));
         LittleEndian.setInt16(dest, offset + 0x18, DosUtils.encodeDate(lastModified));
-        LittleEndian.setInt16(dest, offset + 0x1a, startCluster);
+        if (startCluster > Integer.MAX_VALUE) throw new AssertionError();
+        LittleEndian.setInt16(dest, offset + 0x1a, (int) startCluster);
         LittleEndian.setInt32(dest, offset + 0x1c, (int) length);
         this._dirty = false;
     }

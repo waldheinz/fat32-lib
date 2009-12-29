@@ -28,11 +28,11 @@ class FatBasicDirEntry extends FatObject implements FatConstants {
     protected final byte[] rawData = new byte[32];
 
     FatBasicDirEntry(AbstractDirectory dir) {
-        super(dir.getFatFileSystem());
+        super(dir.getFileSystem());
     }
 
     FatBasicDirEntry(AbstractDirectory dir, byte[] src, int offset) {
-        super(dir.getFatFileSystem());
+        super(dir.getFileSystem());
         
         System.arraycopy(src, offset, rawData, 0, 32);
     }

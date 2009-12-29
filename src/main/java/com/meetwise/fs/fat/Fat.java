@@ -22,7 +22,6 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -307,34 +306,7 @@ public final class Fat {
         testCluster(cluster);
         entries[(int) cluster] = 0;
     }
-
-    /**
-     * Print the contents of this FAT to the given writer. Used for debugging
-     * purposes.
-     *
-     * @param out
-     */
-    public void printTo(PrintWriter out) {
-        int freeCount = 0;
-        out.println("medium descriptor 0x" + Integer.toHexString(getMediumDescriptor()));
-        for (int i = 2; i < entries.length; i++) {
-            long v = entries[i];
-            if (isFreeCluster(v)) {
-                freeCount++;
-            } else {
-                out.print("0x" + Integer.toHexString(i) + " -> ");
-                if (isEofCluster(v)) {
-                    out.println("eof");
-                } else if (isReservedCluster(v)) {
-                    out.println("reserved");
-                } else {
-                    out.println("0x" + Long.toHexString(v));
-                }
-            }
-        }
-        out.println("Nr free entries " + freeCount);
-    }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;

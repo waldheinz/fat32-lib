@@ -85,12 +85,12 @@ abstract class AbstractDirectory
             throws FileSystemException {
         
         if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException(this.getFatFileSystem(),
+            throw new ReadOnlyFileSystemException(this.getFileSystem(),
                     "addFile in readonly filesystem"); //NOI18N
         }
 
         if (getFatEntry(nameExt) != null) {
-            throw new FileSystemException(this.getFatFileSystem(),
+            throw new FileSystemException(this.getFileSystem(),
                     "file already exists " + nameExt); //NOI18N
         }
         
@@ -113,7 +113,7 @@ abstract class AbstractDirectory
             return newEntry;
         }
         
-        throw new FileSystemException(this.getFatFileSystem(),
+        throw new FileSystemException(this.getFileSystem(),
                 "directory is full"); //NOI18N
     }
 
@@ -141,7 +141,7 @@ abstract class AbstractDirectory
             String nameExt, long parentCluster) throws IOException {
         
         final FatDirEntry entry = addFatFile(nameExt);
-        final int clusterSize = getFatFileSystem().getClusterSize();
+        final int clusterSize = getFileSystem().getClusterSize();
         entry.setFlags(FatConstants.F_DIRECTORY);
         final FatFile f = entry.getFatFile();
         f.setLength(clusterSize);
@@ -170,7 +170,7 @@ abstract class AbstractDirectory
     @Override
     public FSDirectoryEntry addDirectory(String name) throws IOException {
         if (getFileSystem().isReadOnly()) throw new
-                ReadOnlyFileSystemException(this.getFatFileSystem(),
+                ReadOnlyFileSystemException(this.getFileSystem(),
                 "readonly filesystem"); //NOI18N
 
         final long parentCluster;

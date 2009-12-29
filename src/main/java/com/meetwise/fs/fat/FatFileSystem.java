@@ -42,6 +42,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     private final HashMap<FatDirEntry, FatFile> files =
             new HashMap<FatDirEntry, FatFile>();
     private final FatType fatType;
+    private final long filesOffset;
 
     public FatFileSystem(BlockDevice api, boolean readOnly)
             throws IOException {
@@ -66,6 +67,8 @@ public final class FatFileSystem extends AbstractFileSystem {
         
         if (bs.getNrFats() <= 0) throw new IOException(
                 "boot sector says there are no FATs");
+        
+        this.filesOffset = FatUtils.getFilesOffset(bs);
 
         //this.fsInfo = new FsInfoSector(bs, getApi());
         this.fsInfo = null;
@@ -105,6 +108,10 @@ public final class FatFileSystem extends AbstractFileSystem {
             rootDir.read(getBlockDevice(), FatUtils.getRootDirOffset(bs));
         }
             
+    }
+
+    public long getFilesOffset() {
+        return filesOffset;
     }
     
     public FatType getFatType() {

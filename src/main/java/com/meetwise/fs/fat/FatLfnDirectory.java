@@ -75,7 +75,7 @@ class FatLfnDirectory extends FatDirectory {
     @Override
     public LfnEntry addFile(String name) throws FileSystemException {
         if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException(this.getFatFileSystem(),
+            throw new ReadOnlyFileSystemException(this.getFileSystem(),
                     "addFile in readonly filesystem");
         }
 
@@ -93,7 +93,7 @@ class FatLfnDirectory extends FatDirectory {
     @Override
     public FSDirectoryEntry addDirectory(String name) throws IOException {
         if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException(this.getFatFileSystem(),
+            throw new ReadOnlyFileSystemException(this.getFileSystem(),
                     "addDirectory in readonly filesystem"); //NOI18N
         }
 
@@ -108,7 +108,7 @@ class FatLfnDirectory extends FatDirectory {
             parentCluster = file.getStartCluster();
         }
 
-        final int clusterSize = getFatFileSystem().getClusterSize();
+        final int clusterSize = getFileSystem().getClusterSize();
         realEntry.setFlags(FatConstants.F_DIRECTORY);
         final FatFile f = realEntry.getFatFile();
         f.setLength(clusterSize);
@@ -208,7 +208,7 @@ class FatLfnDirectory extends FatDirectory {
         final int size = destination.size();
         if (entries.size() < size) {
             if (!canChangeSize(size)) {
-                throw new RootDirectoryFullException(this.getFatFileSystem());
+                throw new RootDirectoryFullException(this.getFileSystem());
             }
         }
 

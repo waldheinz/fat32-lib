@@ -20,13 +20,10 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.BlockDevice;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import com.meetwise.fs.FSFile;
 import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.FileSystemFullException;
-import com.meetwise.fs.ReadOnlyFileSystemException;
+import java.io.IOException;
+import com.meetwise.fs.FSFile;
+import java.nio.ByteBuffer;
 
 /**
  * A File instance is the in-memory representation of a single file (chain of
@@ -34,14 +31,12 @@ import com.meetwise.fs.ReadOnlyFileSystemException;
  * 
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public final class FatFile extends FatObject implements FSFile {
-    private long startCluster;
+public final class FatFile extends ClusterChain implements FSFile {
     private long length;
     private FatDirectory dir;
     
     private boolean isDir;
     
-    private final int clusterSize;
     private final FatDirEntry myEntry;
     
     /**
@@ -51,187 +46,21 @@ public final class FatFile extends FatObject implements FSFile {
      * @param startCluster
      */
     FatFile(FatFileSystem fs, long startCluster) {
-        super(fs);
-
+        super(fs, startCluster);
+        
         this.myEntry = null;
-        this.startCluster = startCluster;
-        this.clusterSize = fs.getClusterSize();
         this.length = getLengthOnDisk();
         this.isDir = true;
     }
 
     FatFile(FatFileSystem fs, FatDirEntry myEntry,
             long startCluster, long length, boolean isDir) {
+
+        super(fs, startCluster);
         
-        super(fs);
-        
-        this.startCluster = startCluster;
         this.myEntry = myEntry;
         this.length = length;
-        this.clusterSize = fs.getClusterSize();
         this.isDir = isDir;
-    }
-
-    @Override
-    public synchronized void read(long fileOffset, ByteBuffer destBuf)
-            throws FileSystemException {
-
-        int len = destBuf.remaining();
-
-        final long max = isDir ? getLengthOnDisk() : getLength();
-        
-        if (fileOffset + len > max)
-            throw new FileSystemException(this.getFatFileSystem(),
-                    "can not read beyond EOF"); //NOI18N
-
-        final FatFileSystem fs = getFatFileSystem();
-        final long[] chain = fs.getFat().getChain(startCluster);
-        final BlockDevice api = fs.getBlockDevice();
-
-        int chainIdx = (int) (fileOffset / clusterSize);
-        if (fileOffset % clusterSize != 0) {
-            int clusOfs = (int) (fileOffset % clusterSize);
-            int size = Math.min(len,
-                    (int) (clusterSize - (fileOffset % clusterSize) - 1));
-            destBuf.limit(destBuf.position() + size);
-
-            try {
-                api.read(getDevOffset(chain[chainIdx], clusOfs), destBuf);
-            } catch (IOException ex) {
-                throw new FileSystemException(fs, ex);
-            }
-            
-            fileOffset += size;
-            len -= size;
-            chainIdx++;
-        }
-
-        while (len > 0) {
-            int size = Math.min(clusterSize, len);
-            destBuf.limit(destBuf.position() + size);
-            
-            try {
-                api.read(getDevOffset(chain[chainIdx], 0), destBuf);
-            } catch (IOException ex) {
-                throw new FileSystemException(fs, ex);
-            }
-
-            len -= size;
-            chainIdx++;
-        }
-    }
-
-    @Override
-    public synchronized void write(long fileOffset, ByteBuffer srcBuf)
-            throws FileSystemException {
-        
-        if (getFileSystem().isReadOnly())
-            throw new ReadOnlyFileSystemException(this.getFatFileSystem(),
-                    "write in readonly filesystem"); //NOI18N
-
-        final long max = (isDir) ? getLengthOnDisk() : getLength();
-        if (fileOffset > max)
-            throw new FileSystemException(this.getFatFileSystem(),
-                    "can not write beyond EOF"); //NOI18N
-
-        int len = srcBuf.remaining();
-        if (fileOffset + len > max)
-            setLength(fileOffset + len);
-
-        final FatFileSystem fs = getFatFileSystem();
-        final long[] chain = fs.getFat().getChain(getStartCluster());
-        final BlockDevice api = fs.getBlockDevice();
-
-        int chainIdx = (int) (fileOffset / clusterSize);
-        if (fileOffset % clusterSize != 0) {
-            int clusOfs = (int) (fileOffset % clusterSize);
-            int size = Math.min(len,
-                    (int) (clusterSize - (fileOffset % clusterSize) - 1));
-            srcBuf.limit(srcBuf.position() + size);
-
-            try {
-                api.write(getDevOffset(chain[chainIdx], clusOfs), srcBuf);
-            } catch (IOException ex) {
-                throw new FileSystemException(fs, ex);
-            }
-            
-            fileOffset += size;
-            len -= size;
-            chainIdx++;
-        }
-        
-        while (len > 0) {
-            int size = Math.min(clusterSize, len);
-            srcBuf.limit(srcBuf.position() + size);
-
-            try {
-                api.write(getDevOffset(chain[chainIdx], 0), srcBuf);
-            } catch (IOException ex) {
-                throw new FileSystemException(fs, ex);
-            }
-
-            len -= size;
-            chainIdx++;
-        }
-    }
-
-    /**
-     * Sets the length.
-     * 
-     * @param length The length to set
-     */
-    @Override
-    public synchronized void setLength(long length) throws FileSystemException {
-
-        if (getFileSystem().isReadOnly()) throw new 
-                ReadOnlyFileSystemException(this.getFatFileSystem(), "readonly filesystem"); //NOI18N
-
-        if (this.length == length) return;
-        
-        final FatFileSystem fs = getFatFileSystem();
-        final Fat fat = fs.getFat();
-        final int nrClusters = (int) ((length + clusterSize - 1) / clusterSize);
-        
-        if (this.length == 0) {
-            final long[] chain;
-            
-            try {
-                chain = fat.allocNew(nrClusters);
-            } catch (IOException ex) {
-                throw new FileSystemFullException(fs, ex);
-            }
-
-            this.startCluster = chain[0];
-            if (myEntry != null)
-                this.myEntry.setStartCluster((int) startCluster);
-        } else {
-            final long[] chain = fs.getFat().getChain(startCluster);
-
-            if (nrClusters != chain.length) {
-                if (nrClusters > chain.length) {
-                    // Grow
-                    int count = nrClusters - chain.length;
-                    while (count > 0) {
-                        try {
-                            fat.allocAppend(getStartCluster());
-                        } catch (IOException ex) {
-                            throw new FileSystemFullException(fs, ex);
-                        }
-                        count--;
-                    }
-                } else {
-                    // Shrink
-                    fat.setEof(chain[nrClusters - 1]);
-                    for (int i = nrClusters; i < chain.length; i++) {
-                        fat.setFree(chain[i]);
-                    }
-                }
-            }
-        }
-        
-        this.length = length;
-        if (myEntry != null)
-            this.myEntry.updateLength(length);
     }
 
     /**
@@ -245,28 +74,6 @@ public final class FatFile extends FatObject implements FSFile {
     }
 
     /**
-     * Gets the size this file occupies on disk
-     * 
-     * @return long
-     */
-    public long getLengthOnDisk() {
-        if (getStartCluster() == 0) return 0;
-        
-        final FatFileSystem fs = getFatFileSystem();
-        final long[] chain = fs.getFat().getChain(getStartCluster());
-        return ((long) chain.length) * fs.getClusterSize();
-    }
-    
-    /**
-     * Returns the startCluster.
-     * 
-     * @return long
-     */
-    public long getStartCluster() {
-        return startCluster;
-    }
-
-    /**
      * Gets the directory contained in this file.
      * 
      * @return Directory
@@ -276,35 +83,12 @@ public final class FatFile extends FatObject implements FSFile {
         if (!isDir) throw new UnsupportedOperationException();
         
         if (dir == null) {
-            dir = new FatLfnDirectory(getFatFileSystem(), this);
+            dir = new FatLfnDirectory(getFileSystem(), this);
         }
         
         return dir;
     }
-
-    /**
-     * Calculates the device offset (0-based) for the given cluster and offset
-     * within the cluster.
-     * @param cluster
-     * @param clusterOffset
-     * @return long
-     * @throws FileSystemException
-     */
-    protected long getDevOffset(long cluster, int clusterOffset)
-            throws FileSystemException {
-        
-        final FatFileSystem fs = getFatFileSystem();
-        final long filesOffset;
-
-        try {
-            filesOffset = FatUtils.getFilesOffset(fs.getBootSector());
-        } catch (IOException ex) {
-            throw new FileSystemException(fs, ex);
-        }
-        return filesOffset + clusterOffset +
-                ((cluster - FatUtils.FIRST_CLUSTER) * clusterSize);
-    }
-
+    
     /**
      * Flush any changes in this file to persistent storage
      * @throws IOException
@@ -320,6 +104,52 @@ public final class FatFile extends FatObject implements FSFile {
     public String toString() {
         return getClass().getSimpleName() + " [length=" + getLength() +
                 ", first cluster=" + getStartCluster() + "]";
+    }
+
+    @Override
+    public void setLength(long length) throws FileSystemException {
+        if (this.length == length) return;
+
+        final long clusterSize = getFileSystem().getClusterSize();
+        final int nrClusters = (int) ((length + clusterSize - 1) / clusterSize);
+
+        super.setChainLength(nrClusters);
+
+        if (myEntry != null)
+            this.myEntry.setStartCluster(super.getStartCluster());
+
+        this.length = length;
+        
+        if (myEntry != null)
+            this.myEntry.updateLength(length);
+    }
+
+    @Override
+    public void read(long offset, ByteBuffer dest) throws FileSystemException {
+        final int len = dest.remaining();
+        final long max = isDir ? getLengthOnDisk() : getLength();
+
+        if (offset + len > max)
+            throw new FileSystemException(getFileSystem(),
+                    "can not read beyond EOF"); //NOI18N
+
+        readData(offset, dest);
+    }
+    
+    @Override
+    public void write(long offset, ByteBuffer srcBuf)
+            throws FileSystemException {
+            
+        final long max = (isDir) ? getLengthOnDisk() : getLength();
+        if (offset > max)
+            throw new FileSystemException(this.getFileSystem(),
+                    "can not write beyond EOF"); //NOI18N
+                    
+        int len = srcBuf.remaining();
+        if (offset + len > max)
+            setLength(offset + len);
+
+        writeData(offset, srcBuf);
     }
     
 }
