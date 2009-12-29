@@ -74,10 +74,8 @@ class FatLfnDirectory extends FatDirectory {
 
     @Override
     public LfnEntry addFile(String name) throws FileSystemException {
-        if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException(this.getFileSystem(),
-                    "addFile in readonly filesystem");
-        }
+        if (getFileSystem().isReadOnly())
+            throw new ReadOnlyFileSystemException(this.getFileSystem());
 
         name = name.trim();
         String shortName = sng.generateShortName(name);
@@ -92,10 +90,8 @@ class FatLfnDirectory extends FatDirectory {
 
     @Override
     public FSDirectoryEntry addDirectory(String name) throws IOException {
-        if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException(this.getFileSystem(),
-                    "addDirectory in readonly filesystem"); //NOI18N
-        }
+        if (getFileSystem().isReadOnly())
+            throw new ReadOnlyFileSystemException(this.getFileSystem());
 
         name = name.trim();
         String shortName = sng.generateShortName(name);

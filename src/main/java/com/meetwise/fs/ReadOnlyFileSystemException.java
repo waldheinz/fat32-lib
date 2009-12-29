@@ -27,7 +27,7 @@ package com.meetwise.fs;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  * @see FileSystem#isReadOnly() 
  */
-public class ReadOnlyFileSystemException extends FileSystemException {
+public final class ReadOnlyFileSystemException extends FileSystemException {
 
     private final static long serialVersionUID = 1;
     
@@ -38,16 +38,5 @@ public class ReadOnlyFileSystemException extends FileSystemException {
      */
     public ReadOnlyFileSystemException(FileSystem fs) {
         super(fs, "read-only file system");
-    }
-
-    /**
-     * Creates a new instance of {@code ReadOnlyFileSystemException} using
-     * the specified detail message.
-     *
-     * @param fs the {@code FileSystem} that generated this exception
-     * @param message the detail message describing why this exception occured
-     */
-    public ReadOnlyFileSystemException(FileSystem fs, String message) {
-        super(fs, message);
     }
 }

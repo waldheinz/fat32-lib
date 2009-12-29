@@ -169,8 +169,7 @@ public class ClusterChain extends FatObject {
             throws FileSystemException {
             
         if (getFileSystem().isReadOnly())
-            throw new ReadOnlyFileSystemException(this.getFileSystem(),
-                    "write in readonly filesystem"); //NOI18N
+            throw new ReadOnlyFileSystemException(this.getFileSystem());
                     
         int len = srcBuf.remaining();
         

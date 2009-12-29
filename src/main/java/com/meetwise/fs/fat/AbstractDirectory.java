@@ -85,8 +85,7 @@ abstract class AbstractDirectory
             throws FileSystemException {
         
         if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException(this.getFileSystem(),
-                    "addFile in readonly filesystem"); //NOI18N
+            throw new ReadOnlyFileSystemException(this.getFileSystem());
         }
 
         if (getFatEntry(nameExt) != null) {
@@ -170,8 +169,7 @@ abstract class AbstractDirectory
     @Override
     public FSDirectoryEntry addDirectory(String name) throws IOException {
         if (getFileSystem().isReadOnly()) throw new
-                ReadOnlyFileSystemException(this.getFileSystem(),
-                "readonly filesystem"); //NOI18N
+                ReadOnlyFileSystemException(this.getFileSystem());
 
         final long parentCluster;
 
