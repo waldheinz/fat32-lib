@@ -1,6 +1,9 @@
 
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BlockDevice;
+import java.io.IOException;
+
 /**
  * The boot sector layout as used by the FAT12 / FAT16 variants.
  *
@@ -17,9 +20,14 @@ public class Fat16BootSector extends BootSector {
      * @see #getNrLogicalSectors()
      */
     public static final int MAX_FAT12_SECTORS = 8202;
+
+    /**
+     * The offset to the sectors per FAT value.
+     */
+    public static final int SECTORS_PER_FAT_OFFSET = 0x16;
     
-    Fat16BootSector(byte[] bytes) {
-        super(bytes);
+    Fat16BootSector(BlockDevice device) throws IOException {
+        super(device);
     }
     
     /**
@@ -29,7 +37,7 @@ public class Fat16BootSector extends BootSector {
      */
     @Override
     public long getSectorsPerFat() {
-        return get16(0x16);
+        return get16(SECTORS_PER_FAT_OFFSET);
     }
 
     /**
@@ -43,7 +51,7 @@ public class Fat16BootSector extends BootSector {
         if (v > 0x7FFF) throw new IllegalArgumentException(
                 "too many sectors for a FAT12/16");
         
-        set16(0x16, (int)v);
+        set16(SECTORS_PER_FAT_OFFSET, (int)v);
     }
 
     @Override

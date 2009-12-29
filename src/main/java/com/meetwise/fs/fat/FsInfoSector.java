@@ -4,7 +4,6 @@ package com.meetwise.fs.fat;
 import com.meetwise.fs.Sector;
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * The FAT32 File System Information Sector.
@@ -24,20 +23,12 @@ class FsInfoSector extends Sector {
      * @param device
      * @throws IOException on read error
      */
-    public FsInfoSector(byte[] bytes) throws IOException {
-        super(bytes);
+    public FsInfoSector(BlockDevice device, long offset) throws IOException {
+        super(device, offset, BootSector.SIZE);
     }
-
+    
     public static int offset(Fat32BootSector bs) {
         return bs.getFsInfoSectorNr() * bs.getBytesPerSector();
-    }
-    
-    boolean isDirty() {
-        return dirty;
-    }
-    
-    void write(BlockDevice device, long offset) throws IOException {
-        device.write(offset, ByteBuffer.wrap(data));
     }
     
     public void setNrFreeClusters(long value) {
@@ -57,24 +48,27 @@ class FsInfoSector extends Sector {
     }
 
     public void init() {
-        data[0x000] = 0x52; // R
-        data[0x001] = 0x52; // R
-        data[0x002] = 0x61; // a
-        data[0x003] = 0x41; // A
-
+        buffer.position(0x00);
+        buffer.put((byte) 0x52);
+        buffer.put((byte) 0x52);
+        buffer.put((byte) 0x61);
+        buffer.put((byte) 0x41);
+        
         /* 480 reserved bytes */
 
-        data[0x1e4] = 0x72; // r
-        data[0x1e5] = 0x72; // r
-        data[0x1e6] = 0x41; // A
-        data[0x1e7] = 0x61; // a
-
+        buffer.position(0x1e4);
+        buffer.put((byte) 0x72);
+        buffer.put((byte) 0x72);
+        buffer.put((byte) 0x41);
+        buffer.put((byte) 0x61);
+        
         setNrFreeClusters(-1);
         setLastAllocatedCluster(2);
-        
-        data[0x1fe] = 0x55;
-        data[0x1ff] = (byte) 0xaa;
 
+        buffer.position(0x1fe);
+        buffer.put((byte) 0x55);
+        buffer.put((byte) 0xaa);
+        
         dirty = true;
     }
 }

@@ -148,7 +148,7 @@ public final class FatFileSystem extends AbstractFileSystem {
         final BlockDevice api = getBlockDevice();
 
         if (bs.isDirty()) {
-            bs.write(api);
+            bs.write();
         }
         
 //        if (fsInfo != null && fsInfo.isDirty()) {

@@ -3,7 +3,6 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * Contains the FAT32 specific parts of the boot sector.
@@ -12,8 +11,8 @@ import java.nio.ByteBuffer;
  */
 public final class Fat32BootSector extends BootSector {
 
-    public Fat32BootSector(byte[] src) {
-        super(src);
+    public Fat32BootSector(BlockDevice device) throws IOException {
+        super(device);
     }
     
     @Override
@@ -139,7 +138,7 @@ public final class Fat32BootSector extends BootSector {
     public void writeCopy(BlockDevice device) throws IOException {
         if (getBootSectorCopySector() > 0) {
             final long offset = getBootSectorCopySector() * SIZE;
-            device.write(offset, ByteBuffer.wrap(data));
+            device.write(offset, buffer);
         }
     }
 }
