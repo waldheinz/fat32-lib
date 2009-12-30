@@ -11,6 +11,12 @@ import java.io.IOException;
  */
 public final class Fat32BootSector extends BootSector {
 
+    /**
+     * The offset to the entry specifying the first cluster of the FAT32
+     * root directory.
+     */
+    public final static int ROOT_DIR_FIRST_CLUSTER_OFFSET = 0x2c;
+
     public Fat32BootSector(BlockDevice device) throws IOException {
         super(device);
     }
@@ -32,7 +38,27 @@ public final class Fat32BootSector extends BootSector {
         set8(0x58, 0x20); /* ' ' */
         set8(0x59, 0x20); /* ' ' */
     }
-    
+
+    /**
+     * Returns the first cluster in the FAT that contains the root directory.
+     *
+     * @return the root directory's first cluster
+     */
+    public long getRootDirFirstCluster() {
+        return get32(ROOT_DIR_FIRST_CLUSTER_OFFSET);
+    }
+
+    /**
+     * Sets the first cluster of the root directory.
+     *
+     * @param value the root directory's first cluster
+     */
+    public void setRootDirFirstCluster(long value) {
+        if (getRootDirFirstCluster() == value) return;
+        
+        set32(ROOT_DIR_FIRST_CLUSTER_OFFSET, value);
+    }
+
     /**
      * Sets the sectur number that contains a copy of the boot sector.
      *
@@ -44,7 +70,6 @@ public final class Fat32BootSector extends BootSector {
                 "boot sector copy sector must be >= 0");
         
         set16(0x32, sectNr);
-        this.dirty = true;
     }
     
     /**
@@ -67,7 +92,8 @@ public final class Fat32BootSector extends BootSector {
             final byte c =
                     (label == null) ? 0 :
                     (label.length() > i) ? (byte) label.charAt(i) : 0x20;
-            super.set8(0x47 + i, c);
+
+            set8(0x47 + i, c);
         }
     }
 
@@ -77,8 +103,8 @@ public final class Fat32BootSector extends BootSector {
 
     public void setFsInfoSectorNr(int offset) {
         if (getFsInfoSectorNr() == offset) return;
-        super.set16(0x30, offset);
-        super.dirty = true;
+
+        set16(0x30, offset);
     }
 
     @Override
@@ -86,7 +112,6 @@ public final class Fat32BootSector extends BootSector {
         if (getSectorsPerFat() == v) return;
         
         set32(0x24, v);
-        super.dirty = true;
     }
 
     @Override

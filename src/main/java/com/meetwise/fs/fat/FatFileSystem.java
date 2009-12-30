@@ -99,8 +99,9 @@ public final class FatFileSystem extends AbstractFileSystem {
 
         fat = fats[0];
         if (fatType == FatType.FAT32) {
+            final Fat32BootSector f32bs = (Fat32BootSector) bs;
             FatFile rootDirFile = new FatFile(this,
-                    bs.getRootDirFirstCluster());
+                    f32bs.getRootDirFirstCluster());
             rootDir = new FatLfnDirectory(this, rootDirFile);
         } else {
             rootDir = new FatLfnDirectory(this,

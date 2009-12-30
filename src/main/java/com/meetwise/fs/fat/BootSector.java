@@ -233,11 +233,6 @@ public abstract class BootSector extends Sector {
         
         set8(0x10, v);
     }
-
-
-    public long getRootDirFirstCluster() {
-        return get32(0x2c);
-    }
     
     /**
      * Gets the number of logical sectors

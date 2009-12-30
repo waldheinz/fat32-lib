@@ -47,10 +47,11 @@ class FatDirectory extends AbstractDirectory {
         super(fs, file);
         
         this.file = file;
+
         this.root = 
                 (fs.getFatType() == FatType.FAT32) ? 
                     (file.getStartCluster() == 
-                    fs.getBootSector().getRootDirFirstCluster()) ?
+                    ((Fat32BootSector)fs.getBootSector()).getRootDirFirstCluster()) ?
                         true : false : false;
     }
 
