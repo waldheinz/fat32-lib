@@ -357,7 +357,9 @@ abstract class AbstractDirectory
      * @param newSize
      * @return boolean
      */
-    protected abstract boolean canChangeSize(int newSize);
+    protected final boolean canChangeSize(int newSize) {
+        return (file != null);
+    }
 
     protected String splitName(String nameExt) {
         int i = nameExt.indexOf('.');

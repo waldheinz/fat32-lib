@@ -67,10 +67,6 @@ class FatDirectory extends AbstractDirectory {
         else return null;
     }
     
-    public boolean isRoot() {
-        return this.root;
-    }
-
     /**
      * Read the contents of this directory from the persistent storage at the
      * given offset.
@@ -175,14 +171,6 @@ class FatDirectory extends AbstractDirectory {
         } else {
             write();
         }
-    }
-    
-    /**
-     * @see org.jnode.fs.fat.AbstractDirectory#canChangeSize(int)
-     */
-    @Override
-    protected boolean canChangeSize(int newSize) {
-        return (file != null);
     }
     
     void setLabel(String label) throws IOException {

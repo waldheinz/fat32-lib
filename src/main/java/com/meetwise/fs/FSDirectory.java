@@ -36,6 +36,7 @@ public interface FSDirectory extends FSObject, Iterable<FSDirectoryEntry> {
      *
      * @return the directory iterator
      */
+    @Override
     public Iterator<FSDirectoryEntry> iterator();
 
     /**
