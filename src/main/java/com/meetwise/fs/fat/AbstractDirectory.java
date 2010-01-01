@@ -43,8 +43,8 @@ abstract class AbstractDirectory
             new Vector<FatBasicDirEntry>();
     
     private boolean dirty;
-    protected FatFile file;
-
+    protected ClusterChain file;
+    
     // for root
     protected AbstractDirectory(FatFileSystem fs, int nrEntries) {
         super(fs);

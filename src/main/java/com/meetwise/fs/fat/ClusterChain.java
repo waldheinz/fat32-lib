@@ -77,12 +77,33 @@ public class ClusterChain {
         return ((long) chain.length) * clusterSize;
     }
 
-
     /**
-     * Sets the length.
+     * Sets the length of this {@code ClusterChain} in bytes. Because a
+     * {@code ClusterChain} can only contain full clusters, the new size
+     * will always be a multiple of the cluster size.
+     *
+     * @param size the desired number of bytes the can be stored in
+     *      this {@code ClusterChain}
+     * @return the true number of bytes this {@code ClusterChain} can contain
+     * @throws IOException on error setting the new size
+     * @see #setChainLength(int) 
+     */
+    public long setSize(long size) throws IOException {
+        final long nrClusters = ((size + clusterSize - 1) / clusterSize);
+        if (nrClusters > Integer.MAX_VALUE)
+            throw new IOException("too many clusters");
+
+        setChainLength((int) nrClusters);
+
+        return clusterSize * nrClusters;
+    }
+    
+    /**
+     * Sets the length of this cluster chain in clusters.
      *
      * @param nrClusters the new number of clusters this chain should contain
-     * @throws IOException
+     * @throws IOException on error updating the chain length
+     * @see #setSize(long) 
      */
     public synchronized void setChainLength(int nrClusters) throws IOException {
         

@@ -114,12 +114,9 @@ public final class FatFile extends ClusterChain implements FSFile {
     @Override
     public void setLength(long length) throws FileSystemException {
         if (this.length == length) return;
-
-        final long clusterSize = fs.getClusterSize();
-        final int nrClusters = (int) ((length + clusterSize - 1) / clusterSize);
-
+        
         try {
-            super.setChainLength(nrClusters);
+            super.setSize(length);
         } catch (IOException ex) {
             throw new FileSystemException(fs, ex);
         }

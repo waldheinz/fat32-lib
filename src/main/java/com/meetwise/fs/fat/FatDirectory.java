@@ -79,7 +79,13 @@ class FatDirectory extends AbstractDirectory {
         // TODO optimize it also to use ByteBuffer at lower level
         // final byte[] data = new byte[entries.size() * 32];
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
-        file.read(0, data);
+        
+        try {
+            file.readData(0, data);
+        } catch (IOException ex) {
+            throw new FileSystemException(getFileSystem(), ex);
+        }
+
         read(data.array());
         resetDirty();
     }
@@ -115,12 +121,21 @@ class FatDirectory extends AbstractDirectory {
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
 
         if (canChangeSize(entries.size())) {
-            file.setLength(data.capacity());
+            try {
+                file.setSize(data.capacity());
+            } catch (IOException ex) {
+                throw new FileSystemException(getFileSystem(), ex);
+            }
         }
         
         write(data.array());
-        // file.write(0, data, 0, data.length);
-        file.write(0, data);
+
+        try {
+            file.writeData(0, data);
+        } catch (IOException ex) {
+            throw new FileSystemException(getFileSystem(), ex);
+        }
+
         resetDirty();
     }
 
