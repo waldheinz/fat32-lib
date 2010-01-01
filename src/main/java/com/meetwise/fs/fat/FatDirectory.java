@@ -43,10 +43,8 @@ class FatDirectory extends AbstractDirectory {
      * @param file
      * @throws FileSystemException 
      */
-    public FatDirectory(FatFileSystem fs, FatFile file) throws FileSystemException {
+    public FatDirectory(FatFileSystem fs, FatFile file) throws FileSystemException{
         super(fs, file);
-        
-        this.file = file;
 
         this.root = 
                 (fs.getFatType() == FatType.FAT32) ? 

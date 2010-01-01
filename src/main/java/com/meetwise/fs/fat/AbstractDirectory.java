@@ -39,27 +39,33 @@ abstract class AbstractDirectory
         extends FatObject
         implements FSDirectory, Iterable<FSDirectoryEntry> {
 
-    protected Vector<FatBasicDirEntry> entries =
-            new Vector<FatBasicDirEntry>();
-    
+    protected final Vector<FatBasicDirEntry> entries;
+    protected final ClusterChain file;
+
     private boolean dirty;
-    protected ClusterChain file;
-    
-    // for root
-    protected AbstractDirectory(FatFileSystem fs, int nrEntries) {
+
+    protected AbstractDirectory(FatFileSystem fs,
+            int nrEntries, ClusterChain file) {
+        
         super(fs);
         
-        entries.setSize(nrEntries);
-        dirty = false;
-    }
-    
-    protected AbstractDirectory(FatFileSystem fs, int nrEntries, FatFile file) {
-        this(fs, nrEntries);
+        this.entries = new Vector<FatBasicDirEntry>(nrEntries);
+        this.entries.setSize(nrEntries);
         this.file = file;
     }
     
-    protected AbstractDirectory(FatFileSystem fs, FatFile myFile) {
-        this(fs, (int) myFile.getLength() / 32, myFile);
+    protected AbstractDirectory(FatFileSystem fs, ClusterChain chain)
+            throws FileSystemException {
+        
+        super(fs);
+        
+        final long entryCount = chain.getLengthOnDisk() / 32;
+        if (entryCount > Integer.MAX_VALUE)
+            throw new FileSystemException(fs, "too many directory entries");
+
+        this.entries = new Vector<FatBasicDirEntry>((int) entryCount);
+        this.entries.setSize((int) entryCount);
+        this.file = chain;
     }
     
     /**

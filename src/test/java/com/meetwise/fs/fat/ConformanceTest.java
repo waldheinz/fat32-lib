@@ -39,6 +39,7 @@ public class ConformanceTest {
         root.addFile("jdom-1.0.jar");
         final FSDirectoryEntry dir = root.addDirectory("testDir.test");
         dir.getDirectory().addFile("this.should.work.toooo");
+        fs.flush();
     }
 
     @Test
