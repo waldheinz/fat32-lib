@@ -22,7 +22,6 @@ package com.meetwise.fs.fat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -256,30 +255,7 @@ abstract class AbstractDirectory
             }
         }
     }
-
-    /**
-     * Print the contents of this directory to the given writer. Used for
-     * debugging purposes.
-     * 
-     * @param out
-     */
-    public void printTo(PrintWriter out) {
-        int freeCount = 0;
-
-        for (int i = 0; i < entries.size(); i++) {
-            FatBasicDirEntry entry = entries.get(i);
-            
-            if (entry != null) {
-                out.println("0x" + Integer.toHexString(i) +
-                        " " + entries.get(i));
-            } else {
-                freeCount++;
-            }
-        }
-        
-        out.println("Unused entries " + freeCount);
-    }
-
+    
     private class DirIterator implements Iterator<FSDirectoryEntry> {
 
         private int offset = 0;
