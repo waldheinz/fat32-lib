@@ -21,11 +21,18 @@
 package com.meetwise.fs.fat;
 
 /**
+ * 
  * @author gbin
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 class FatBasicDirEntry extends FatObject implements FatConstants {
 
-    protected final byte[] rawData = new byte[32];
+    /**
+     * The size in bytes of an FAT directory entry.
+     */
+    public final static int SIZE = 32;
+    
+    protected final byte[] rawData = new byte[SIZE];
 
     FatBasicDirEntry(AbstractDirectory dir) {
         super(dir.getFileSystem());
@@ -34,10 +41,10 @@ class FatBasicDirEntry extends FatObject implements FatConstants {
     FatBasicDirEntry(AbstractDirectory dir, byte[] src, int offset) {
         super(dir.getFileSystem());
         
-        System.arraycopy(src, offset, rawData, 0, 32);
+        System.arraycopy(src, offset, rawData, 0, SIZE);
     }
 
     public void write(byte[] dest, int offset) {
-        System.arraycopy(rawData, 0, dest, offset, 32);
+        System.arraycopy(rawData, 0, dest, offset, SIZE);
     }
 }
