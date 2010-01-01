@@ -149,7 +149,6 @@ class FatLfnDirectory extends FatDirectory {
     }
 
     private void readLFN() {
-//        System.out.println("Read LFN");
         int i = 0;
         int size = entries.size();
 
@@ -166,7 +165,6 @@ class FatLfnDirectory extends FatDirectory {
             int offset = i; // beginning of the entry
             // check when we reach a real entry
             while (entries.get(i) instanceof FatLfnDirEntry) {
-                // System.out.println(" Jumped over : " + entries.get(i));
                 i++;
                 if (i >= size) {
                     // This is a cutted entry, forgive it
