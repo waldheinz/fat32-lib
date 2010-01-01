@@ -107,7 +107,7 @@ public final class Fat {
      * @param offset the byte offset where to read the FAZ from the device
      * @throws IOException on read error
      */
-    public synchronized void read(BlockDevice device, long offset)
+    public void read(BlockDevice device, long offset)
             throws IOException {
         
         final byte[] data = new byte[nrSectors * sectorSize];
@@ -126,7 +126,7 @@ public final class Fat {
      * @param offset the byte offset where to write the FAT on the device
      * @throws IOException on write error
      */
-    public synchronized void write(BlockDevice device, long offset)
+    public void write(BlockDevice device, long offset)
             throws IOException {
 
         final byte[] data = new byte[nrSectors * sectorSize];
@@ -185,7 +185,7 @@ public final class Fat {
         return this.lastFreeCluster;
     }
     
-    public synchronized long[] getChain(long startCluster) {
+    public long[] getChain(long startCluster) {
         testCluster(startCluster);
         // Count the chain first
         int count = 1;
@@ -212,7 +212,7 @@ public final class Fat {
      * @param cluster
      * @return long The next cluster number or -1 which means eof.
      */
-    public synchronized long getNextCluster(long cluster) {
+    public long getNextCluster(long cluster) {
         testCluster(cluster);
         long entry = entries[(int) cluster];
         if (isEofCluster(entry)) {
@@ -259,7 +259,6 @@ public final class Fat {
         this.dirty = true;
         
         return entryIndex;
-
     }
 
     /**
@@ -269,7 +268,7 @@ public final class Fat {
      * @return long
      * @throws IOException if there are no free clusters
      */
-    public synchronized long[] allocNew(int nrClusters) throws IOException {
+    public long[] allocNew(int nrClusters) throws IOException {
 
         long rc[] = new long[nrClusters];
 
@@ -289,7 +288,7 @@ public final class Fat {
      * @return long the newly allocated and appended cluster number
      * @throws IOException if there are no free clusters
      */
-    public synchronized long allocAppend(long cluster)
+    public long allocAppend(long cluster)
             throws IOException {
         
         testCluster(cluster);
@@ -304,12 +303,12 @@ public final class Fat {
         return newCluster;
     }
 
-    public synchronized void setEof(long cluster) {
+    public void setEof(long cluster) {
         testCluster(cluster);
         entries[(int) cluster] = fatType.getEofMarker();
     }
 
-    public synchronized void setFree(long cluster) {
+    public void setFree(long cluster) {
         testCluster(cluster);
         entries[(int) cluster] = 0;
     }

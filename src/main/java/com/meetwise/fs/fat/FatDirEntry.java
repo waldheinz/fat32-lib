@@ -165,14 +165,17 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
         return flags;
     }
 
+    @Override
     public long getCreated() {
         return created;
     }
 
+    @Override
     public long getLastModified() {
         return lastModified;
     }
 
+    @Override
     public long getLastAccessed() {
         return lastAccessed;
     }
@@ -195,6 +198,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
         return ext;
     }
 
+    @Override
     public String getName() {
         if (ext.length() > 0) {
             return name + "." + ext;
@@ -254,6 +258,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
         setDirty();
     }
 
+    @Override
     public void setLastModified(long lastModified) {
         this.lastModified = lastModified;
         setDirty();
@@ -291,7 +296,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * 
      * @param newLength The length to set
      */
-    public synchronized void updateLength(long newLength) {
+    public void updateLength(long newLength) {
         this.length = newLength;
         setDirty();
     }
@@ -303,6 +308,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * @return File
      * @throws IOException on read error
      */
+    @Override
     public FSFile getFile() throws IOException {
         if (isFile()) {
             return getFatFile();
@@ -317,6 +323,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      *
      * @throws IOException on read error
      */
+    @Override
     public FSDirectory getDirectory() throws IOException {
         if (isDirectory()) {
             return getFatFile().getDirectory();
@@ -340,6 +347,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * 
      * @param name The name to set
      */
+    @Override
     public void setName(String name) {
         FatUtils.checkValidName(name);
         this.name = name;
@@ -404,6 +412,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * @return 
      * @see org.jnode.fs.FSDirectoryEntry#isFile()
      */
+    @Override
     public boolean isFile() {
         return (!(isDirectory() || isLabel()));
     }
@@ -414,6 +423,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * @return 
      * @see org.jnode.fs.FSDirectoryEntry#isDirectory()
      */
+    @Override
     public boolean isDirectory() {
         return ((flags & F_DIRECTORY) != 0);
     }
@@ -539,6 +549,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * 
      * @return boolean
      */
+    @Override
     public final boolean isDirty() {
         return _dirty;
     }
@@ -551,6 +562,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
     /**
      * @return The directory this entry belongs to.
      */
+    @Override
     public FSDirectory getParent() {
         return parent;
     }

@@ -105,7 +105,7 @@ public class ClusterChain {
      * @throws IOException on error updating the chain length
      * @see #setSize(long) 
      */
-    public synchronized void setChainLength(int nrClusters) throws IOException {
+    public void setChainLength(int nrClusters) throws IOException {
         
         if (this.startCluster == 0) {
             final long[] chain;
@@ -136,7 +136,7 @@ public class ClusterChain {
         }
     }
     
-    public synchronized void readData(long offset, ByteBuffer dest)
+    public void readData(long offset, ByteBuffer dest)
             throws IOException {
 
         int len = dest.remaining();
@@ -168,7 +168,7 @@ public class ClusterChain {
         }
     }
     
-    public synchronized void writeData(long offset, ByteBuffer srcBuf)
+    public void writeData(long offset, ByteBuffer srcBuf)
             throws IOException {
         
         int len = srcBuf.remaining();

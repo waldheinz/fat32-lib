@@ -89,7 +89,7 @@ class FatDirectory extends AbstractDirectory {
     }
 
     @Override
-    protected synchronized void read(byte[] src) {
+    protected void read(byte[] src) {
         super.read(src);
         findLabelEntry();
     }
@@ -113,7 +113,7 @@ class FatDirectory extends AbstractDirectory {
      *
      * @throws FileSystemException
      */
-    protected synchronized void write() throws FileSystemException {
+    protected void write() throws FileSystemException {
         // TODO optimize it also to use ByteBuffer at lower level
         // final byte[] data = new byte[entries.size() * 32];
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
@@ -137,7 +137,7 @@ class FatDirectory extends AbstractDirectory {
         resetDirty();
     }
 
-    public synchronized void read(BlockDevice device, long offset) throws FileSystemException {
+    public void read(BlockDevice device, long offset) throws FileSystemException {
         ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
 
         try {
@@ -150,7 +150,7 @@ class FatDirectory extends AbstractDirectory {
         resetDirty();
     }
 
-    public synchronized void write(BlockDevice device, long offset)
+    public void write(BlockDevice device, long offset)
             throws FileSystemException {
         
         final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);

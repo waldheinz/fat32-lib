@@ -84,7 +84,7 @@ public final class FatFile extends ClusterChain implements FSFile {
      * @return Directory
      * @throws IOException on read error
      */
-    synchronized FatDirectory getDirectory() throws IOException {
+    FatDirectory getDirectory() throws IOException {
         if (!isDir) throw new UnsupportedOperationException();
         
         if (dir == null) {

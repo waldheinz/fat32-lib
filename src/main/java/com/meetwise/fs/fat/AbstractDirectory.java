@@ -33,7 +33,10 @@ import com.meetwise.fs.FileSystemException;
 import com.meetwise.fs.ReadOnlyFileSystemException;
 
 /**
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * 
+ *
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 abstract class AbstractDirectory
         extends FatObject
@@ -86,7 +89,7 @@ abstract class AbstractDirectory
      * @return
      * @throws FileSystemException 
      */
-    protected synchronized FatDirEntry addFatFile(String nameExt)
+    protected FatDirEntry addFatFile(String nameExt)
             throws FileSystemException {
         
         if (getFileSystem().isReadOnly()) {
@@ -141,7 +144,7 @@ abstract class AbstractDirectory
      * @return 
      * @throws IOException
      */
-    protected synchronized FatDirEntry addFatDirectory(
+    protected FatDirEntry addFatDirectory(
             String nameExt, long parentCluster) throws IOException {
         
         final FatDirEntry entry = addFatFile(nameExt);
@@ -247,7 +250,7 @@ abstract class AbstractDirectory
      * @param nameExt
      */
     @Override
-    public synchronized void remove(String nameExt) throws IOException {
+    public void remove(String nameExt) throws IOException {
         final FatDirEntry entry = getFatEntry(nameExt);
 
         if (entry == null) throw new FileNotFoundException(nameExt);
@@ -413,7 +416,7 @@ abstract class AbstractDirectory
      * 
      * @param src
      */
-    protected synchronized void read(byte[] src) {
+    protected  void read(byte[] src) {
         
         for (int i = 0; i < entries.size(); i++) {
             int index = i * 32;
@@ -432,7 +435,7 @@ abstract class AbstractDirectory
      * 
      * @param dest
      */
-    protected synchronized void write(byte[] dest) {
+    protected void write(byte[] dest) {
         byte[] empty = new byte[32];
         
         for (int i = 0; i < entries.size(); i++) {
