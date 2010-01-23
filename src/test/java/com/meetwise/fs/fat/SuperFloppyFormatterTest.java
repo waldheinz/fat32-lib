@@ -54,5 +54,8 @@ public class SuperFloppyFormatterTest {
         RamDisk rd = new RamDisk(1024 * 1024);
         SuperFloppyFormatter f = new SuperFloppyFormatter(rd);
         f.format();
+
+        FatFileSystem fs = new FatFileSystem(rd, false);
+        assertNotNull(fs.getRoot());
     }
 }

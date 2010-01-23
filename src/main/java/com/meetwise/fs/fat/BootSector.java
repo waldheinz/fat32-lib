@@ -219,7 +219,7 @@ public abstract class BootSector extends Sector {
      * 
      * @return int
      */
-    public int getNrFats() {
+    public final int getNrFats() {
         return get8(0x10);
     }
 
@@ -228,7 +228,7 @@ public abstract class BootSector extends Sector {
      *
      * @param v the new number of fats
      */
-    public void setNrFats(int v) {
+    public final void setNrFats(int v) {
         if (v == getNrFats()) return;
         
         set8(0x10, v);

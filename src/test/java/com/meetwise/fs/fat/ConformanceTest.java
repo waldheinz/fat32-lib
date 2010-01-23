@@ -49,13 +49,18 @@ public class ConformanceTest {
         /* divide by 2 because we use LFNs which take entries, too */
         final int max = fs.getBootSector().getRootDirEntryCount() / 2;
 
-        for (int i=0; i < max; i++) {
+        System.out.println("max=" + fs.getBootSector().getRootDirEntryCount());
+
+        assertEquals(FatType.FAT12, fs.getFatType());
+
+        int i=0;
+        for (; i < max; i++) {
             root.addFile("f-" + i);
         }
-
+        
         try {
             root.addFile("fails");
-            fail("added too many files to root directory");
+            fail("added too many files to root directory: " + ++i);
         } catch (RootDirectoryFullException ex) {
             /* fine */
         }

@@ -69,7 +69,7 @@ public enum FatType {
         
         @Override
         public long readEntry(byte[] data, int index) {
-            final int idx = index * 2;
+            final int idx = index << 1;
             final int b1 = data[idx] & 0xFF;
             final int b2 = data[idx + 1] & 0xFF;
             return (b2 << 8) | b1;

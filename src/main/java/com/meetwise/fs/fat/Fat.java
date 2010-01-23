@@ -122,11 +122,10 @@ public final class Fat {
     /**
      * Write the contents of this FAT to the given device at the given offset.
      * 
-     * @param device the device to write the FAT to
      * @param offset the byte offset where to write the FAT on the device
      * @throws IOException on write error
      */
-    public void write(BlockDevice device, long offset)
+    public void write(long offset)
             throws IOException {
 
         final byte[] data = new byte[nrSectors * sectorSize];
@@ -138,7 +137,7 @@ public final class Fat {
         device.write(offset, ByteBuffer.wrap(data));
         this.dirty = false;
     }
-
+    
     /**
      * Gets the medium descriptor byte
      * 
@@ -315,9 +314,8 @@ public final class Fat {
     
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-
+        if (!(obj instanceof Fat)) return false;
+        
         final Fat other = (Fat) obj;
         if (!Arrays.equals(this.entries, other.entries)) return false;
         if (this.fatType != other.fatType) return false;

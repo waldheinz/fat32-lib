@@ -100,10 +100,11 @@ public final class FatFileSystem extends AbstractFileSystem {
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
             ClusterChain rootDirFile = new ClusterChain(fat, getClusterSize(),
                     getFilesOffset(), f32bs.getRootDirFirstCluster(), isReadOnly());
-            rootDir = new FatLfnDirectory(rootDirFile, true);
+            rootDir = new FatLfnDirectory(getFilesOffset(), rootDirFile, true);
         } else {
             final Fat16BootSector f16bs = (Fat16BootSector) bs;
-            rootDir = new FatLfnDirectory(api, FatUtils.getFatOffset(bs, 0),
+            rootDir = new FatLfnDirectory(getFilesOffset(), fat,
+                    api, FatUtils.getFatOffset(bs, 0),
                     f16bs.getRootDirEntryCount(),
                     bs.getBytesPerSector() * bs.getSectorsPerCluster(),
                     isReadOnly());
@@ -159,7 +160,7 @@ public final class FatFileSystem extends AbstractFileSystem {
 
         if (fat.isDirty()) {
             for (int i = 0; i < bs.getNrFats(); i++) {
-                fat.write(api, FatUtils.getFatOffset(bs, i));
+                fat.write(FatUtils.getFatOffset(bs, i));
             }
         }
 
@@ -174,16 +175,6 @@ public final class FatFileSystem extends AbstractFileSystem {
         return rootDir;
     }
     
-
-        if (file == null) {
-            file = new FatFile(this, entry, entry.getStartCluster(),
-                    entry.getLength(), entry.isDirectory());
-            files.put(entry, file);
-        }
-
-        return file;
-    }
-
     public int getClusterSize() {
         return bs.getBytesPerSector() * bs.getSectorsPerCluster();
     }
