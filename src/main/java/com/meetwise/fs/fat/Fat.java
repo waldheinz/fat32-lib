@@ -43,6 +43,7 @@ public final class Fat {
     private final int nrSectors;
     private final int sectorSize;
     private final BlockDevice device;
+    private final BootSector bs;
     private final long offset;
     
     private boolean dirty;
@@ -66,6 +67,7 @@ public final class Fat {
     }
     
     private Fat(BootSector bs, long offset) throws IOException {
+        this.bs = bs;
         this.fatType = bs.getFatType();
         if (bs.getSectorsPerFat() > Integer.MAX_VALUE)
             throw new IllegalArgumentException("FAT too large");
@@ -86,6 +88,15 @@ public final class Fat {
         
         entries = new long[(int) ((nrSectors * sectorSize) /
                 fatType.getEntrySize())];
+    }
+    
+    /**
+     * Returns the {@code BootSector} that specifies this {@code Fat}.
+     *
+     * @return this {@code Fat}'s {@code BootSector}
+     */
+    public BootSector getBootSector() {
+        return this.bs;
     }
 
     /**

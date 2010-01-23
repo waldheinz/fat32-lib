@@ -172,6 +172,17 @@ public abstract class BootSector extends Sector {
     }
 
     /**
+     * Returns the number of bytes per cluster, which is calculated from the
+     * {@link #getSectorsPerCluster() sectors per cluster} and the
+     * {@link #getBytesPerSector() bytes per sector}.
+     *
+     * @return the number of bytes per cluster
+     */
+    public int getBytesPerCluster() {
+        return this.getSectorsPerCluster() * this.getBytesPerSector();
+    }
+
+    /**
      * Gets the number of sectors/cluster
      * 
      * @return int

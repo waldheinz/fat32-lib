@@ -461,7 +461,7 @@ abstract class AbstractDirectory
         FatFile file = files.get(entry);
         
         if (file == null) {
-            file = new FatFile(fat, entry, getClusterSize(),
+            file = new FatFile(fat, entry,
                     filesOffset, entry.getStartCluster(),
                     entry.getLength(), entry.isDirectory(),
                     isReadOnly());

@@ -20,8 +20,7 @@ public class ClusterChain {
     private long startCluster;
     private final boolean readOnly;
 
-    public ClusterChain(Fat fat, int clusterSize,
-            long dataOffset, long startCluster, boolean readOnly) {
+    public ClusterChain(Fat fat, long dataOffset, long startCluster, boolean readOnly) {
         
         this.fat = fat;
         if (startCluster != 0)
@@ -29,7 +28,7 @@ public class ClusterChain {
         this.device = fat.getDevice();
         this.dataOffset = dataOffset;
         this.startCluster = startCluster;
-        this.clusterSize = clusterSize;
+        this.clusterSize = fat.getBootSector().getBytesPerCluster();
         this.readOnly = readOnly;
     }
 
