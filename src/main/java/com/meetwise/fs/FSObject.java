@@ -37,12 +37,4 @@ public interface FSObject {
      * @return if this {@code FSObject} is still valid
      */
     public boolean isValid();
-
-    /**
-     * Gets the filesystem to which this object belongs.
-     * 
-     * @return the file system this object is part of
-     */
-    public FileSystem getFileSystem();
-
 }

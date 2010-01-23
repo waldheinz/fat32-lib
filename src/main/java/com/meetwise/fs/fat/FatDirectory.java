@@ -21,8 +21,8 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
+import com.meetwise.fs.FSDirectory;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Iterator;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
@@ -30,7 +30,7 @@ import com.meetwise.fs.FileSystemException;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-class FatDirectory extends AbstractDirectory {
+abstract class FatDirectory extends AbstractDirectory implements FSDirectory {
 
     private final boolean root;
 
@@ -40,58 +40,33 @@ class FatDirectory extends AbstractDirectory {
      * Constructor for Directory.
      * 
      * @param fs
-     * @param file
+     * @param chain
      * @throws FileSystemException 
      */
-    public FatDirectory(FatFileSystem fs, FatFile file) throws FileSystemException{
-        super(fs, file);
+    public FatDirectory(long filesOffset, ClusterChain chain, boolean isRoot)
+            throws FileSystemException, IOException {
+        
+        super(filesOffset, chain);
 
-        this.root = 
-                (fs.getFatType() == FatType.FAT32) ? 
-                    (file.getStartCluster() == 
-                    ((Fat32BootSector)fs.getBootSector()).getRootDirFirstCluster()) ?
-                        true : false : false;
+        this.root = isRoot;
+        if (isRoot)
+            findLabelEntry();
     }
 
     // for root
-    protected FatDirectory(FatFileSystem fs, int nrEntries) {
-        super(fs, nrEntries, null);
+    protected FatDirectory(long filesOffset, Fat fat, BlockDevice device, long offset, int nrEntries,
+            int clusterSize, boolean readOnly)
+            throws FileSystemException, IOException {
+        
+        super(filesOffset, fat, device, offset, nrEntries, clusterSize, readOnly);
         
         root = true;
+        findLabelEntry();
     }
 
     String getLabel() {
         if (labelEntry != null) return labelEntry.getName();
         else return null;
-    }
-    
-    /**
-     * Read the contents of this directory from the persistent storage at the
-     * given offset.
-     * 
-     * @throws FileSystemException
-     */
-    protected void read() throws FileSystemException {
-        entries.setSize((int) file.getLengthOnDisk() / 32);
-
-        // TODO optimize it also to use ByteBuffer at lower level
-        // final byte[] data = new byte[entries.size() * 32];
-        final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
-        
-        try {
-            file.readData(0, data);
-        } catch (IOException ex) {
-            throw new FileSystemException(getFileSystem(), ex);
-        }
-
-        read(data.array());
-        resetDirty();
-    }
-
-    @Override
-    protected void read(byte[] src) {
-        super.read(src);
-        findLabelEntry();
     }
     
     private void findLabelEntry() {
@@ -104,85 +79,6 @@ class FatDirectory extends AbstractDirectory {
                     break;
                 }
             }
-        }
-    }
-
-    /**
-     * Write the contents of this directory to the given persistent storage at
-     * the given offset.
-     *
-     * @throws FileSystemException
-     */
-    protected void write() throws FileSystemException {
-        // TODO optimize it also to use ByteBuffer at lower level
-        // final byte[] data = new byte[entries.size() * 32];
-        final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
-
-        if (canChangeSize(entries.size())) {
-            try {
-                file.setSize(data.capacity());
-            } catch (IOException ex) {
-                throw new FileSystemException(getFileSystem(), ex);
-            }
-        }
-        
-        write(data.array());
-
-        try {
-            file.writeData(0, data);
-        } catch (IOException ex) {
-            throw new FileSystemException(getFileSystem(), ex);
-        }
-
-        resetDirty();
-    }
-
-    public void read(BlockDevice device, long offset) throws FileSystemException {
-        ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
-
-        try {
-            device.read(offset, data);
-        } catch (IOException ex) {
-            throw new FileSystemException(this.getFileSystem(), ex);
-        }
-        
-        read(data.array());
-        resetDirty();
-    }
-
-    public void write(BlockDevice device, long offset)
-            throws FileSystemException {
-        
-        final ByteBuffer data = ByteBuffer.allocate(entries.size() * 32);
-        write(data.array());
-        try {
-            device.write(offset, data);
-        } catch (IOException ex) {
-            throw new FileSystemException(this.getFileSystem(), ex);
-        }
-        resetDirty();
-    }
-
-    /**
-     * Flush the contents of this directory to the persistent storage
-     * 
-     * @throws FileSystemException 
-     */
-    @Override
-    public void flush() throws FileSystemException {
-        if (file == null) {
-            final FatFileSystem fs = getFileSystem();
-            long offset;
-            
-            try {
-                offset = FatUtils.getRootDirOffset(fs.getBootSector());
-            } catch (IOException ex) {
-                throw new FileSystemException(fs, ex);
-            }
-
-            write(fs.getBlockDevice(), offset);
-        } else {
-            write();
         }
     }
     

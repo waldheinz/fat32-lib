@@ -29,7 +29,7 @@ import java.util.Iterator;
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte
  */
-public interface FSDirectory extends FSObject, Iterable<FSDirectoryEntry> {
+public interface FSDirectory extends Iterable<FSDirectoryEntry> {
 
     /**
      * Gets an iterator to iterate over the entries of this directory.

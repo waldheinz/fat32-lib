@@ -20,6 +20,8 @@
  
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BlockDevice;
+import com.meetwise.fs.FSDirectory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,12 +31,13 @@ import java.util.Iterator;
 
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.ReadOnlyFileSystemException;
 
 /**
+ *
  * @author gbin
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class FatLfnDirectory extends FatDirectory {
+final class FatLfnDirectory extends FatDirectory implements FSDirectory {
 
     private final HashMap<String, LfnEntry> shortNameIndex =
             new HashMap<String, LfnEntry>();
@@ -46,26 +49,32 @@ class FatLfnDirectory extends FatDirectory {
 
     /**
      * @param fs
-     * @param file
+     * @param chain
      * @throws FileSystemException
      */
-    public FatLfnDirectory(FatFileSystem fs, FatFile file) throws FileSystemException {
-        super(fs, file);
+    public FatLfnDirectory(long filesOffset, ClusterChain chain, boolean isRoot) throws FileSystemException, IOException {
+        super(filesOffset, chain, isRoot);
         
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
-        read();
+        
+        parseLfn();
     }
-
+    
     /**
-     * Constructor for the root directory.
+     * Constructor for the FAT12/16 root directory.
      *
      * @param fs
      * @param nrEntries
      */
-    public FatLfnDirectory(FatFileSystem fs, int nrEntries) {
-        super(fs, nrEntries);
+    public FatLfnDirectory(long filesOffset, Fat fat, BlockDevice device, long offset, int nrEntries,
+            int clusterSize, boolean readOnly)
+            throws FileSystemException, IOException {
+        
+        super(filesOffset, fat, device, offset, nrEntries, clusterSize, readOnly);
         
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
+
+        parseLfn();
     }
     
     ShortNameGenerator getShortNameGenerator() {
@@ -73,10 +82,7 @@ class FatLfnDirectory extends FatDirectory {
     }
 
     @Override
-    public LfnEntry addFile(String name) throws FileSystemException {
-        if (getFileSystem().isReadOnly())
-            throw new ReadOnlyFileSystemException(this.getFileSystem());
-
+    public LfnEntry addFile(String name) throws FileSystemException {    
         name = name.trim();
         String shortName = sng.generateShortName(name);
         FatDirEntry realEntry = new FatDirEntry(this, splitName(shortName), splitExt(shortName));
@@ -84,42 +90,26 @@ class FatLfnDirectory extends FatDirectory {
         shortNameIndex.put(shortName, entry);
         longFileNameIndex.put(name, entry);
         setDirty();
-        flush();
         return entry;
     }
 
     @Override
     public FSDirectoryEntry addDirectory(String name) throws IOException {
-        if (getFileSystem().isReadOnly())
-            throw new ReadOnlyFileSystemException(this.getFileSystem());
-
         name = name.trim();
         String shortName = sng.generateShortName(name);
-        FatDirEntry realEntry = new FatDirEntry(this, splitName(shortName), splitExt(shortName));
-
-        final long parentCluster;
-        if (file == null) {
-            parentCluster = 0;
-        } else {
-            parentCluster = file.getStartCluster();
-        }
-
-        final int clusterSize = getFileSystem().getClusterSize();
+        FatDirEntry realEntry = new FatDirEntry(
+                this, splitName(shortName), splitExt(shortName));
+        
+        final int clusterSize = getClusterSize();
         realEntry.setFlags(FatConstants.F_DIRECTORY);
         final FatFile f = realEntry.getFatFile();
         f.setLength(clusterSize);
-
-        // TODO optimize it also to use ByteBuffer at lower level
-        // final byte[] buf = new byte[clusterSize];
+        
         final ByteBuffer buf = ByteBuffer.allocate(clusterSize);
 
-        // Clean the contents of this cluster to avoid reading strange data
-        // in the directory.
-        // file.write(0, buf, 0, buf.length);
         f.write(0, buf);
-
-        f.getDirectory().initialize(f.getStartCluster(), parentCluster);
-
+        f.getDirectory().initialize(f.getStartCluster(), getStorageCluster());
+        
         LfnEntry entry = new LfnEntry(this, realEntry, name);
         shortNameIndex.put(shortName, entry);
         longFileNameIndex.put(name, entry);
@@ -133,7 +123,7 @@ class FatLfnDirectory extends FatDirectory {
         name = name.trim();
         FSDirectoryEntry entry;
         
-        // try first as a long file name
+        // try first as a long chain name
         entry = longFileNameIndex.get(name);
         if (entry == null)
             return shortNameIndex.get(name.toUpperCase());
@@ -141,14 +131,8 @@ class FatLfnDirectory extends FatDirectory {
             return entry;
 
     }
-
-    @Override
-    protected void read(byte[] src) {
-        super.read(src);
-        readLFN();
-    }
-
-    private void readLFN() {
+    
+    private void parseLfn() {
         int i = 0;
         int size = entries.size();
 
@@ -186,8 +170,8 @@ class FatLfnDirectory extends FatDirectory {
         }
 
     }
-
-    private void updateLFN() throws FileSystemException {
+    
+    private void updateLFN() throws IOException {
         ArrayList<FatBasicDirEntry> destination = new ArrayList<FatBasicDirEntry>();
 
         if (labelEntry != null) destination.add(labelEntry);
@@ -202,7 +186,7 @@ class FatLfnDirectory extends FatDirectory {
         final int size = destination.size();
         if (entries.size() < size) {
             if (!canChangeSize(size)) {
-                throw new RootDirectoryFullException(this.getFileSystem());
+                throw new IOException("root directory is full");
             }
         }
 
@@ -228,7 +212,7 @@ class FatLfnDirectory extends FatDirectory {
     }
 
     @Override
-    public void flush() throws FileSystemException {
+    public void flush() throws FileSystemException, IOException {
         updateLFN();
         
         super.flush();

@@ -20,6 +20,8 @@
  
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BlockDevice;
+import com.meetwise.fs.FSDirectory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -27,10 +29,11 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import java.util.Vector;
-import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
 import com.meetwise.fs.ReadOnlyFileSystemException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 
@@ -39,36 +42,77 @@ import com.meetwise.fs.ReadOnlyFileSystemException;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 abstract class AbstractDirectory
-        extends FatObject
-        implements FSDirectory, Iterable<FSDirectoryEntry> {
+        implements Iterable<FSDirectoryEntry> , FSDirectory {
 
     protected final Vector<FatBasicDirEntry> entries;
-    protected final ClusterChain file;
-
+    private final ClusterChain chain;
+    private final BlockDevice device;
+    private final long deviceOffset;
+    private final Map<FatDirEntry, FatFile> files;
+    private final Fat fat;
     private boolean dirty;
+    private final int clusterSize;
+    private final boolean readOnly;
+    private final long filesOffset;
 
-    protected AbstractDirectory(FatFileSystem fs,
-            int nrEntries, ClusterChain file) {
-        
-        super(fs);
+    protected AbstractDirectory(long filesOffset, Fat fat, BlockDevice device,
+            long offset, int nrEntries, int clusterSize, boolean readOnly) throws IOException {
         
         this.entries = new Vector<FatBasicDirEntry>(nrEntries);
+        this.files = new HashMap<FatDirEntry, FatFile>();
         this.entries.setSize(nrEntries);
-        this.file = file;
+        this.chain = null;
+        this.filesOffset = filesOffset;
+        this.fat = fat;
+        this.device = device;
+        this.deviceOffset = offset;
+        this.clusterSize = clusterSize;
+        this.readOnly = readOnly;
+        
+        read();
     }
     
-    protected AbstractDirectory(FatFileSystem fs, ClusterChain chain)
-            throws FileSystemException {
+    protected AbstractDirectory(long filesOffset, ClusterChain chain)
+            throws IOException {
         
-        super(fs);
-        
-        final long entryCount = chain.getLengthOnDisk() / 32;
-        if (entryCount > Integer.MAX_VALUE)
-            throw new FileSystemException(fs, "too many directory entries");
+        final long size = chain.getLengthOnDisk() / FatBasicDirEntry.SIZE;
+        if (size > Integer.MAX_VALUE)
+            throw new IOException("too many directory entries");
 
-        this.entries = new Vector<FatBasicDirEntry>((int) entryCount);
-        this.entries.setSize((int) entryCount);
-        this.file = chain;
+        this.entries = new Vector<FatBasicDirEntry>((int) size);
+        this.files = new HashMap<FatDirEntry, FatFile>();
+        this.entries.setSize((int) size);
+        this.filesOffset = filesOffset;
+        this.chain = chain;
+        this.device = null;
+        this.deviceOffset = -1;
+        this.clusterSize = chain.getClusterSize();
+        this.readOnly = chain.isReadOnly();
+        this.fat = chain.getFat();
+        
+        read();
+    }
+
+    public final int getClusterSize() {
+        return clusterSize;
+    }
+    
+    /**
+     * Returns the first cluster of this directory, if it is stored in a
+     * cluster chain. This is true for all directories excpet the root
+     * directories of FAT12/16 partitions, for which 0 is returned.
+     *
+     * @return the first cluster of the chain where the contents of this
+     *      directory are stored, or 0 for FAT12/16 root directories
+     */
+    protected final long getStorageCluster() {
+        if (this.chain != null) {
+            assert (this.chain.getStartCluster() >= Fat.FIRST_CLUSTER);
+            
+            return this.chain.getStartCluster();
+        } else {
+            return 0;
+        }
     }
     
     /**
@@ -81,6 +125,10 @@ abstract class AbstractDirectory
     public Iterator<FSDirectoryEntry> iterator() {
         return new DirIterator();
     }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
     
     /**
      * Add a directory entry.
@@ -92,12 +140,12 @@ abstract class AbstractDirectory
     protected FatDirEntry addFatFile(String nameExt)
             throws FileSystemException {
         
-        if (getFileSystem().isReadOnly()) {
-            throw new ReadOnlyFileSystemException(this.getFileSystem());
+        if (isReadOnly()) {
+            throw new ReadOnlyFileSystemException(null);
         }
 
         if (getFatEntry(nameExt) != null) {
-            throw new FileSystemException(this.getFileSystem(),
+            throw new FileSystemException(null,
                     "file already exists " + nameExt); //NOI18N
         }
         
@@ -120,12 +168,12 @@ abstract class AbstractDirectory
             return newEntry;
         }
         
-        throw new FileSystemException(this.getFileSystem(),
+        throw new FileSystemException(null,
                 "directory is full"); //NOI18N
     }
 
     /**
-     * Add a new file with a given name to this directory.
+     * Add a new chain with a given name to this directory.
      * 
      * @param name
      * @return 
@@ -144,22 +192,19 @@ abstract class AbstractDirectory
      * @return 
      * @throws IOException
      */
-    protected FatDirEntry addFatDirectory(
+    private FatDirEntry addFatDirectory(
             String nameExt, long parentCluster) throws IOException {
         
         final FatDirEntry entry = addFatFile(nameExt);
-        final int clusterSize = getFileSystem().getClusterSize();
         entry.setFlags(FatConstants.F_DIRECTORY);
         final FatFile f = entry.getFatFile();
         f.setLength(clusterSize);
-
-        //TODO optimize it also to use ByteBuffer at lower level        
-        //final byte[] buf = new byte[clusterSize];
+        
         final ByteBuffer buf = ByteBuffer.allocate(clusterSize);
 
         // Clean the contents of this cluster to avoid reading strange data
         // in the directory.
-        //file.write(0, buf, 0, buf.length);
+        //chain.write(0, buf, 0, buf.length);
         f.write(0, buf);
 
         f.getDirectory().initialize(f.getStartCluster(), parentCluster);
@@ -176,15 +221,15 @@ abstract class AbstractDirectory
      */
     @Override
     public FSDirectoryEntry addDirectory(String name) throws IOException {
-        if (getFileSystem().isReadOnly()) throw new
-                ReadOnlyFileSystemException(this.getFileSystem());
+        if (isReadOnly()) throw new
+                ReadOnlyFileSystemException(null);
 
         final long parentCluster;
 
-        if (file == null) {
+        if (chain == null) {
             parentCluster = 0;
         } else {
-            parentCluster = file.getStartCluster();
+            parentCluster = chain.getStartCluster();
         }
         
         return addFatDirectory(name, parentCluster);
@@ -245,7 +290,7 @@ abstract class AbstractDirectory
     }
 
     /**
-     * Remove a file or directory with a given name
+     * Remove a chain or directory with a given name
      * 
      * @param nameExt
      */
@@ -355,7 +400,7 @@ abstract class AbstractDirectory
     /**
      * Mark this directory as not dirty.
      */
-    protected final void resetDirty() {
+    private final void resetDirty() {
         this.dirty = false;
     }
 
@@ -367,7 +412,7 @@ abstract class AbstractDirectory
      * @return boolean
      */
     protected final boolean canChangeSize(int newSize) {
-        return (file != null);
+        return (chain != null);
     }
 
     protected String splitName(String nameExt) {
@@ -405,19 +450,80 @@ abstract class AbstractDirectory
         e.setStartCluster((int) parentCluster);
     }
 
+    
+    /**
+     * Gets the file for the given entry.
+     * 
+     * @param entry
+     * @return 
+     */
+    FatFile getFile(FatDirEntry entry) {
+        FatFile file = files.get(entry);
+        
+        if (file == null) {
+            file = new FatFile(fat, entry, getClusterSize(),
+                    filesOffset, entry.getStartCluster(),
+                    entry.getLength(), entry.isDirectory(),
+                    isReadOnly());
+            files.put(entry, file);
+        }
+        
+        return file;
+    }
+
     /**
      * Flush the contents of this directory to the persistent storage
      */
     @Override
-    public abstract void flush() throws IOException;
-    
-    /**
-     * Read the contents of this directory from the given byte array
-     * 
-     * @param src
-     */
-    protected  void read(byte[] src) {
+    public void flush() throws IOException {
+        final ByteBuffer data = ByteBuffer.allocate(
+                entries.size() * FatBasicDirEntry.SIZE);
+
+        final byte[] empty = new byte[32];
+
+
+        for (FatFile f : files.values()) {
+            f.flush();
+        }
+
+        for (int i = 0; i < entries.size(); i++) {
+            final FatBasicDirEntry entry = entries.get(i);
+
+            if (entry != null) {
+                entry.write(data.array(), i * 32);
+            } else {
+                System.arraycopy(empty, 0, data.array(), i * 32, 32);
+            }
+        }
         
+        if (chain != null) {
+            final long trueSize = chain.setSize(data.capacity());
+            chain.writeData(0, data);
+
+            if (trueSize > data.capacity()) {
+                final int rest = (int) (trueSize - data.capacity());
+                final ByteBuffer fill = ByteBuffer.allocate(rest);
+                chain.writeData(data.capacity(), fill);
+            }
+        } else {
+            device.write(deviceOffset, data);
+        }
+
+        resetDirty();
+    }
+    
+    private void read() throws IOException {
+        final ByteBuffer data = ByteBuffer.allocate(
+                entries.size() * FatBasicDirEntry.SIZE);
+
+        if (this.chain != null) {
+            chain.readData(0, data);
+        } else {
+            device.read(deviceOffset, data);
+        }
+        
+        final byte[] src = data.array();
+
         for (int i = 0; i < entries.size(); i++) {
             int index = i * 32;
             if (src[index] == 0) {
@@ -428,25 +534,4 @@ abstract class AbstractDirectory
             }
         }
     }
-
-    /**
-     * Write the contents of this directory to the given device at the given
-     * offset.
-     * 
-     * @param dest
-     */
-    protected void write(byte[] dest) {
-        byte[] empty = new byte[32];
-        
-        for (int i = 0; i < entries.size(); i++) {
-            final FatBasicDirEntry entry = entries.get(i);
-            
-            if (entry != null) {
-                entry.write(dest, i * 32);
-            } else {
-                System.arraycopy(empty, 0, dest, i * 32, 32);
-            }
-        }
-    }
-
 }

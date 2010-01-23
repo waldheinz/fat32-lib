@@ -339,9 +339,9 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * @return File
      */
     public FatFile getFatFile() {
-        return getFileSystem().getFile(this);
+        return getDir().getFile(this);
     }
-
+    
     /**
      * Sets the name.
      * 

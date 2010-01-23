@@ -23,7 +23,6 @@ package com.meetwise.fs.fat;
 import com.meetwise.fs.AbstractFileSystem;
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
-import java.util.HashMap;
 import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FileSystemException;
 
@@ -39,8 +38,6 @@ public final class FatFileSystem extends AbstractFileSystem {
     private final FsInfoSector fsInfo;
     private final BootSector bs;
     private final FatLfnDirectory rootDir;
-    private final HashMap<FatDirEntry, FatFile> files =
-            new HashMap<FatDirEntry, FatFile>();
     private final FatType fatType;
     private final long filesOffset;
 
@@ -58,7 +55,8 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @param ignoreFatDifferences
      * @throws IOException on read error
      */
-    public FatFileSystem(BlockDevice api, boolean readOnly, boolean ignoreFatDifferences)
+    public FatFileSystem(BlockDevice api, boolean readOnly,
+            boolean ignoreFatDifferences)
             throws IOException {
         
         super(api, readOnly);
@@ -100,13 +98,15 @@ public final class FatFileSystem extends AbstractFileSystem {
         fat = fats[0];
         if (fatType == FatType.FAT32) {
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
-            FatFile rootDirFile = new FatFile(this,
-                    f32bs.getRootDirFirstCluster());
-            rootDir = new FatLfnDirectory(this, rootDirFile);
+            ClusterChain rootDirFile = new ClusterChain(fat, getClusterSize(),
+                    getFilesOffset(), f32bs.getRootDirFirstCluster(), isReadOnly());
+            rootDir = new FatLfnDirectory(rootDirFile, true);
         } else {
-            rootDir = new FatLfnDirectory(this,
-                    ((Fat16BootSector)bs).getRootDirEntryCount());
-            rootDir.read(getBlockDevice(), FatUtils.getRootDirOffset(bs));
+            final Fat16BootSector f16bs = (Fat16BootSector) bs;
+            rootDir = new FatLfnDirectory(api, FatUtils.getFatOffset(bs, 0),
+                    f16bs.getRootDirEntryCount(),
+                    bs.getBytesPerSector() * bs.getSectorsPerCluster(),
+                    isReadOnly());
         }
             
     }
@@ -156,9 +156,6 @@ public final class FatFileSystem extends AbstractFileSystem {
 //            fsInfo.write(api, bs.getF);
 //        }
         
-        for (FatFile f : files.values()) {
-            f.flush();
-        }
 
         if (fat.isDirty()) {
             for (int i = 0; i < bs.getNrFats(); i++) {
@@ -177,21 +174,13 @@ public final class FatFileSystem extends AbstractFileSystem {
         return rootDir;
     }
     
-    /**
-     * Gets the file for the given entry.
-     * 
-     * @param entry
-     * @return 
-     */
-    FatFile getFile(FatDirEntry entry) {
-        FatFile file = files.get(entry);
-        
+
         if (file == null) {
             file = new FatFile(this, entry, entry.getStartCluster(),
                     entry.getLength(), entry.isDirectory());
             files.put(entry, file);
         }
-        
+
         return file;
     }
 

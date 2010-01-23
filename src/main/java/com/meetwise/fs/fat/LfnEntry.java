@@ -164,11 +164,7 @@ class LfnEntry implements FSDirectoryEntry {
     public boolean isValid() {
         return realEntry.isValid();
     }
-
-    public FileSystem getFileSystem() {
-        return realEntry.getFileSystem();
-    }
-
+    
     public boolean isDeleted() {
         return realEntry.isDeleted();
     }

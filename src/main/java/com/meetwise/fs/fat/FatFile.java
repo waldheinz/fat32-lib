@@ -20,7 +20,6 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FileSystem;
 import com.meetwise.fs.FileSystemException;
 import java.io.IOException;
 import com.meetwise.fs.FSFile;
@@ -35,34 +34,17 @@ import java.nio.ByteBuffer;
 public final class FatFile extends ClusterChain implements FSFile {
 
     private final FatDirEntry myEntry;
-    private final FatFileSystem fs;
 
     private long length;
     private FatDirectory dir;
     private boolean isDir;
     private boolean valid;
     
-    /**
-     * Constructor used for the FAT32 root directory.
-     *
-     * @param fs
-     * @param startCluster
-     */
-    FatFile(FatFileSystem fs, long startCluster) {
-        super(fs.getFat(), fs.getClusterSize(), fs.getFilesOffset(), startCluster);
+    FatFile(Fat fat, FatDirEntry myEntry, int clusterSize, long filesOffset,
+            long startCluster, long length, boolean isDir, boolean readOnly) {
 
-        this.fs = fs;
-        this.myEntry = null;
-        this.length = getLengthOnDisk();
-        this.isDir = true;
-    }
+        super(fat, clusterSize, filesOffset, startCluster, readOnly);
 
-    FatFile(FatFileSystem fs, FatDirEntry myEntry,
-            long startCluster, long length, boolean isDir) {
-
-        super(fs.getFat(), fs.getClusterSize(), fs.getFilesOffset(), startCluster);
-
-        this.fs = fs;
         this.myEntry = myEntry;
         this.length = length;
         this.isDir = isDir;
@@ -88,7 +70,7 @@ public final class FatFile extends ClusterChain implements FSFile {
         if (!isDir) throw new UnsupportedOperationException();
         
         if (dir == null) {
-            dir = new FatLfnDirectory(fs, this);
+            dir = new FatLfnDirectory(dataOffset, this, false);
         }
         
         return dir;
@@ -118,7 +100,7 @@ public final class FatFile extends ClusterChain implements FSFile {
         try {
             super.setSize(length);
         } catch (IOException ex) {
-            throw new FileSystemException(fs, ex);
+            throw new FileSystemException(null, ex);
         }
 
         if (myEntry != null)
@@ -136,13 +118,13 @@ public final class FatFile extends ClusterChain implements FSFile {
         final long max = isDir ? getLengthOnDisk() : getLength();
 
         if (offset + len > max)
-            throw new FileSystemException(getFileSystem(),
+            throw new FileSystemException(null,
                     "can not read beyond EOF"); //NOI18N
 
         try {
             readData(offset, dest);
         } catch (IOException ex) {
-            throw new FileSystemException(fs, ex);
+            throw new FileSystemException(null, ex);
         }
     }
     
@@ -152,7 +134,7 @@ public final class FatFile extends ClusterChain implements FSFile {
             
         final long max = (isDir) ? getLengthOnDisk() : getLength();
         if (offset > max)
-            throw new FileSystemException(this.getFileSystem(),
+            throw new FileSystemException(null,
                     "can not write beyond EOF"); //NOI18N
                     
         int len = srcBuf.remaining();
@@ -161,7 +143,7 @@ public final class FatFile extends ClusterChain implements FSFile {
         try {
             writeData(offset, srcBuf);
         } catch (IOException ex) {
-            throw new FileSystemException(fs, ex);
+            throw new FileSystemException(null, ex);
         }
     }
 
@@ -169,10 +151,6 @@ public final class FatFile extends ClusterChain implements FSFile {
     public boolean isValid() {
         return this.valid;
     }
-
-    @Override
-    public FileSystem getFileSystem() {
-        return this.fs;
-    }
+    
     
 }

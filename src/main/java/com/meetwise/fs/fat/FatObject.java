@@ -26,19 +26,13 @@ import com.meetwise.fs.FSObject;
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
 public abstract class FatObject implements FSObject {
-
-    /** 
-     * The filesystem I'm a part of
-     */
-    private final FatFileSystem fs;
-
+    
     /** 
      * Is this object still valid?
      */
     private boolean valid;
     
-    public FatObject(FatFileSystem fs) {
-        this.fs = fs;
+    public FatObject() {
         this.valid = true;
     }
 
@@ -60,15 +54,4 @@ public abstract class FatObject implements FSObject {
     protected void invalidate() {
         valid = false;
     }
-
-    /**
-     * Gets the filesystem I'm a part of.
-     *
-     * @return the file system of this object
-     */
-    @Override
-    public final FatFileSystem getFileSystem() {
-        return fs;
-    }
-    
 }

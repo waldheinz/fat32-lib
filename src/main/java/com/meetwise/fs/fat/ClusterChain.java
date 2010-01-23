@@ -12,15 +12,16 @@ import java.nio.ByteBuffer;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public class ClusterChain {
-    private final Fat fat;
+    protected final Fat fat;
     private final BlockDevice device;
     private final int clusterSize;
-    private final long dataOffset;
+    protected final long dataOffset;
     
     private long startCluster;
+    private final boolean readOnly;
 
     public ClusterChain(Fat fat, int clusterSize,
-            long dataOffset, long startCluster) {
+            long dataOffset, long startCluster, boolean readOnly) {
         
         this.fat = fat;
         if (startCluster != 0)
@@ -29,8 +30,17 @@ public class ClusterChain {
         this.dataOffset = dataOffset;
         this.startCluster = startCluster;
         this.clusterSize = clusterSize;
+        this.readOnly = readOnly;
     }
 
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+    
+    public int getClusterSize() {
+        return clusterSize;
+    }
+    
     public Fat getFat() {
         return fat;
     }
