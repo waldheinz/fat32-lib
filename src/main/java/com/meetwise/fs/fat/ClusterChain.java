@@ -20,13 +20,13 @@ public class ClusterChain {
     private long startCluster;
     private final boolean readOnly;
 
-    public ClusterChain(Fat fat, long dataOffset, long startCluster, boolean readOnly) {
+    public ClusterChain(Fat fat, long startCluster, boolean readOnly) {
         
         this.fat = fat;
         if (startCluster != 0)
             this.fat.testCluster(startCluster);
         this.device = fat.getDevice();
-        this.dataOffset = dataOffset;
+        this.dataOffset = FatUtils.getFilesOffset(fat.getBootSector());
         this.startCluster = startCluster;
         this.clusterSize = fat.getBootSector().getBytesPerCluster();
         this.readOnly = readOnly;

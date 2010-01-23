@@ -40,10 +40,10 @@ public final class FatFile extends ClusterChain implements FSFile {
     private boolean isDir;
     private boolean valid;
     
-    FatFile(Fat fat, FatDirEntry myEntry, long filesOffset,
+    FatFile(Fat fat, FatDirEntry myEntry,
             long startCluster, long length, boolean isDir, boolean readOnly) {
 
-        super(fat, filesOffset, startCluster, readOnly);
+        super(fat, startCluster, readOnly);
 
         this.myEntry = myEntry;
         this.length = length;
@@ -70,7 +70,7 @@ public final class FatFile extends ClusterChain implements FSFile {
         if (!isDir) throw new UnsupportedOperationException();
         
         if (dir == null) {
-            dir = new FatLfnDirectory(dataOffset, this, false);
+            dir = new FatLfnDirectory(this, false);
         }
         
         return dir;

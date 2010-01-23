@@ -43,10 +43,10 @@ abstract class FatDirectory extends AbstractDirectory implements FSDirectory {
      * @param chain
      * @throws FileSystemException 
      */
-    public FatDirectory(long filesOffset, ClusterChain chain, boolean isRoot)
+    public FatDirectory(ClusterChain chain, boolean isRoot)
             throws FileSystemException, IOException {
         
-        super(filesOffset, chain);
+        super(chain);
 
         this.root = isRoot;
         if (isRoot)
@@ -54,11 +54,11 @@ abstract class FatDirectory extends AbstractDirectory implements FSDirectory {
     }
 
     // for root
-    protected FatDirectory(long filesOffset, Fat fat, BlockDevice device, long offset, int nrEntries,
+    protected FatDirectory(Fat fat, BlockDevice device, long offset, int nrEntries,
             int clusterSize, boolean readOnly)
             throws FileSystemException, IOException {
         
-        super(filesOffset, fat, device, offset, nrEntries, clusterSize, readOnly);
+        super(fat, device, offset, nrEntries, clusterSize, readOnly);
         
         root = true;
         findLabelEntry();

@@ -183,7 +183,7 @@ public final class SuperFloppyFormatter {
         final Fat fat = Fat.create(bs, 0);
         
         final FatLfnDirectory rootDir = new FatLfnDirectory(
-                FatUtils.getFilesOffset(bs), fat,
+                fat,
                 device, FatUtils.getFatOffset(bs, 0),
                 bs.getRootDirEntryCount(), clusterSize, false);
                 

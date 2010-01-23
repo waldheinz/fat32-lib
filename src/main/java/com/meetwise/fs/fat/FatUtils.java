@@ -39,7 +39,7 @@ class FatUtils {
      * @return long
      * @throws IOException 
      */
-    public static long getFatOffset(BootSector bs, int fatNr) throws IOException {
+    public static long getFatOffset(BootSector bs, int fatNr) {
         long sectSize = bs.getBytesPerSector();
         long sectsPerFat = bs.getSectorsPerFat();
         long resSects = bs.getNrReservedSectors();
@@ -59,13 +59,13 @@ class FatUtils {
      * @return long
      * @throws IOException 
      */
-    public static long getRootDirOffset(BootSector bs) throws IOException {
+    public static long getRootDirOffset(BootSector bs) {
         long sectSize = bs.getBytesPerSector();
         long sectsPerFat = bs.getSectorsPerFat();
         int fats = bs.getNrFats();
 
         long offset = getFatOffset(bs, 0);
-
+        
         offset += fats * sectsPerFat * sectSize;
 
         return offset;
@@ -78,7 +78,7 @@ class FatUtils {
      * @return long
      * @throws IOException 
      */
-    public static long getFilesOffset(BootSector bs) throws IOException {
+    public static long getFilesOffset(BootSector bs) {
         long offset = getRootDirOffset(bs);
         
         offset += bs.getRootDirEntryCount() * 32;

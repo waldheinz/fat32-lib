@@ -53,16 +53,14 @@ abstract class AbstractDirectory
     private boolean dirty;
     private final int clusterSize;
     private final boolean readOnly;
-    private final long filesOffset;
 
-    protected AbstractDirectory(long filesOffset, Fat fat, BlockDevice device,
+    protected AbstractDirectory(Fat fat, BlockDevice device,
             long offset, int nrEntries, int clusterSize, boolean readOnly) throws IOException {
         
         this.entries = new Vector<FatBasicDirEntry>(nrEntries);
         this.files = new HashMap<FatDirEntry, FatFile>();
         this.entries.setSize(nrEntries);
         this.chain = null;
-        this.filesOffset = filesOffset;
         this.fat = fat;
         this.device = device;
         this.deviceOffset = offset;
@@ -72,7 +70,7 @@ abstract class AbstractDirectory
         read();
     }
     
-    protected AbstractDirectory(long filesOffset, ClusterChain chain)
+    protected AbstractDirectory(ClusterChain chain)
             throws IOException {
         
         final long size = chain.getLengthOnDisk() / FatBasicDirEntry.SIZE;
@@ -82,7 +80,6 @@ abstract class AbstractDirectory
         this.entries = new Vector<FatBasicDirEntry>((int) size);
         this.files = new HashMap<FatDirEntry, FatFile>();
         this.entries.setSize((int) size);
-        this.filesOffset = filesOffset;
         this.chain = chain;
         this.device = null;
         this.deviceOffset = -1;
@@ -461,8 +458,7 @@ abstract class AbstractDirectory
         FatFile file = files.get(entry);
         
         if (file == null) {
-            file = new FatFile(fat, entry,
-                    filesOffset, entry.getStartCluster(),
+            file = new FatFile(fat, entry, entry.getStartCluster(),
                     entry.getLength(), entry.isDirectory(),
                     isReadOnly());
             files.put(entry, file);

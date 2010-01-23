@@ -52,8 +52,8 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
      * @param chain
      * @throws FileSystemException
      */
-    public FatLfnDirectory(long filesOffset, ClusterChain chain, boolean isRoot) throws FileSystemException, IOException {
-        super(filesOffset, chain, isRoot);
+    public FatLfnDirectory(ClusterChain chain, boolean isRoot) throws FileSystemException, IOException {
+        super(chain, isRoot);
         
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
         
@@ -66,11 +66,11 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
      * @param fs
      * @param nrEntries
      */
-    public FatLfnDirectory(long filesOffset, Fat fat, BlockDevice device, long offset, int nrEntries,
+    public FatLfnDirectory(Fat fat, BlockDevice device, long offset, int nrEntries,
             int clusterSize, boolean readOnly)
             throws FileSystemException, IOException {
         
-        super(filesOffset, fat, device, offset, nrEntries, clusterSize, readOnly);
+        super(fat, device, offset, nrEntries, clusterSize, readOnly);
         
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
 
