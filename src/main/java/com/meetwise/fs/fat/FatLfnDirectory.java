@@ -20,8 +20,9 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.BlockDevice;
 import com.meetwise.fs.FSDirectory;
+import com.meetwise.fs.FSDirectoryEntry;
+import com.meetwise.fs.FileSystemException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,8 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FileSystemException;
 
 /**
  *
@@ -46,7 +45,7 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
             new HashMap<String, LfnEntry>();
 
     private final ShortNameGenerator sng;
-
+    
     /**
      * @param fs
      * @param chain
@@ -66,11 +65,10 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
      * @param fs
      * @param nrEntries
      */
-    public FatLfnDirectory(Fat fat, BlockDevice device, long offset, int nrEntries,
-            int clusterSize, boolean readOnly)
+    public FatLfnDirectory(Fat fat, boolean readOnly)
             throws FileSystemException, IOException {
         
-        super(fat, device, offset, nrEntries, clusterSize, readOnly);
+        super(fat, readOnly);
         
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
 

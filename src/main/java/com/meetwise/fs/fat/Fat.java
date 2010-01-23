@@ -89,6 +89,10 @@ public final class Fat {
         entries = new long[(int) ((nrSectors * sectorSize) /
                 fatType.getEntrySize())];
     }
+
+    public FatType getFatType() {
+        return fatType;
+    }
     
     /**
      * Returns the {@code BootSector} that specifies this {@code Fat}.

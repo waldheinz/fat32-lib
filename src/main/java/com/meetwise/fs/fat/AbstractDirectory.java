@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
 import java.util.Vector;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
@@ -54,17 +53,24 @@ abstract class AbstractDirectory
     private final int clusterSize;
     private final boolean readOnly;
 
-    protected AbstractDirectory(Fat fat, BlockDevice device,
-            long offset, int nrEntries, int clusterSize, boolean readOnly) throws IOException {
+    protected AbstractDirectory(Fat fat, boolean readOnly) throws IOException {
+
+        if (fat.getFatType() == FatType.FAT32) {
+            /* FAT32 stores it's root directory in a cluster chain */
+            throw new IllegalArgumentException("FAT32 not supported");
+        }
+
+        final Fat16BootSector bs = (Fat16BootSector) fat.getBootSector();
+        final int nrEntries = bs.getRootDirEntryCount();
         
         this.entries = new Vector<FatBasicDirEntry>(nrEntries);
         this.files = new HashMap<FatDirEntry, FatFile>();
         this.entries.setSize(nrEntries);
         this.chain = null;
         this.fat = fat;
-        this.device = device;
-        this.deviceOffset = offset;
-        this.clusterSize = clusterSize;
+        this.device = bs.getDevice();
+        this.deviceOffset = FatUtils.getRootDirOffset(bs);
+        this.clusterSize = bs.getBytesPerCluster();
         this.readOnly = readOnly;
         
         read();
@@ -446,7 +452,6 @@ abstract class AbstractDirectory
         e.setFlags(FatConstants.F_DIRECTORY);
         e.setStartCluster((int) parentCluster);
     }
-
     
     /**
      * Gets the file for the given entry.

@@ -20,7 +20,6 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.BlockDevice;
 import com.meetwise.fs.FSDirectory;
 import java.io.IOException;
 import java.util.Iterator;
@@ -54,11 +53,10 @@ abstract class FatDirectory extends AbstractDirectory implements FSDirectory {
     }
 
     // for root
-    protected FatDirectory(Fat fat, BlockDevice device, long offset, int nrEntries,
-            int clusterSize, boolean readOnly)
+    protected FatDirectory(Fat fat, boolean readOnly)
             throws FileSystemException, IOException {
         
-        super(fat, device, offset, nrEntries, clusterSize, readOnly);
+        super(fat, readOnly);
         
         root = true;
         findLabelEntry();
