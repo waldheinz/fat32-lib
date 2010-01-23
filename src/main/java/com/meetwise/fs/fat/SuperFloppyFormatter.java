@@ -180,7 +180,7 @@ public final class SuperFloppyFormatter {
             f32bs.writeCopy(device);
         }
         
-        final Fat fat = new Fat(bs, device);
+        final Fat fat = Fat.create(bs, 0);
         
         final FatLfnDirectory rootDir = new FatLfnDirectory(
                 FatUtils.getFilesOffset(bs), fat,
@@ -190,9 +190,9 @@ public final class SuperFloppyFormatter {
         rootDir.flush();
         
         for (int i = 0; i < bs.getNrFats(); i++) {
-            fat.write(FatUtils.getFatOffset(bs, i));
+            fat.writeCopy(FatUtils.getFatOffset(bs, i));
         }
-
+        
         if (label != null) {
             FatFileSystem fs = new FatFileSystem(device, false);
             fs.setVolumeLabel(label);

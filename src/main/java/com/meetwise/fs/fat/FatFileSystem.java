@@ -35,7 +35,6 @@ import com.meetwise.fs.FileSystemException;
 public final class FatFileSystem extends AbstractFileSystem {
     
     private final Fat fat;
-    private final FsInfoSector fsInfo;
     private final BootSector bs;
     private final FatLfnDirectory rootDir;
     private final FatType fatType;
@@ -67,33 +66,19 @@ public final class FatFileSystem extends AbstractFileSystem {
                 "boot sector says there are no FATs");
         
         this.filesOffset = FatUtils.getFilesOffset(bs);
+        this.fatType = bs.getFatType();
+        this.fat = Fat.read(bs, 0);
 
-        //this.fsInfo = new FsInfoSector(bs, getApi());
-        this.fsInfo = null;
-
-        Fat[] fats = new Fat[bs.getNrFats()];
-        fatType = bs.getFatType();
-
-        for (int i = 0; i < fats.length; i++) {
-            Fat tmpFat = new Fat(bs, api);
-            fats[i] = tmpFat;
-            
-            try {
-                tmpFat.read(getBlockDevice(), FatUtils.getFatOffset(bs, i));
-            } catch (IOException ex) {
-                throw new FileSystemException(this, ex);
-            }
-        }
-
-
-        if (!ignoreFatDifferences) for (int i = 1; i < fats.length; i++) {
-            if (!fats[0].equals(fats[i])) {
+        if (!ignoreFatDifferences) {
+            for (int i=1; i < bs.getNrFats(); i++) {
+                final Fat tmpFat = Fat.read(bs, i);
+                if (!fat.equals(tmpFat)) {
                     throw new FileSystemException(this,
-                        "FAT " + i + " differs from FAT 0");
+                            "FAT " + i + " differs from FAT 0");
+                }
             }
         }
 
-        fat = fats[0];
         if (fatType == FatType.FAT32) {
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
             ClusterChain rootDirFile = new ClusterChain(fat, getClusterSize(),
@@ -144,28 +129,19 @@ public final class FatFileSystem extends AbstractFileSystem {
      */
     @Override
     public void flush() throws IOException {
-
-        final BlockDevice api = getBlockDevice();
-
         if (bs.isDirty()) {
             bs.write();
         }
         
-//        if (fsInfo != null && fsInfo.isDirty()) {
-//            fsInfo.write(api, bs.getF);
-//        }
-        
-
         if (fat.isDirty()) {
             for (int i = 0; i < bs.getNrFats(); i++) {
-                fat.write(FatUtils.getFatOffset(bs, i));
+                fat.writeCopy(FatUtils.getFatOffset(bs, i));
             }
         }
-
+        
         if (rootDir.isDirty()) {
             rootDir.flush();
         }
-
     }
     
     @Override

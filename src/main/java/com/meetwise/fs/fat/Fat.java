@@ -37,23 +37,35 @@ public final class Fat {
      * The first cluster that really holds user data in a FAT.
      */
     public final static int FIRST_CLUSTER = 2;
-
+    
     private final long[] entries;
     private final FatType fatType;
-
-    /** The number of sectors this fat takes */
     private final int nrSectors;
-    
-    /** The number of bytes/sector */
     private final int sectorSize;
     private final BlockDevice device;
-
+    private final long offset;
+    
     private boolean dirty;
-
-    /** entry index for find next free entry */
     private int lastFreeCluster = 2;
     
-    Fat(BootSector bs, BlockDevice device) throws IOException {
+    public static Fat read(BootSector bs, int fatNr)
+            throws IOException {
+        
+        final long fatOffset = FatUtils.getFatOffset(bs, fatNr);
+        final Fat result = new Fat(bs, fatOffset);
+        result.read();
+        return result;
+    }
+
+    public static Fat create(BootSector bs, int fatNr) throws IOException {
+        final long fatOffset = FatUtils.getFatOffset(bs, fatNr);
+        final Fat result = new Fat(bs, fatOffset);
+        result.init(bs.getMediumDescriptor());
+        result.write();
+        return result;
+    }
+    
+    private Fat(BootSector bs, long offset) throws IOException {
         this.fatType = bs.getFatType();
         if (bs.getSectorsPerFat() > Integer.MAX_VALUE)
             throw new IllegalArgumentException("FAT too large");
@@ -68,28 +80,34 @@ public final class Fat {
 
         this.nrSectors = (int) bs.getSectorsPerFat();
         this.sectorSize = bs.getBytesPerSector();
-        this.device = device;
+        this.device = bs.getDevice();
         this.dirty = false;
+        this.offset = offset;
         
         entries = new long[(int) ((nrSectors * sectorSize) /
                 fatType.getEntrySize())];
-        entries[0] = (bs.getMediumDescriptor() & 0xFF) | 0xFFFFF00L;
     }
 
+    /**
+     * Returns the {@code BlockDevice} where this {@code Fat} is stored.
+     *
+     * @return the device holding this FAT
+     */
     public BlockDevice getDevice() {
         return device;
+    }
+
+    private void init(int mediumDescriptor) {
+        entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
     }
     
     /**
      * Read the contents of this FAT from the given device at the given offset.
      * 
-     * @param device the device to read the FAT from
-     * @param offset the byte offset where to read the FAZ from the device
+     * @param offset the byte offset where to read the FAT from the device
      * @throws IOException on read error
      */
-    public void read(BlockDevice device, long offset)
-            throws IOException {
-        
+    private void read() throws IOException {
         final byte[] data = new byte[nrSectors * sectorSize];
         device.read(offset, ByteBuffer.wrap(data));
 
@@ -99,15 +117,17 @@ public final class Fat {
         this.dirty = false;
     }
     
+    public void write() throws IOException {
+        this.writeCopy(offset);
+    }
+    
     /**
      * Write the contents of this FAT to the given device at the given offset.
      * 
-     * @param offset the byte offset where to write the FAT on the device
+     * @param offset 
      * @throws IOException on write error
      */
-    public void write(long offset)
-            throws IOException {
-
+    public void writeCopy(long offset) throws IOException {
         final byte[] data = new byte[nrSectors * sectorSize];
         
         for (int index = 0; index < entries.length; index++) {
@@ -301,7 +321,9 @@ public final class Fat {
         if (this.fatType != other.fatType) return false;
         if (this.nrSectors != other.nrSectors) return false;
         if (this.sectorSize != other.sectorSize) return false;
-        
+        if (this.getMediumDescriptor() != other.getMediumDescriptor())
+            return false;
+
         return true;
     }
 

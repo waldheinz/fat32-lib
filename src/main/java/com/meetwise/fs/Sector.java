@@ -33,6 +33,15 @@ public class Sector {
     public boolean isDirty() {
         return this.dirty;
     }
+    
+    /**
+     * Returns the {@code BlockDevice} where this {@code Sector} is stored.
+     *
+     * @return this {@code Sector}'s device
+     */
+    public BlockDevice getDevice() {
+        return this.device;
+    }
 
     public void write() throws IOException {
         buffer.rewind();
