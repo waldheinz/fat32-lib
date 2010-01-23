@@ -52,27 +52,7 @@ public final class Fat {
 
     /** entry index for find next free entry */
     private int lastFreeCluster = 2;
-
-    /**
-     * Create a new instance
-     * 
-     * @param fs the {@link FatFileSystem} this FAT is part of
-     * @param mediumDescriptor
-     * @param sectors
-     * @param sectorSize
-     */
-    public Fat(FatFileSystem fs, int mediumDescriptor, long sectors, int sectorSize) {
-        this.fatType = fs.getFatType();
-        this.device = fs.getBlockDevice();
-        if (sectors > Integer.MAX_VALUE) throw new IllegalArgumentException("FAT too large");
-        this.nrSectors = (int) sectors;
-        this.sectorSize = sectorSize;
-        this.dirty = false;
-        entries = new long[(int) ((sectors * sectorSize) /
-                this.fatType.getEntrySize())];
-        entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
-    }
-
+    
     Fat(BootSector bs, BlockDevice device) throws IOException {
         this.fatType = bs.getFatType();
         if (bs.getSectorsPerFat() > Integer.MAX_VALUE)
@@ -364,7 +344,7 @@ public final class Fat {
     protected boolean isEofCluster(long entry) {
         return fatType.isEofCluster(entry);
     }
-
+    
     protected void testCluster(long cluster) throws IllegalArgumentException {
         if ((cluster < FIRST_CLUSTER) || (cluster >= entries.length)) {
             throw new IllegalArgumentException(

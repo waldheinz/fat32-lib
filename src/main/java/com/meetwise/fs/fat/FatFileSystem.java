@@ -75,11 +75,9 @@ public final class FatFileSystem extends AbstractFileSystem {
         fatType = bs.getFatType();
 
         for (int i = 0; i < fats.length; i++) {
-            Fat tmpFat = new Fat(
-                    this, bs.getMediumDescriptor(), bs.getSectorsPerFat(),
-                    bs.getBytesPerSector());
+            Fat tmpFat = new Fat(bs, api);
             fats[i] = tmpFat;
-
+            
             try {
                 tmpFat.read(getBlockDevice(), FatUtils.getFatOffset(bs, i));
             } catch (IOException ex) {

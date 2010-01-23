@@ -26,7 +26,6 @@ import java.util.List;
 import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
-import com.meetwise.fs.FileSystem;
 
 /**
  * 
