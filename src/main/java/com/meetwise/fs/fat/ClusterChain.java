@@ -16,10 +16,10 @@ public class ClusterChain {
     private final BlockDevice device;
     private final int clusterSize;
     protected final long dataOffset;
+    private final boolean readOnly;
     
     private long startCluster;
-    private final boolean readOnly;
-
+    
     public ClusterChain(Fat fat, long startCluster, boolean readOnly) {
         
         this.fat = fat;
@@ -82,10 +82,9 @@ public class ClusterChain {
     public long getLengthOnDisk() {
         if (getStartCluster() == 0) return 0;
         
-        final long[] chain = getFat().getChain(getStartCluster());
-        return ((long) chain.length) * clusterSize;
+        return getChainLength() * clusterSize;
     }
-
+    
     /**
      * Sets the length of this {@code ClusterChain} in bytes. Because a
      * {@code ClusterChain} can only contain full clusters, the new size
@@ -106,7 +105,19 @@ public class ClusterChain {
 
         return clusterSize * nrClusters;
     }
-    
+
+    /**
+     * Determines the length of this {@code ClusterChain} in clusters.
+     *
+     * @return the length of this chain
+     */
+    public final int getChainLength() {
+        if (getStartCluster() == 0) return 0;
+        
+        final long[] chain = getFat().getChain(getStartCluster());
+        return chain.length;
+    }
+
     /**
      * Sets the length of this cluster chain in clusters.
      *
@@ -114,7 +125,7 @@ public class ClusterChain {
      * @throws IOException on error updating the chain length
      * @see #setSize(long) 
      */
-    public void setChainLength(int nrClusters) throws IOException {
+    public final void setChainLength(int nrClusters) throws IOException {
         
         if (this.startCluster == 0) {
             final long[] chain;
