@@ -47,7 +47,7 @@ public final class Fat {
     private final long offset;
     
     private boolean dirty;
-    private int lastFreeCluster = 2;
+    private int lastFreeCluster;
     
     public static Fat read(BootSector bs, int fatNr)
             throws IOException {
@@ -85,6 +85,7 @@ public final class Fat {
         this.device = bs.getDevice();
         this.dirty = false;
         this.offset = offset;
+        this.lastFreeCluster = FIRST_CLUSTER;
         
         entries = new long[(int) ((nrSectors * sectorSize) /
                 fatType.getEntrySize())];
@@ -114,6 +115,7 @@ public final class Fat {
 
     private void init(int mediumDescriptor) {
         entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
+        entries[1] = fatType.getEofMarker();
     }
     
     /**
@@ -248,21 +250,21 @@ public final class Fat {
         int entryIndex = -1;
 
         for (i = lastFreeCluster; i < entries.length; i++) {
-            if (isFreeCluster(entries[i])) {
+            if (isFreeCluster(i)) {
                 entryIndex = i;
                 break;
             }
         }
         
         if (entryIndex < 0) {
-            for (i = 2; i < lastFreeCluster; i++) {
-                if (isFreeCluster(entries[i])) {
+            for (i = FIRST_CLUSTER; i < lastFreeCluster; i++) {
+                if (isFreeCluster(i)) {
                     entryIndex = i;
                     break;
                 }
             }
         }
-
+        
         if (entryIndex < 0) {
             throw new IOException(
                     "FAT Full (" + entries.length + ", " + i + ")"); //NOI18N
@@ -270,6 +272,7 @@ public final class Fat {
 
         entries[entryIndex] = fatType.getEofMarker();
         lastFreeCluster = (entryIndex + 1) % entries.length;
+        if (lastFreeCluster < FIRST_CLUSTER) lastFreeCluster = FIRST_CLUSTER;
         this.dirty = true;
         
         return entryIndex;
@@ -283,17 +286,16 @@ public final class Fat {
      * @throws IOException if there are no free clusters
      */
     public long[] allocNew(int nrClusters) throws IOException {
-
-        long rc[] = new long[nrClusters];
-
+        final long rc[] = new long[nrClusters];
+        
         rc[0] = allocNew();
         for (int i = 1; i < nrClusters; i++) {
             rc[i] = allocAppend(rc[i - 1]);
         }
-
+        
         return rc;
     }
-
+    
     /**
      * Allocate a cluster to append to a new file
      * 
@@ -359,9 +361,10 @@ public final class Fat {
      * @return boolean
      */
     protected boolean isFreeCluster(long entry) {
-        return (entry == 0);
+        if (entry > Integer.MAX_VALUE) throw new IllegalArgumentException();
+        return (entries[(int) entry] == 0);
     }
-
+    
     /**
      * Is the given entry a reserved cluster?
      *

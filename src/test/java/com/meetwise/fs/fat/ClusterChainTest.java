@@ -29,7 +29,7 @@ public class ClusterChainTest {
         bs.write();
         
         fat = Fat.create(bs, 0);
-        cc = new ClusterChain(fat, Fat.FIRST_CLUSTER, false);
+        cc = new ClusterChain(fat, false);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class ClusterChainTest {
     
     @Test
     public void testSetSize() throws IOException {
-        System.out.println("setLength");
+        System.out.println("setSize");
         
         cc.setSize(bs.getBytesPerCluster());
         assertEquals(1, cc.getChainLength());
@@ -55,5 +55,14 @@ public class ClusterChainTest {
         cc.setSize(0);
         assertEquals(0, cc.getChainLength());
     }
-    
+
+    @Test
+    public void testFirstClusterAlloc() throws IOException {
+        System.out.println("firstClusterAlloc");
+
+        cc.setSize(bs.getBytesPerCluster());
+
+        assertEquals(1, cc.getChainLength());
+        assertEquals(bs.getBytesPerCluster(), cc.getLengthOnDisk());
+    }
 }

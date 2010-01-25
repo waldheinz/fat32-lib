@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public class ClusterChain {
+class ClusterChain {
     protected final Fat fat;
     private final BlockDevice device;
     private final int clusterSize;
@@ -20,11 +20,27 @@ public class ClusterChain {
     
     private long startCluster;
     
+    /**
+     * Creates a new {@code ClusterChain} that contains no clusters.
+     *
+     * @param fat the {@code Fat} that holds the new chain
+     * @param readOnly if the chain should be created read-only
+     */
+    public ClusterChain(Fat fat, boolean readOnly) {
+        this(fat, 0, readOnly);
+    }
+    
     public ClusterChain(Fat fat, long startCluster, boolean readOnly) {
-        
         this.fat = fat;
-        if (startCluster != 0)
+        
+        if (startCluster != 0) {
             this.fat.testCluster(startCluster);
+            
+            if (this.fat.isFreeCluster(startCluster))
+                throw new IllegalArgumentException(
+                    "cluster " + startCluster + " is free");
+        }
+        
         this.device = fat.getDevice();
         this.dataOffset = FatUtils.getFilesOffset(fat.getBootSector());
         this.startCluster = startCluster;
@@ -126,30 +142,34 @@ public class ClusterChain {
      * @see #setSize(long) 
      */
     public final void setChainLength(int nrClusters) throws IOException {
-        
-        if (this.startCluster == 0) {
-            final long[] chain;
-
-            chain = fat.allocNew(nrClusters);
-
+        if ((this.startCluster == 0) && (nrClusters > 0)) {
+            final long[] chain = fat.allocNew(nrClusters);
             this.startCluster = chain[0];
         } else {
             final long[] chain = fat.getChain(startCluster);
-
+            
             if (nrClusters != chain.length) {
                 if (nrClusters > chain.length) {
-                    // Grow
+                    /* grow the chain */
                     int count = nrClusters - chain.length;
-
+                    
                     while (count > 0) {
                         fat.allocAppend(getStartCluster());
                         count--;
                     }
                 } else {
-                    // Shrink
-                    fat.setEof(chain[nrClusters - 1]);
-                    for (int i = nrClusters; i < chain.length; i++) {
-                        fat.setFree(chain[i]);
+                    /* shrink the chain */
+                    if (nrClusters > 0) {
+                        fat.setEof(chain[nrClusters - 1]);
+                        for (int i = nrClusters; i < chain.length; i++) {
+                            fat.setFree(chain[i]);
+                        }
+                    } else {
+                        for (int i=0; i < chain.length; i++) {
+                            fat.setFree(chain[i]);
+                        }
+                        
+                        this.startCluster = 0;
                     }
                 }
             }
@@ -188,11 +208,24 @@ public class ClusterChain {
         }
     }
     
+    /**
+     * Writes data to this cluster chain, possibly growing the chain so it
+     * can store the additional data.
+     *
+     * @param offset the offset where to write the first byte from the buffer
+     * @param srcBuf the buffer to write to this {@code ClusterChain}
+     * @throws IOException on write error
+     */
     public void writeData(long offset, ByteBuffer srcBuf)
             throws IOException {
         
         int len = srcBuf.remaining();
-        
+
+        final long minSize = offset + srcBuf.remaining();
+        if (getLengthOnDisk() < minSize) {
+            setSize(minSize);
+        }
+
         final long[] chain = fat.getChain(getStartCluster());
 
         int chainIdx = (int) (offset / clusterSize);
