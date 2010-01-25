@@ -37,7 +37,6 @@ class FatBasicDirEntry extends FatObject implements FatConstants {
 
     FatBasicDirEntry(AbstractDirectory dir) {
         this.dir = dir;
-        
     }
 
     FatBasicDirEntry(AbstractDirectory dir, byte[] src, int offset) {
@@ -48,9 +47,7 @@ class FatBasicDirEntry extends FatObject implements FatConstants {
     public AbstractDirectory getDir() {
         return dir;
     }
-
     
-
     public void write(byte[] dest, int offset) {
         System.arraycopy(rawData, 0, dest, offset, SIZE);
     }

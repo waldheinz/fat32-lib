@@ -182,7 +182,14 @@ public final class SuperFloppyFormatter {
         
         final Fat fat = Fat.create(bs, 0);
         
-        final FatLfnDirectory rootDir = new FatLfnDirectory(fat, false);
+        final AbstractDirectory rootDirStore;
+        if (fatType == FatType.FAT32) {
+            rootDirStore = null;
+        } else {
+            rootDirStore = new Fat16RootDirectory(fat, false);
+        }
+
+        final FatLfnDirectory rootDir = new FatLfnDirectory(rootDirStore);
         
         rootDir.flush();
         

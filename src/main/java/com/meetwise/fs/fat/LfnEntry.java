@@ -32,14 +32,10 @@ import com.meetwise.fs.FSFile;
  * @author gbin
  */
 class LfnEntry implements FSDirectoryEntry {
-    // decompacted LFN entry
     private String fileName;
-    // TODO: Make them available
-    // private Date creationTime;
-    // private Date lastAccessed;
-    private FatLfnDirectory parent;
-    private FatDirEntry realEntry;
-
+    private final FatLfnDirectory parent;
+    private final FatDirEntry realEntry;
+    
     public LfnEntry(FatLfnDirectory parent, FatDirEntry realEntry, String longName) {
         this.realEntry = realEntry;
         this.parent = parent;
@@ -69,19 +65,21 @@ class LfnEntry implements FSDirectoryEntry {
 
         if ((fileName.length() % 13) != 0) // there is a remaining part
             totalEntrySize++;
-
-        // entry
+            
         FatBasicDirEntry[] entries = new FatBasicDirEntry[totalEntrySize];
         int j = 0;
         int checkSum = calculateCheckSum();
         for (int i = totalEntrySize - 2; i > 0; i--) {
             entries[i] =
-                    new FatLfnDirEntry(parent, fileName.substring(j * 13, j * 13 + 13), j + 1,
+                    new FatLfnDirEntry(parent.getStorageDirectory(),
+                    fileName.substring(j * 13, j * 13 + 13), j + 1,
                             (byte) checkSum, false);
             j++;
         }
+
         entries[0] =
-                new FatLfnDirEntry(parent, fileName.substring(j * 13), j + 1, (byte) checkSum, true);
+                new FatLfnDirEntry(parent.getStorageDirectory(),
+                fileName.substring(j * 13), j + 1, (byte) checkSum, true);
         entries[totalEntrySize - 1] = realEntry;
         return entries;
 
@@ -107,44 +105,53 @@ class LfnEntry implements FSDirectoryEntry {
         return (byte) (sum & 0xff);
     }
 
+    @Override
     public String getName() {
         return fileName;
     }
 
+    @Override
     public FSDirectory getParent() {
-        return realEntry.getParent();
+        return parent;
     }
 
+    @Override
     public long getCreated() {
         return realEntry.getCreated();
     }
 
+    @Override
     public long getLastModified() {
         return realEntry.getLastModified();
     }
 
+    @Override
     public long getLastAccessed() {
         return realEntry.getLastAccessed();
     }
 
+    @Override
     public boolean isFile() {
         return realEntry.isFile();
     }
 
+    @Override
     public boolean isDirectory() {
         return realEntry.isDirectory();
     }
 
+    @Override
     public void setName(String newName) {
         fileName = newName;
         realEntry.setName(parent.getShortNameGenerator().
                 generateShortName(newName));
     }
-
+    
     public void setCreated(long created) {
         realEntry.setCreated(created);
     }
 
+    @Override
     public void setLastModified(long lastModified) {
         realEntry.setLastModified(lastModified);
     }
@@ -153,14 +160,17 @@ class LfnEntry implements FSDirectoryEntry {
         realEntry.setLastAccessed(lastAccessed);
     }
 
+    @Override
     public FSFile getFile() throws IOException {
         return realEntry.getFile();
     }
 
+    @Override
     public FSDirectory getDirectory() throws IOException {
         return realEntry.getDirectory();
     }
 
+    @Override
     public boolean isValid() {
         return realEntry.isValid();
     }
@@ -182,17 +192,11 @@ class LfnEntry implements FSDirectoryEntry {
     }
 
     /**
-     * @param realEntry The realEntry to set.
-     */
-    public void setRealEntry(FatDirEntry realEntry) {
-        this.realEntry = realEntry;
-    }
-
-    /**
      * Indicate if the entry has been modified in memory (ie need to be saved)
      * 
      * @return true if the entry need to be saved
      */
+    @Override
     public boolean isDirty() {
         return true;
     }

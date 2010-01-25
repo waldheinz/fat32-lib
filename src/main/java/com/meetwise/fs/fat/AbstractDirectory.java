@@ -40,9 +40,9 @@ import java.util.Map;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 abstract class AbstractDirectory
-        implements Iterable<FSDirectoryEntry> , FSDirectory {
+        implements Iterable<FSDirectoryEntry> {
 
-    private final Vector<FatBasicDirEntry> entries;
+    final Vector<FatBasicDirEntry> entries;
     private final Map<FatDirEntry, FatFile> files;
     private final Fat fat;
     private boolean dirty;
@@ -152,19 +152,7 @@ abstract class AbstractDirectory
         throw new FileSystemException(null,
                 "directory is full"); //NOI18N
     }
-
-    /**
-     * Add a new chain with a given name to this directory.
-     * 
-     * @param name
-     * @return 
-     * @throws IOException
-     */
-    @Override
-    public FSDirectoryEntry addFile(String name) throws IOException {
-        return addFatFile(name);
-    }
-
+    
     /**
      * Add a directory entry of the type directory.
      * 
@@ -188,24 +176,9 @@ abstract class AbstractDirectory
         //chain.write(0, buf, 0, buf.length);
         f.write(0, buf);
         
-        f.getDirectory().initialize(f.getStartCluster(), parentCluster);
+        f.getDirectory().getStorageDirectory().initialize(f.getStartCluster(), parentCluster);
         flush();
         return entry;
-    }
-
-    /**
-     * Add a new (sub-)directory with a given name to this directory.
-     * 
-     * @param name
-     * @return 
-     * @throws IOException
-     */
-    @Override
-    public FSDirectoryEntry addDirectory(String name) throws IOException {
-        if (isReadOnly()) throw new
-                ReadOnlyFileSystemException(null);
-                
-        return addFatDirectory(name, getStorageCluster());
     }
 
     /**
@@ -240,28 +213,10 @@ abstract class AbstractDirectory
     }
 
     /**
-     * Gets the entry with the given name.
-     * 
-     * @param name
-     * @return 
-     * @throws IOException
-     */
-    @Override
-    public FSDirectoryEntry getEntry(String name) throws IOException {
-        final FatDirEntry entry = getFatEntry(name);
-        if (entry == null) {
-            throw new FileNotFoundException(name);
-        } else {
-            return entry;
-        }
-    }
-
-    /**
      * Remove a chain or directory with a given name
      * 
      * @param nameExt
      */
-    @Override
     public void remove(String nameExt) throws IOException {
         final FatDirEntry entry = getFatEntry(nameExt);
 
@@ -271,7 +226,6 @@ abstract class AbstractDirectory
             if (entries.get(i) == entry) {
                 entries.set(i, null);
                 setDirty();
-                flush();
                 return;
             }
         }
@@ -410,7 +364,6 @@ abstract class AbstractDirectory
     /**
      * Flush the contents of this directory to the persistent storage
      */
-    @Override
     public void flush() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
                 entries.size() * FatBasicDirEntry.SIZE);

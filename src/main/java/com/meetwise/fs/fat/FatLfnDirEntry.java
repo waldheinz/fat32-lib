@@ -23,16 +23,12 @@ package com.meetwise.fs.fat;
 import com.meetwise.fs.util.LittleEndian;
 
 /**
+ *
  * @author gbin
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 class FatLfnDirEntry extends FatBasicDirEntry {
-    /**
-     * @param dir
-     */
-    public FatLfnDirEntry(AbstractDirectory dir) {
-        super(dir);
-    }
-
+    
     /**
      * @param dir
      * @param src

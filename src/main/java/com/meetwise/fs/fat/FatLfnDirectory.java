@@ -42,7 +42,7 @@ final class FatLfnDirectory implements FSDirectory {
     private final HashMap<ShortName, LfnEntry> shortNameIndex =
             new HashMap<ShortName, LfnEntry>();
             
-    private final HashMap<String, LfnEntry> longFileNameIndex =
+    private final HashMap<String, LfnEntry> longNameIndex =
             new HashMap<String, LfnEntry>();
 
     private final ShortNameGenerator sng;
@@ -60,6 +60,14 @@ final class FatLfnDirectory implements FSDirectory {
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
         
         parseLfn();
+    }
+
+    /**
+     * TODO: get rid of this method
+     * @return
+     */
+    public AbstractDirectory getStorageDirectory() {
+        return this.dir;
     }
 
     public boolean isDirty() {
@@ -123,7 +131,7 @@ final class FatLfnDirectory implements FSDirectory {
         FatDirEntry realEntry = new FatDirEntry(dir, shortName);
         LfnEntry entry = new LfnEntry(this, realEntry, name);
         shortNameIndex.put(shortName, entry);
-        longFileNameIndex.put(name, entry);
+        longNameIndex.put(name, entry);
         dir.setDirty();
         return entry;
     }
@@ -142,11 +150,11 @@ final class FatLfnDirectory implements FSDirectory {
         final ByteBuffer buf = ByteBuffer.allocate(clusterSize);
 
         f.write(0, buf);
-        f.getDirectory().initialize(f.getStartCluster(), dir.getStorageCluster());
+        f.getDirectory().getStorageDirectory().initialize(f.getStartCluster(), dir.getStorageCluster());
         
         LfnEntry entry = new LfnEntry(this, realEntry, name);
         shortNameIndex.put(sn, entry);
-        longFileNameIndex.put(name, entry);
+        longNameIndex.put(name, entry);
         dir.setDirty();
         flush();
         return entry;
@@ -156,7 +164,7 @@ final class FatLfnDirectory implements FSDirectory {
     public FSDirectoryEntry getEntry(String name) {
         name = name.trim();
 
-        final FSDirectoryEntry entry = longFileNameIndex.get(name);
+        final FSDirectoryEntry entry = longNameIndex.get(name);
         
         if (entry == null)
             return shortNameIndex.get(new ShortName(name));
@@ -194,11 +202,11 @@ final class FatLfnDirectory implements FSDirectory {
                 break;
             }
             
-            LfnEntry current = new LfnEntry(this, entries, offset, i - offset);
-
+            LfnEntry current = new LfnEntry(this, dir.entries, offset, i - offset);
+            
             if (!current.isDeleted() && current.isValid() && !current.isDotDir()) {
                 shortNameIndex.put(current.getRealEntry().getShortName(), current);
-                longFileNameIndex.put(current.getName(), current);
+                longNameIndex.put(current.getName(), current);
             }
         }
 
@@ -234,7 +242,7 @@ final class FatLfnDirectory implements FSDirectory {
             }
             
             if (useAdd) {
-                entries.add(i, destination.get(i));
+                dir.entries.add(i, destination.get(i));
             }
         }
 
@@ -285,10 +293,10 @@ final class FatLfnDirectory implements FSDirectory {
     @Override
     public void remove(String name) throws IOException {
         name = name.trim();
-        LfnEntry byLongName = longFileNameIndex.get(name);
+        LfnEntry byLongName = longNameIndex.get(name);
         
         if (byLongName != null) {
-            longFileNameIndex.remove(name);
+            longNameIndex.remove(name);
             shortNameIndex.remove(byLongName.getRealEntry().getShortName());
             return;
         }
@@ -296,7 +304,7 @@ final class FatLfnDirectory implements FSDirectory {
         LfnEntry byShortName = shortNameIndex.get(new ShortName(name));
 
         if (byShortName != null) {
-            longFileNameIndex.remove(byShortName.getName());
+            longNameIndex.remove(byShortName.getName());
             shortNameIndex.remove(new ShortName(name));
         }
         
