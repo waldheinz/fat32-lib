@@ -78,12 +78,12 @@ public final class FatFileSystem extends AbstractFileSystem {
                 }
             }
         }
-
+        
         if (fatType == FatType.FAT32) {
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
             ClusterChain rootDirFile = new ClusterChain(fat,
                     f32bs.getRootDirFirstCluster(), isReadOnly());
-            final FatDirectory fd = new FatDirectory(rootDirFile, readOnly, true);
+            final FatDirectory fd = FatDirectory.read(rootDirFile, readOnly, true);
             rootDir = new FatLfnDirectory(fd);
         } else {
             final Fat16RootDirectory rd =

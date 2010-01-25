@@ -40,12 +40,20 @@ final class FatDirectory extends AbstractDirectory {
      * @param chain
      * @throws FileSystemException 
      */
-    public FatDirectory(ClusterChain chain, boolean readOnly, boolean isRoot) throws IOException {
+    private FatDirectory(ClusterChain chain, boolean readOnly, boolean isRoot) {
         super(chain.getFat(),
                 (int)(chain.getLengthOnDisk() / FatBasicDirEntry.SIZE),
                 readOnly, isRoot);
         
         this.chain = chain;   
+    }
+
+    public static FatDirectory read(ClusterChain chain,
+            boolean readOnly, boolean root) throws IOException {
+        
+        final FatDirectory result = new FatDirectory(chain, readOnly, root);
+        result.read();
+        return result;
     }
 
     @Override

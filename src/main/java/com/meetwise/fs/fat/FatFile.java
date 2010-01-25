@@ -70,7 +70,7 @@ public final class FatFile extends ClusterChain implements FSFile {
         if (!isDir) throw new UnsupportedOperationException();
         
         if (dir == null) {
-            final FatDirectory fatDir = new FatDirectory(this, isReadOnly(), false);
+            final FatDirectory fatDir = FatDirectory.read(this, isReadOnly(), false);
             dir = new FatLfnDirectory(fatDir);
         }
         
