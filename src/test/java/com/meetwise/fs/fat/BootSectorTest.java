@@ -26,4 +26,24 @@ public class BootSectorTest {
         assertTrue(bs instanceof Fat32BootSector);
         assertEquals(2, bs.getNrFats());
     }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testSetSectorsPerClusterInvalid() throws IOException {
+        System.out.println("setSectorsPerCluster (invalid)");
+
+        RamDisk rd = new RamDisk(512);
+        BootSector bs = new Fat32BootSector(rd);
+        bs.init();
+        bs.setSectorsPerCluster(3);
+    }
+
+    @Test
+    public void testSetSectorsPerClusterValid() throws IOException {
+        System.out.println("setSectorsPerCluster (valid)");
+
+        RamDisk rd = new RamDisk(512);
+        BootSector bs = new Fat32BootSector(rd);
+        bs.init();
+        bs.setSectorsPerCluster(4);
+    }
 }
