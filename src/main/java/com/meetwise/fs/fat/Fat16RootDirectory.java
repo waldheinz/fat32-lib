@@ -14,11 +14,23 @@ final class Fat16RootDirectory extends AbstractDirectory {
     private final BlockDevice device;
     private final long deviceOffset;
 
-    public Fat16RootDirectory(Fat fat, boolean readOnly) throws IOException {
+    private Fat16RootDirectory(Fat fat, boolean readOnly) {
         super(fat, fat.getBootSector().getRootDirEntryCount(), readOnly, true);
 
         this.deviceOffset = FatUtils.getRootDirOffset(fat.getBootSector());
         this.device = fat.getDevice();
+    }
+
+    public static Fat16RootDirectory read(Fat fat, boolean readOnly) throws IOException {
+        final Fat16RootDirectory result = new Fat16RootDirectory(fat, readOnly);
+        result.read();
+        return result;
+    }
+
+    public static Fat16RootDirectory create(Fat fat) throws IOException {
+        final Fat16RootDirectory result = new Fat16RootDirectory(fat, false);
+        result.flush();
+        return result;
     }
 
     @Override

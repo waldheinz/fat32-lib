@@ -86,7 +86,8 @@ public final class FatFileSystem extends AbstractFileSystem {
             final FatDirectory fd = new FatDirectory(rootDirFile, readOnly, true);
             rootDir = new FatLfnDirectory(fd);
         } else {
-            final Fat16RootDirectory rd = new Fat16RootDirectory(fat, readOnly);
+            final Fat16RootDirectory rd =
+                    Fat16RootDirectory.read(fat, readOnly);
             rootDir = new FatLfnDirectory(rd);
         }
             

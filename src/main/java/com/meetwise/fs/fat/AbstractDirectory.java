@@ -20,7 +20,6 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FSDirectory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -50,18 +49,16 @@ abstract class AbstractDirectory
     private final boolean readOnly;
     private final boolean isRoot;
     
-    protected AbstractDirectory(Fat fat, int entryCount, boolean readOnly, boolean isRoot) throws IOException {
-        final Fat16BootSector bs = (Fat16BootSector) fat.getBootSector();
+    protected AbstractDirectory(Fat fat, int entryCount,
+            boolean readOnly, boolean isRoot) {
         
         this.entries = new Vector<FatBasicDirEntry>(entryCount);
         this.entries.setSize(entryCount);
         this.files = new HashMap<FatDirEntry, FatFile>();
         this.fat = fat;
-        this.clusterSize = bs.getBytesPerCluster();
+        this.clusterSize = fat.getBootSector().getBytesPerCluster();
         this.readOnly = readOnly;
         this.isRoot = isRoot;
-        
-        read();
     }
     
     protected abstract void read(ByteBuffer data) throws IOException;
@@ -390,7 +387,7 @@ abstract class AbstractDirectory
         resetDirty();
     }
     
-    private void read() throws IOException {
+    protected final void read() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
                 entries.size() * FatBasicDirEntry.SIZE);
                 
