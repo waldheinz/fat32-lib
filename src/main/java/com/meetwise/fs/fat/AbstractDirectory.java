@@ -20,7 +20,6 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.BlockDevice;
 import com.meetwise.fs.FSDirectory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -43,79 +42,54 @@ import java.util.Map;
 abstract class AbstractDirectory
         implements Iterable<FSDirectoryEntry> , FSDirectory {
 
-    protected final Vector<FatBasicDirEntry> entries;
-    private final ClusterChain chain;
-    private final BlockDevice device;
-    private final long deviceOffset;
+    private final Vector<FatBasicDirEntry> entries;
     private final Map<FatDirEntry, FatFile> files;
     private final Fat fat;
     private boolean dirty;
     private final int clusterSize;
     private final boolean readOnly;
-
-    protected AbstractDirectory(Fat fat, boolean readOnly) throws IOException {
-
-        if (fat.getFatType() == FatType.FAT32) {
-            /* FAT32 stores it's root directory in a cluster chain */
-            throw new IllegalArgumentException("FAT32 not supported");
-        }
-
+    private final boolean isRoot;
+    
+    protected AbstractDirectory(Fat fat, int entryCount, boolean readOnly, boolean isRoot) throws IOException {
         final Fat16BootSector bs = (Fat16BootSector) fat.getBootSector();
-        final int nrEntries = bs.getRootDirEntryCount();
         
-        this.entries = new Vector<FatBasicDirEntry>(nrEntries);
+        this.entries = new Vector<FatBasicDirEntry>(entryCount);
+        this.entries.setSize(entryCount);
         this.files = new HashMap<FatDirEntry, FatFile>();
-        this.entries.setSize(nrEntries);
-        this.chain = null;
         this.fat = fat;
-        this.device = bs.getDevice();
-        this.deviceOffset = FatUtils.getRootDirOffset(bs);
         this.clusterSize = bs.getBytesPerCluster();
         this.readOnly = readOnly;
+        this.isRoot = isRoot;
         
         read();
     }
     
-    protected AbstractDirectory(ClusterChain chain)
-            throws IOException {
-        
-        final long size = chain.getLengthOnDisk() / FatBasicDirEntry.SIZE;
-        if (size > Integer.MAX_VALUE)
-            throw new IOException("too many directory entries");
+    protected abstract void read(ByteBuffer data) throws IOException;
+    
+    protected abstract void write(ByteBuffer data) throws IOException;
 
-        this.entries = new Vector<FatBasicDirEntry>((int) size);
-        this.files = new HashMap<FatDirEntry, FatFile>();
-        this.entries.setSize((int) size);
-        this.chain = chain;
-        this.device = null;
-        this.deviceOffset = -1;
-        this.clusterSize = chain.getClusterSize();
-        this.readOnly = chain.isReadOnly();
-        this.fat = chain.getFat();
-        
-        read();
+    protected abstract long getStorageCluster();
+
+    protected abstract boolean canChangeSize(int entryCount);
+
+    public final void setEntry(int idx, FatBasicDirEntry entry) {
+        this.entries.set(idx, entry);
+    }
+
+    public final FatBasicDirEntry getEntry(int idx) {
+        return this.entries.get(idx);
+    }
+
+    public final int getCapacity() {
+        return this.entries.capacity();
+    }
+
+    public final int getEntryCount() {
+        return this.entries.size();
     }
 
     public final int getClusterSize() {
         return clusterSize;
-    }
-    
-    /**
-     * Returns the first cluster of this directory, if it is stored in a
-     * cluster chain. This is true for all directories excpet the root
-     * directories of FAT12/16 partitions, for which 0 is returned.
-     *
-     * @return the first cluster of the chain where the contents of this
-     *      directory are stored, or 0 for FAT12/16 root directories
-     */
-    protected final long getStorageCluster() {
-        if (this.chain != null) {
-            assert (this.chain.getStartCluster() >= Fat.FIRST_CLUSTER);
-            
-            return this.chain.getStartCluster();
-        } else {
-            return 0;
-        }
     }
     
     /**
@@ -132,7 +106,11 @@ abstract class AbstractDirectory
     public boolean isReadOnly() {
         return readOnly;
     }
-    
+
+    public final boolean isRoot() {
+        return this.isRoot;
+    }
+
     /**
      * Add a directory entry.
      * 
@@ -209,7 +187,7 @@ abstract class AbstractDirectory
         // in the directory.
         //chain.write(0, buf, 0, buf.length);
         f.write(0, buf);
-
+        
         f.getDirectory().initialize(f.getStartCluster(), parentCluster);
         flush();
         return entry;
@@ -226,16 +204,8 @@ abstract class AbstractDirectory
     public FSDirectoryEntry addDirectory(String name) throws IOException {
         if (isReadOnly()) throw new
                 ReadOnlyFileSystemException(null);
-
-        final long parentCluster;
-
-        if (chain == null) {
-            parentCluster = 0;
-        } else {
-            parentCluster = chain.getStartCluster();
-        }
-        
-        return addFatDirectory(name, parentCluster);
+                
+        return addFatDirectory(name, getStorageCluster());
     }
 
     /**
@@ -400,18 +370,7 @@ abstract class AbstractDirectory
     private final void resetDirty() {
         this.dirty = false;
     }
-
-    /**
-     * Can this directory change size of <code>newSize</code> directory
-     * entries?
-     * 
-     * @param newSize
-     * @return boolean
-     */
-    protected final boolean canChangeSize(int newSize) {
-        return (chain != null);
-    }
-
+    
     /**
      * Sets the first two entries '.' and '..' in the directory
      * 
@@ -472,19 +431,8 @@ abstract class AbstractDirectory
                 System.arraycopy(empty, 0, data.array(), i * 32, 32);
             }
         }
-        
-        if (chain != null) {
-            final long trueSize = chain.setSize(data.capacity());
-            chain.writeData(0, data);
 
-            if (trueSize > data.capacity()) {
-                final int rest = (int) (trueSize - data.capacity());
-                final ByteBuffer fill = ByteBuffer.allocate(rest);
-                chain.writeData(data.capacity(), fill);
-            }
-        } else {
-            device.write(deviceOffset, data);
-        }
+        write(data);
 
         resetDirty();
     }
@@ -492,13 +440,9 @@ abstract class AbstractDirectory
     private void read() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
                 entries.size() * FatBasicDirEntry.SIZE);
+                
+        read(data);
 
-        if (this.chain != null) {
-            chain.readData(0, data);
-        } else {
-            device.read(deviceOffset, data);
-        }
-        
         final byte[] src = data.array();
 
         for (int i = 0; i < entries.size(); i++) {

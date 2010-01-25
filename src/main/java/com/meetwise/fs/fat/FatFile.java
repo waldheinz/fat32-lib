@@ -36,7 +36,7 @@ public final class FatFile extends ClusterChain implements FSFile {
     private final FatDirEntry myEntry;
 
     private long length;
-    private FatDirectory dir;
+    private FatLfnDirectory dir;
     private boolean isDir;
     private boolean valid;
     
@@ -66,11 +66,12 @@ public final class FatFile extends ClusterChain implements FSFile {
      * @return Directory
      * @throws IOException on read error
      */
-    FatDirectory getDirectory() throws IOException {
+    FatLfnDirectory getDirectory() throws IOException {
         if (!isDir) throw new UnsupportedOperationException();
         
         if (dir == null) {
-            dir = new FatLfnDirectory(this, false);
+            final FatDirectory fatDir = new FatDirectory(this, isReadOnly(), false);
+            dir = new FatLfnDirectory(fatDir);
         }
         
         return dir;

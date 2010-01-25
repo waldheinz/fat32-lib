@@ -32,11 +32,12 @@ import java.util.Iterator;
 
 
 /**
+ * 
  *
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-final class FatLfnDirectory extends FatDirectory implements FSDirectory {
+final class FatLfnDirectory implements FSDirectory {
 
     private final HashMap<ShortName, LfnEntry> shortNameIndex =
             new HashMap<ShortName, LfnEntry>();
@@ -45,36 +46,72 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
             new HashMap<String, LfnEntry>();
 
     private final ShortNameGenerator sng;
+
+    private FatDirEntry labelEntry;
+    private final AbstractDirectory dir;
     
     /**
      * @param fs
      * @param chain
      * @throws FileSystemException
      */
-    public FatLfnDirectory(ClusterChain chain, boolean isRoot) throws FileSystemException, IOException {
-        super(chain, isRoot);
-        
+    public FatLfnDirectory(AbstractDirectory dir) throws FileSystemException, IOException {
+        this.dir = dir;
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
         
         parseLfn();
     }
-    
-    /**
-     * Constructor for the FAT12/16 root directory.
-     *
-     * @param fs
-     * @param nrEntries
-     */
-    public FatLfnDirectory(Fat fat, boolean readOnly)
-            throws FileSystemException, IOException {
-        
-        super(fat, readOnly);
-        
-        this.sng = new ShortNameGenerator(shortNameIndex.keySet());
 
-        parseLfn();
+    public boolean isDirty() {
+        return dir.isDirty();
     }
-    
+
+    String getLabel() {
+        if (labelEntry != null) return labelEntry.getName();
+        else return null;
+    }
+
+    private void findLabelEntry() {
+        for (int i=0; i < dir.getEntryCount(); i++) {
+            if (dir.getEntry(i) instanceof FatDirEntry) {
+                FatDirEntry e = (FatDirEntry) dir.getEntry(i);
+                if (e.isLabel()) {
+                    labelEntry = e;
+                    dir.setEntry(i, null);
+                    break;
+                }
+            }
+        }
+    }
+
+    void setLabel(String label) throws IOException {
+        if (!dir.isRoot()) {
+            throw new IOException(
+                    "volume name change on non-root directory"); //NOI18N
+        }
+
+        if (label != null) {
+            Iterator<FSDirectoryEntry> i = iterator();
+            FatDirEntry current;
+            while (labelEntry == null && i.hasNext()) {
+                current = (FatDirEntry) i.next();
+                if (current.isLabel() &&
+                        !(current.isHidden() && current.isReadonly() && current.isSystem())) {
+                    labelEntry = current;
+                }
+            }
+
+            if (labelEntry == null) {
+                labelEntry = dir.addFatFile(label);
+                labelEntry.setLabel();
+            }
+
+            labelEntry.setName(label);
+        } else {
+            labelEntry = null;
+        }
+    }
+
     ShortNameGenerator getShortNameGenerator() {
         return sng;
     }
@@ -83,11 +120,11 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
     public LfnEntry addFile(String name) throws FileSystemException {    
         name = name.trim();
         final ShortName shortName = sng.generateShortName(name);
-        FatDirEntry realEntry = new FatDirEntry(this, shortName);
+        FatDirEntry realEntry = new FatDirEntry(dir, shortName);
         LfnEntry entry = new LfnEntry(this, realEntry, name);
         shortNameIndex.put(shortName, entry);
         longFileNameIndex.put(name, entry);
-        setDirty();
+        dir.setDirty();
         return entry;
     }
 
@@ -95,9 +132,9 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
     public FSDirectoryEntry addDirectory(String name) throws IOException {
         name = name.trim();
         final ShortName sn = sng.generateShortName(name);
-        FatDirEntry realEntry = new FatDirEntry(this, sn);
+        FatDirEntry realEntry = new FatDirEntry(dir, sn);
         
-        final int clusterSize = getClusterSize();
+        final int clusterSize = dir.getClusterSize();
         realEntry.setFlags(FatConstants.F_DIRECTORY);
         final FatFile f = realEntry.getFatFile();
         f.setLength(clusterSize);
@@ -105,12 +142,12 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
         final ByteBuffer buf = ByteBuffer.allocate(clusterSize);
 
         f.write(0, buf);
-        f.getDirectory().initialize(f.getStartCluster(), getStorageCluster());
+        f.getDirectory().initialize(f.getStartCluster(), dir.getStorageCluster());
         
         LfnEntry entry = new LfnEntry(this, realEntry, name);
         shortNameIndex.put(sn, entry);
         longFileNameIndex.put(name, entry);
-        setDirty();
+        dir.setDirty();
         flush();
         return entry;
     }
@@ -130,11 +167,11 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
     
     private void parseLfn() {
         int i = 0;
-        int size = entries.size();
+        int size = dir.getEntryCount();
 
         while (i < size) {
             // jump over empty entries
-            while (i < size && entries.get(i) == null) {
+            while (i < size && dir.getEntry(i) == null) {
                 i++;
             }
 
@@ -144,7 +181,7 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
 
             int offset = i; // beginning of the entry
             // check when we reach a real entry
-            while (entries.get(i) instanceof FatLfnDirEntry) {
+            while (dir.getEntry(i) instanceof FatLfnDirEntry) {
                 i++;
                 if (i >= size) {
                     // This is a cutted entry, forgive it
@@ -180,29 +217,30 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
         }
 
         final int size = destination.size();
-        if (entries.size() < size) {
-            if (!canChangeSize(size)) {
+        if (dir.getCapacity() < size) {
+            if (!dir.canChangeSize(size)) {
                 throw new IOException("root directory is full");
             }
         }
-
+        
         boolean useAdd = false;
         for (int i = 0; i < size; i++) {
             if (!useAdd) {
                 try {
-                    entries.set(i, destination.get(i));
+                    dir.setEntry(i, destination.get(i));
                 } catch (ArrayIndexOutOfBoundsException aEx) {
                     useAdd = true;
                 }
             }
+            
             if (useAdd) {
                 entries.add(i, destination.get(i));
             }
         }
 
-        final int entireSize = entries.size();
+        final int entireSize = dir.getEntryCount();
         for (int i = size; i < entireSize; i++) {
-            entries.set(i, null); // remove stale entries
+            dir.setEntry(i, null); // remove stale entries
         }
 
     }
@@ -210,8 +248,7 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
     @Override
     public void flush() throws FileSystemException, IOException {
         updateLFN();
-        
-        super.flush();
+        dir.flush();
     }
 
     @Override

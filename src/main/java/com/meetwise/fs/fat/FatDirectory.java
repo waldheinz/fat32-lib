@@ -20,20 +20,18 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FSDirectory;
 import java.io.IOException;
-import java.util.Iterator;
-import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
+import java.nio.ByteBuffer;
 
 /**
+ * A directory that is stored in a cluster chain.
+ *
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-abstract class FatDirectory extends AbstractDirectory implements FSDirectory {
-
-    private final boolean root;
-
-    protected FatDirEntry labelEntry;
+final class FatDirectory extends AbstractDirectory {
+    private final ClusterChain chain;
+    
 
     /**
      * Constructor for Directory.
@@ -42,69 +40,40 @@ abstract class FatDirectory extends AbstractDirectory implements FSDirectory {
      * @param chain
      * @throws FileSystemException 
      */
-    public FatDirectory(ClusterChain chain, boolean isRoot)
-            throws FileSystemException, IOException {
+    public FatDirectory(ClusterChain chain, boolean readOnly, boolean isRoot) throws IOException {
+        super(chain.getFat(),
+                (int)(chain.getLengthOnDisk() / FatBasicDirEntry.SIZE),
+                readOnly, isRoot);
         
-        super(chain);
-
-        this.root = isRoot;
-        if (isRoot)
-            findLabelEntry();
+        this.chain = chain;   
     }
 
-    // for root
-    protected FatDirectory(Fat fat, boolean readOnly)
-            throws FileSystemException, IOException {
-        
-        super(fat, readOnly);
-        
-        root = true;
-        findLabelEntry();
+    @Override
+    protected void read(ByteBuffer data) throws IOException {
+        this.chain.readData(0, data);
     }
 
-    String getLabel() {
-        if (labelEntry != null) return labelEntry.getName();
-        else return null;
+    @Override
+    protected void write(ByteBuffer data) throws IOException {
+        final long trueSize = chain.setSize(data.capacity());
+        chain.writeData(0, data);
+        
+        if (trueSize > data.capacity()) {
+            final int rest = (int) (trueSize - data.capacity());
+            final ByteBuffer fill = ByteBuffer.allocate(rest);
+            chain.writeData(data.capacity(), fill);
+        }
+    }
+
+    @Override
+    protected long getStorageCluster() {
+        return chain.getStartCluster();
+    }
+
+    @Override
+    protected boolean canChangeSize(int entryCount) {
+        /* TODO: check this */
+        return true;
     }
     
-    private void findLabelEntry() {
-        for (int i=0; i < entries.size(); i++) {
-            if (entries.get(i) instanceof FatDirEntry) {
-                FatDirEntry e = (FatDirEntry) entries.get(i);
-                if (e.isLabel()) {
-                    labelEntry = e;
-                    entries.set(i, null);
-                    break;
-                }
-            }
-        }
-    }
-    
-    void setLabel(String label) throws IOException {
-        if (!root) {
-            throw new IOException(
-                    "volume name change on non-root directory"); //NOI18N
-        }
-
-        if (label != null) {
-            Iterator<FSDirectoryEntry> i = iterator();
-            FatDirEntry current;
-            while (labelEntry == null && i.hasNext()) {
-                current = (FatDirEntry) i.next();
-                if (current.isLabel() &&
-                        !(current.isHidden() && current.isReadonly() && current.isSystem())) {
-                    labelEntry = current;
-                }
-            }
-
-            if (labelEntry == null) {
-                labelEntry = addFatFile(label);
-                labelEntry.setLabel();
-            }
-
-            labelEntry.setName(label);
-        } else {
-            labelEntry = null;
-        }
-    }
 }
