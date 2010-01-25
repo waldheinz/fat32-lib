@@ -65,4 +65,11 @@ public class ClusterChainTest {
         assertEquals(1, cc.getChainLength());
         assertEquals(bs.getBytesPerCluster(), cc.getLengthOnDisk());
     }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testSetChainLengthNegative() throws IOException {
+        System.out.println("setChainLength (negative)");
+
+        cc.setChainLength(-1);
+    }
 }

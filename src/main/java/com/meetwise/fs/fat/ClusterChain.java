@@ -137,11 +137,15 @@ class ClusterChain {
     /**
      * Sets the length of this cluster chain in clusters.
      *
-     * @param nrClusters the new number of clusters this chain should contain
+     * @param nrClusters the new number of clusters this chain should contain,
+     *      must be {@code >= 0}
      * @throws IOException on error updating the chain length
      * @see #setSize(long) 
      */
     public final void setChainLength(int nrClusters) throws IOException {
+        if (nrClusters < 0) throw new IllegalArgumentException(
+                "negative cluster count"); //NOI18N
+                
         if ((this.startCluster == 0) && (nrClusters > 0)) {
             final long[] chain = fat.allocNew(nrClusters);
             this.startCluster = chain[0];
