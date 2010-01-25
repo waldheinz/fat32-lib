@@ -103,12 +103,6 @@ abstract class FatDirectory extends AbstractDirectory implements FSDirectory {
             }
 
             labelEntry.setName(label);
-
-            if (label.length() > 8) {
-                labelEntry.setExt(label.substring(8));
-            } else {
-                labelEntry.setExt("");
-            }
         } else {
             labelEntry = null;
         }

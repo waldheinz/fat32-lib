@@ -11,7 +11,7 @@ import java.util.Set;
  */
 final class ShortNameGenerator {
     
-    private final Set<String> usedNames;
+    private final Set<ShortName> usedNames;
 
     /**
      * Creates a new instance of {@code ShortNameGenerator} that will use
@@ -22,7 +22,7 @@ final class ShortNameGenerator {
      *
      * @param usedNames the look-up for already used 8.3 names
      */
-    public ShortNameGenerator(Set<String> usedNames) {
+    public ShortNameGenerator(Set<ShortName> usedNames) {
         this.usedNames = Collections.unmodifiableSet(usedNames);
     }
     
@@ -82,7 +82,7 @@ final class ShortNameGenerator {
      * @return the generated 8.3 file name
      * @throws IllegalStateException if no unused short name could be found
      */
-    public String generateShortName(String longFullName)
+    public ShortName generateShortName(String longFullName)
             throws IllegalStateException {
         
         final String longName;
@@ -107,7 +107,7 @@ final class ShortNameGenerator {
             longExt.substring(0, 3) : longExt;
 
         if (forceSuffix || (longName.length() > 8) ||
-                usedNames.contains(longName + "." + shortExt)) {
+                usedNames.contains(new ShortName(longName, shortExt))) {
 
             /* we have to append the "~n" suffix */
 
@@ -117,11 +117,11 @@ final class ShortNameGenerator {
                 final String serial = "~" + i; //NOI18N
                 final int serialLen = serial.length();
                 final String shortName = longName.substring(
-                        0, Math.min(maxLongIdx, 8-serialLen)) + serial +
-                        "." + shortExt; //NOI18N
+                        0, Math.min(maxLongIdx, 8-serialLen)) + serial;
+                final ShortName result = new ShortName(shortName, shortExt);
                 
-                if (!usedNames.contains(shortName)) {
-                    return shortName;
+                if (!usedNames.contains(result)) {
+                    return result;
                 }
             }
 
@@ -130,7 +130,7 @@ final class ShortNameGenerator {
                     + longFullName + "\"");
         }
 
-        return longName + "." + shortExt; //NOI18N
+        return new ShortName(longName, shortExt);
     }
     
 }

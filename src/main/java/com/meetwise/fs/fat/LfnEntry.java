@@ -90,8 +90,8 @@ class LfnEntry implements FSDirectoryEntry {
     private byte calculateCheckSum() {
 
         char[] fullName = new char[] {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
-        char[] name = realEntry.getNameOnly().toCharArray();
-        char[] ext = realEntry.getExt().toCharArray();
+        char[] name = realEntry.getShortName().getName().toCharArray();
+        char[] ext = realEntry.getShortName().getExt().toCharArray();
         System.arraycopy(name, 0, fullName, 0, name.length);
         System.arraycopy(ext, 0, fullName, 8, ext.length);
 
@@ -137,7 +137,8 @@ class LfnEntry implements FSDirectoryEntry {
 
     public void setName(String newName) {
         fileName = newName;
-        realEntry.setName(parent.getShortNameGenerator().generateShortName(newName));
+        realEntry.setName(parent.getShortNameGenerator().
+                generateShortName(newName));
     }
 
     public void setCreated(long created) {

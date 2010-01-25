@@ -153,7 +153,7 @@ abstract class AbstractDirectory
         }
         
         final FatDirEntry newEntry =
-                new FatDirEntry(this, splitName(nameExt), splitExt(nameExt));
+                new FatDirEntry(this, new ShortName(nameExt));
         
         for (int i = 0; i < entries.size(); i++) {
             FatBasicDirEntry e = entries.get(i);
@@ -254,21 +254,15 @@ abstract class AbstractDirectory
      * @return FatDirEntry null == not found
      */
     protected FatDirEntry getFatEntry(String nameExt) {
-
-        final String name = splitName(nameExt);
-        final String ext = splitExt(nameExt);
+        final ShortName toFind = new ShortName(nameExt);
 
         for (int i = 0; i < entries.size(); i++) {
             final FatBasicDirEntry entry = entries.get(i);
 
             if (entry != null && entry instanceof FatDirEntry) {
-                FatDirEntry fde = (FatDirEntry) entry;
-
-                if (name.equalsIgnoreCase(fde.getNameOnly()) && 
-                        ext.equalsIgnoreCase(fde.getExt())) {
-                    
-                    return fde;
-                }
+                final FatDirEntry fde = (FatDirEntry) entry;
+                
+                if (fde.getShortName().equals(toFind)) return fde;
             }
         }
         
@@ -418,24 +412,6 @@ abstract class AbstractDirectory
         return (chain != null);
     }
 
-    protected String splitName(String nameExt) {
-        int i = nameExt.indexOf('.');
-        if (i < 0) {
-            return nameExt;
-        } else {
-            return nameExt.substring(0, i);
-        }
-    }
-
-    protected String splitExt(String nameExt) {
-        int i = nameExt.indexOf('.');
-        if (i < 0) {
-            return "";
-        } else {
-            return nameExt.substring(i + 1);
-        }
-    }
-
     /**
      * Sets the first two entries '.' and '..' in the directory
      * 
@@ -443,11 +419,11 @@ abstract class AbstractDirectory
      * @param parentCluster
      */
     protected void initialize(long myCluster, long parentCluster) {
-        FatDirEntry e = new FatDirEntry(this, ".", "");
+        FatDirEntry e = new FatDirEntry(this, new ShortName(".", ""));
         entries.set(0, e);
         e.setFlags(FatConstants.F_DIRECTORY);
         e.setStartCluster((int) myCluster);
-        e = new FatDirEntry(this, "..", "");
+        e = new FatDirEntry(this, new ShortName("..", ""));
         entries.set(1, e);
         e.setFlags(FatConstants.F_DIRECTORY);
         e.setStartCluster((int) parentCluster);

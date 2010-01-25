@@ -29,31 +29,32 @@ public class ShortNameGeneratorTest {
     public void testGenerateShortName() {
         System.out.println("generateShortName");
 
-        final Set<String> used = new HashSet<String>();
+        final Set<ShortName> used = new HashSet<ShortName>();
         final ShortNameGenerator sng = new ShortNameGenerator(used);
         
-        assertEquals("FOO.TXT",
+        assertEquals(new ShortName("FOO.TXT"),
                 sng.generateShortName("foo.txt"));
-        assertEquals("TEST01~1.TXT",
+        assertEquals(new ShortName("TEST01~1.TXT"),
                 sng.generateShortName("TEST 01.TXT"));
-        assertEquals("TEXTFILE.TXT",
+        assertEquals(new ShortName("TEXTFILE.TXT"),
                 sng.generateShortName("TextFile.Txt"));
-        assertEquals("TEXTFI~1.TXT",
+        assertEquals(new ShortName("TEXTFI~1.TXT"),
                 sng.generateShortName("TextFile1.Mine.txt"));
-        assertEquals("VER_12~1.TEX",
+        assertEquals(new ShortName("VER_12~1.TEX"),
                 sng.generateShortName("ver +1.2.text"));
-        assertEquals("MICROS~1.BAK",
+        assertEquals(new ShortName("MICROS~1.BAK"),
                 sng.generateShortName("microsoft.bak"));
     }
-
+    
     @Test
     public void testGenerateTildeSuffix() {
         System.out.println("generateTildeSuffix");
         
-        final Set<String> used = new HashSet<String>();
+        final Set<ShortName> used = new HashSet<ShortName>();
         final ShortNameGenerator sng = new ShortNameGenerator(used);
 
         used.add(sng.generateShortName("foo.txt"));
-        assertEquals("FOO~1.TXT", sng.generateShortName("foo.txt"));
+        assertEquals(new ShortName("FOO~1.TXT"),
+                sng.generateShortName("foo.txt"));
     }
 }

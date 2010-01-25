@@ -35,10 +35,7 @@ import com.meetwise.fs.util.LittleEndian;
 class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
 
     /** Name of this entry */
-    private String name;
-    
-    /** Extension of this entry */
-    private String ext;
+    private ShortName shortName;
     
     /** Has this entry been deleted? */
     private boolean deleted;
@@ -86,16 +83,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
         
         return new FatDirEntry(dir, src, offset);
     }
-
-    /**
-     * Create a new entry
-     * 
-     * @param dir
-     */
-    public FatDirEntry(AbstractDirectory dir) {
-        this(dir, "", "");
-    }
-
+    
     /**
      * Create a new entry
      * 
@@ -103,11 +91,11 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * @param name
      * @param ext
      */
-    public FatDirEntry(AbstractDirectory dir, String name, String ext) {
+    public FatDirEntry(AbstractDirectory dir, ShortName name) {
         super(dir);
+        
         this.parent = dir;
-        setName(name);
-        setExt(ext);
+        this.shortName = name;
         this.flags = F_ARCHIVE;
         this.created = this.lastModified = this.lastAccessed = System.currentTimeMillis();
         this._dirty = false;
@@ -134,13 +122,15 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
         if (LittleEndian.getUInt8(src, offset) == 0x05) {
             nameArr[0] = (char) 0xe5;
         }
-        setName(new String(nameArr).trim());
-
+        
         char[] extArr = new char[3];
         for (int i = 0; i < extArr.length; i++) {
             extArr[i] = (char) LittleEndian.getUInt8(src, offset + 0x08 + i);
         }
-        setExt(new String(extArr).trim());
+        
+        this.shortName = new ShortName(
+                new String(nameArr).trim(),
+                new String(extArr).trim());
 
         this.flags = LittleEndian.getUInt8(src, offset + 0x0b);
         this.created =
@@ -188,25 +178,12 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
     public boolean isDeleted() {
         return deleted;
     }
-
-    /**
-     * Returns the ext.
-     * 
-     * @return String
-     */
-    public String getExt() {
-        return ext;
-    }
-
+    
     @Override
     public String getName() {
-        if (ext.length() > 0) {
-            return name + "." + ext;
-        } else {
-            return name;
-        }
+        return shortName.toString();
     }
-
+    
     /**
      * Returns the length.
      * 
@@ -221,10 +198,10 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      * 
      * @return String
      */
-    public String getNameOnly() {
-        return name;
+    public ShortName getShortName() {
+        return shortName;
     }
-
+    
     /**
      * Returns the startCluster.
      * 
@@ -276,17 +253,6 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      */
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
-        setDirty();
-    }
-
-    /**
-     * Sets the ext.
-     * 
-     * @param ext The ext to set
-     */
-    public void setExt(String ext) {
-        FatUtils.checkValidExt(ext);
-        this.ext = ext;
         setDirty();
     }
 
@@ -349,8 +315,13 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
      */
     @Override
     public void setName(String name) {
-        FatUtils.checkValidName(name);
-        this.name = name;
+        this.shortName = new ShortName(name);
+        setDirty();
+    }
+
+    public void setName(ShortName sn) {
+        if (this.shortName.equals(sn)) return;
+        this.shortName = sn;
         setDirty();
     }
 
@@ -455,6 +426,9 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
             dest[offset] = (byte) 0xe5;
         }
 
+        final String name = shortName.getName();
+        final String ext = shortName.getExt();
+
         for (int i = 0; i < 8; i++) {
             char ch;
             if (i < name.length()) {
@@ -487,7 +461,7 @@ class FatDirEntry extends FatBasicDirEntry implements FSDirectoryEntry {
 
             dest[offset + 0x08 + i] = (byte) ch;
         }
-
+        
         LittleEndian.setInt8(dest, offset + 0x0b, flags);
         LittleEndian.setInt16(dest, offset + 0x0e, DosUtils.encodeTime(created));
         LittleEndian.setInt16(dest, offset + 0x10, DosUtils.encodeDate(created));

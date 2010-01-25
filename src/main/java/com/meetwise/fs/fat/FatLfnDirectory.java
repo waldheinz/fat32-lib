@@ -38,9 +38,9 @@ import java.util.Iterator;
  */
 final class FatLfnDirectory extends FatDirectory implements FSDirectory {
 
-    private final HashMap<String, LfnEntry> shortNameIndex =
-            new HashMap<String, LfnEntry>();
-    
+    private final HashMap<ShortName, LfnEntry> shortNameIndex =
+            new HashMap<ShortName, LfnEntry>();
+            
     private final HashMap<String, LfnEntry> longFileNameIndex =
             new HashMap<String, LfnEntry>();
 
@@ -82,8 +82,8 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
     @Override
     public LfnEntry addFile(String name) throws FileSystemException {    
         name = name.trim();
-        String shortName = sng.generateShortName(name);
-        FatDirEntry realEntry = new FatDirEntry(this, splitName(shortName), splitExt(shortName));
+        final ShortName shortName = sng.generateShortName(name);
+        FatDirEntry realEntry = new FatDirEntry(this, shortName);
         LfnEntry entry = new LfnEntry(this, realEntry, name);
         shortNameIndex.put(shortName, entry);
         longFileNameIndex.put(name, entry);
@@ -94,9 +94,8 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
     @Override
     public FSDirectoryEntry addDirectory(String name) throws IOException {
         name = name.trim();
-        String shortName = sng.generateShortName(name);
-        FatDirEntry realEntry = new FatDirEntry(
-                this, splitName(shortName), splitExt(shortName));
+        final ShortName sn = sng.generateShortName(name);
+        FatDirEntry realEntry = new FatDirEntry(this, sn);
         
         final int clusterSize = getClusterSize();
         realEntry.setFlags(FatConstants.F_DIRECTORY);
@@ -109,7 +108,7 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
         f.getDirectory().initialize(f.getStartCluster(), getStorageCluster());
         
         LfnEntry entry = new LfnEntry(this, realEntry, name);
-        shortNameIndex.put(shortName, entry);
+        shortNameIndex.put(sn, entry);
         longFileNameIndex.put(name, entry);
         setDirty();
         flush();
@@ -119,12 +118,11 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
     @Override
     public FSDirectoryEntry getEntry(String name) {
         name = name.trim();
-        FSDirectoryEntry entry;
+
+        final FSDirectoryEntry entry = longFileNameIndex.get(name);
         
-        // try first as a long chain name
-        entry = longFileNameIndex.get(name);
         if (entry == null)
-            return shortNameIndex.get(name.toUpperCase());
+            return shortNameIndex.get(new ShortName(name));
         else
             return entry;
 
@@ -162,7 +160,7 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
             LfnEntry current = new LfnEntry(this, entries, offset, i - offset);
 
             if (!current.isDeleted() && current.isValid() && !current.isDotDir()) {
-                shortNameIndex.put(current.getRealEntry().getName(), current);
+                shortNameIndex.put(current.getRealEntry().getShortName(), current);
                 longFileNameIndex.put(current.getName(), current);
             }
         }
@@ -251,19 +249,18 @@ final class FatLfnDirectory extends FatDirectory implements FSDirectory {
     public void remove(String name) throws IOException {
         name = name.trim();
         LfnEntry byLongName = longFileNameIndex.get(name);
-
+        
         if (byLongName != null) {
             longFileNameIndex.remove(name);
-            shortNameIndex.remove(byLongName.getRealEntry().getName());
+            shortNameIndex.remove(byLongName.getRealEntry().getShortName());
             return;
         }
-
-        String uppedName = name.toUpperCase();
-        LfnEntry byShortName = shortNameIndex.get(uppedName);
+        
+        LfnEntry byShortName = shortNameIndex.get(new ShortName(name));
 
         if (byShortName != null) {
             longFileNameIndex.remove(byShortName.getName());
-            shortNameIndex.remove(uppedName);
+            shortNameIndex.remove(new ShortName(name));
         }
         
         throw new FileNotFoundException(name);

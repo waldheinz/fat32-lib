@@ -146,26 +146,7 @@ class FatUtils {
 
         return normalizeName(splitName(nameExt), splitExt(nameExt));
     }
-
-    public static void checkValidName(String name) {
-        checkString(name, "name", 1, 8);
-    }
-
-    public static void checkValidExt(String ext) {
-        checkString(ext, "extension", 0, 3);
-    }
-
-    private static void checkString(String str, String strType, int minLength, int maxLength) {
-        if (str == null)
-            throw new IllegalArgumentException(strType + " is null");
-        if (str.length() < minLength)
-            throw new IllegalArgumentException(strType + " must have at least " + maxLength +
-                    " characters: " + str);
-        if (str.length() > maxLength)
-            throw new IllegalArgumentException(strType + " has more than " + maxLength +
-                    " characters: " + str);
-    }
-
+    
     public static final int SUBNAME_SIZE = 13;
 
     /**
