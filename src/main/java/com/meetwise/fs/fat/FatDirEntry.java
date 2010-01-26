@@ -33,6 +33,11 @@ import com.meetwise.fs.util.LittleEndian;
  */
 class FatDirEntry extends AbstractDirectoryEntry {
 
+    /**
+     * The offset to the flags byte in a directory entry.
+     */
+    public static final int FLAGS_OFFSET = 0x0b;
+    
     /** Name of this entry */
     private ShortName shortName;
     
@@ -69,7 +74,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
     public static AbstractDirectoryEntry create(
             AbstractDirectory dir, byte[] src, int offset) {
         
-        int flags = LittleEndian.getUInt8(src, offset + 0x0b);
+        int flags = LittleEndian.getUInt8(src, offset + FLAGS_OFFSET);
         boolean r = (flags & F_READONLY) != 0;
         boolean h = (flags & F_HIDDEN) != 0;
         boolean s = (flags & F_SYSTEM) != 0;
@@ -131,7 +136,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
                 new String(nameArr).trim(),
                 new String(extArr).trim());
 
-        this.flags = LittleEndian.getUInt8(src, offset + 0x0b);
+        this.flags = LittleEndian.getUInt8(src, offset + FLAGS_OFFSET);
         this.created =
                 DosUtils.decodeDateTime(LittleEndian.getUInt16(src, offset + 0x10),
                                         LittleEndian.getUInt16(src, offset + 0x0e));
@@ -451,7 +456,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
             dest[offset + 0x08 + i] = (byte) ch;
         }
         
-        LittleEndian.setInt8(dest, offset + 0x0b, flags);
+        LittleEndian.setInt8(dest, offset + FLAGS_OFFSET, flags);
         LittleEndian.setInt16(dest, offset + 0x0e, DosUtils.encodeTime(created));
         LittleEndian.setInt16(dest, offset + 0x10, DosUtils.encodeDate(created));
         LittleEndian.setInt16(dest, offset + 0x12, DosUtils.encodeDate(lastAccessed));
