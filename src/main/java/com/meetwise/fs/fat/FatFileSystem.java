@@ -87,12 +87,12 @@ public final class FatFileSystem extends AbstractFileSystem {
             final FatDirectory fd = FatDirectory.read(
                     rootDirFile, readOnly, true);
             this.fsiSector = FsInfoSector.read(f32bs);
-
-//            if (fsiSector.getFreeClusterCount() != fat.getFreeClusterCount()) {
-//                throw new IOException("free cluster count mismatch - fat: " +
-//                        fat.getFreeClusterCount() + " - fsinfo: " +
-//                        fsiSector.getFreeClusterCount());
-//            }
+            
+            if (fsiSector.getFreeClusterCount() != fat.getFreeClusterCount()) {
+                throw new IOException("free cluster count mismatch - fat: " +
+                        fat.getFreeClusterCount() + " - fsinfo: " +
+                        fsiSector.getFreeClusterCount());
+            }
             
             rootDir = new FatLfnDirectory(fd);
         } else {
