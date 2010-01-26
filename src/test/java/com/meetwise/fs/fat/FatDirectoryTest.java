@@ -33,6 +33,6 @@ public class FatDirectoryTest {
     public void testGetStorageCluster() {
         System.out.println("getStorageCluster");
 
-        assertEquals(bs.getRootDirFirstCluster(), dir.getStorageCluster());
+        assertEquals(0, dir.getStorageCluster());
     }
 }
