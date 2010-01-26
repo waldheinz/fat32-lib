@@ -74,11 +74,15 @@ final class FatDirectory extends AbstractDirectory {
         }
     }
 
+    /**
+     * 
+     * @return
+     */
     @Override
     protected long getStorageCluster() {
-        return chain.getStartCluster();
+        return isRoot() ? 0 : chain.getStartCluster();
     }
-
+    
     @Override
     protected boolean canChangeSize(int entryCount) {
         /* TODO: check this */

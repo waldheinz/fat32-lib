@@ -151,34 +151,6 @@ abstract class AbstractDirectory
     }
     
     /**
-     * Add a directory entry of the type directory.
-     * 
-     * @param nameExt
-     * @param parentCluster
-     * @return 
-     * @throws IOException
-     */
-    private FatDirEntry addFatDirectory(
-            String nameExt, long parentCluster) throws IOException {
-        
-        final FatDirEntry entry = addFatFile(nameExt);
-        entry.setFlags(FatConstants.F_DIRECTORY);
-        final FatFile f = entry.getFatFile();
-        f.setLength(clusterSize);
-        
-        final ByteBuffer buf = ByteBuffer.allocate(clusterSize);
-
-        // Clean the contents of this cluster to avoid reading strange data
-        // in the directory.
-        //chain.write(0, buf, 0, buf.length);
-        f.write(0, buf);
-        
-        f.getDirectory().getStorageDirectory().initialize(f.getStartCluster(), parentCluster);
-        flush();
-        return entry;
-    }
-
-    /**
      * Gets the number of directory entries in this directory
      * 
      * @return int

@@ -38,6 +38,7 @@ public class SuperFloppyFormatterTest {
         System.out.println("fat32Format");
 
         BlockDevice dev = new RamDisk(50 * 1024 * 1024);
+        dev = FileDisk.create(new File("/tmp/fat32-test.img"), 40960000);
         SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
         f.setFatType(FatType.FAT32);
 //        f.setVolumeLabel("test");
@@ -45,6 +46,10 @@ public class SuperFloppyFormatterTest {
         
         FatFileSystem fs = new FatFileSystem(dev, false);
         assertEquals(FatType.FAT32, fs.getFatType());
+        fs.getRoot().addFile("this is another looooong name");
+        fs.getRoot().addDirectory("this is a sub-directory!!!");
+        fs.close();
+        
 //        assertEquals("test", fs.getVolumeLabel());
     }
     

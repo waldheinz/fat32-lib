@@ -25,7 +25,6 @@ import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -142,19 +141,13 @@ final class FatLfnDirectory implements FSDirectory {
     public FSDirectoryEntry addDirectory(String name) throws IOException {
         name = name.trim();
         final ShortName sn = sng.generateShortName(name);
-        FatDirEntry realEntry = new FatDirEntry(dir, sn);
-        
-        final int clusterSize = dir.getClusterSize();
+        final FatDirEntry realEntry = new FatDirEntry(dir, sn);
         realEntry.setFlags(FatConstants.F_DIRECTORY);
         final FatFile f = realEntry.getFatFile();
-        f.setLength(clusterSize);
+        final FatDirectory fatDir = FatDirectory.create(f, dir.getStorageCluster(), false);
+        realEntry.setStartCluster(fatDir.getStorageCluster());
         
-        final ByteBuffer buf = ByteBuffer.allocate(clusterSize);
-
-        f.write(0, buf);
-        f.getDirectory().getStorageDirectory().initialize(f.getStartCluster(), dir.getStorageCluster());
-        
-        LfnEntry entry = new LfnEntry(this, realEntry, name);
+        final LfnEntry entry = new LfnEntry(this, realEntry, name);
         shortNameIndex.put(sn, entry);
         longNameIndex.put(name, entry);
         dir.setDirty();
@@ -218,7 +211,7 @@ final class FatLfnDirectory implements FSDirectory {
         ArrayList<FatBasicDirEntry> destination = new ArrayList<FatBasicDirEntry>();
 
         if (labelEntry != null) destination.add(labelEntry);
-
+        
         for (LfnEntry currentEntry : shortNameIndex.values()) {
             FatBasicDirEntry[] encoded = currentEntry.compactForm();
             for (int i = 0; i < encoded.length; i++) {

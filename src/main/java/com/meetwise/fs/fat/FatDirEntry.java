@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Date;
 
 import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
 import com.meetwise.fs.util.DosUtils;
 import com.meetwise.fs.util.LittleEndian;
@@ -322,7 +321,7 @@ class FatDirEntry extends FatBasicDirEntry {
      * 
      * @param startCluster The startCluster to set
      */
-    protected void setStartCluster(long startCluster) {
+    void setStartCluster(long startCluster) {
         this.startCluster = startCluster;
         setDirty();
     }

@@ -31,7 +31,7 @@ import java.nio.ByteBuffer;
  * 
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  */
-public final class FatFile extends ClusterChain implements FSFile {
+final class FatFile extends ClusterChain implements FSFile {
 
     private final FatDirEntry myEntry;
 
