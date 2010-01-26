@@ -329,14 +329,20 @@ abstract class AbstractDirectory
      * @param parentCluster
      */
     protected void initialize(long myCluster, long parentCluster) {
-        FatDirEntry e = new FatDirEntry(this, new ShortName(".", ""));
-        entries.set(0, e);
-        e.setFlags(FatConstants.F_DIRECTORY);
-        e.setStartCluster((int) myCluster);
-        e = new FatDirEntry(this, new ShortName("..", ""));
-        entries.set(1, e);
-        e.setFlags(FatConstants.F_DIRECTORY);
-        e.setStartCluster((int) parentCluster);
+        final FatDirEntry dot = new FatDirEntry(
+                this, new ShortName(".", "")); //NOI18N
+        
+        dot.setFlags(FatConstants.F_DIRECTORY);
+        dot.setStartCluster((int) myCluster);
+        entries.set(0, dot);
+
+        if (!isRoot) {
+            final FatDirEntry dotDot = new FatDirEntry(
+                    this, new ShortName("..", "")); //NOI18N
+            dotDot.setFlags(FatConstants.F_DIRECTORY);
+            dotDot.setStartCluster((int) parentCluster);
+            entries.set(1, dotDot);
+        }
     }
     
     /**
