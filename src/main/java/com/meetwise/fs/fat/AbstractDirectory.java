@@ -29,6 +29,7 @@ import java.util.Vector;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
 import com.meetwise.fs.ReadOnlyFileSystemException;
+import com.meetwise.fs.util.LittleEndian;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -363,6 +364,23 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
 
         resetDirty();
     }
+
+    private AbstractDirectoryEntry parseEntry(byte[] src, int offset) {
+        final int flags = LittleEndian.getUInt8(
+                src, offset + AbstractDirectoryEntry.FLAGS_OFFSET);
+        
+        boolean r = (flags & FatConstants.F_READONLY) != 0;
+        boolean h = (flags & FatConstants.F_HIDDEN) != 0;
+        boolean s = (flags & FatConstants.F_SYSTEM) != 0;
+        boolean v = (flags & FatConstants.F_LABEL) != 0;
+
+        if (r && h && s && v) {
+            // this is a LFN entry, don't need to parse it!
+            return new FatLfnDirEntry(this, src, offset);
+        }
+        
+        return new FatDirEntry(this, src, offset);
+    }
     
     protected final void read() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
@@ -377,8 +395,7 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
             if (src[index] == 0) {
                 entries.set(i, null);
             } else {
-                AbstractDirectoryEntry entry = FatDirEntry.create(this, src, index);
-                entries.set(i, entry);
+                entries.set(i, parseEntry(src, index));
             }
         }
     }

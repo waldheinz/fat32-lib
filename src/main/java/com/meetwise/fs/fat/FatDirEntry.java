@@ -33,10 +33,6 @@ import com.meetwise.fs.util.LittleEndian;
  */
 class FatDirEntry extends AbstractDirectoryEntry {
 
-    /**
-     * The offset to the flags byte in a directory entry.
-     */
-    public static final int FLAGS_OFFSET = 0x0b;
     
     /** Name of this entry */
     private ShortName shortName;
@@ -47,9 +43,6 @@ class FatDirEntry extends AbstractDirectoryEntry {
     /** Is this entry not used? */
     private boolean unused;
     
-    /** Flags of this entry */
-    private int flags;
-
     /** Time of creation. */
     private long created;
 
@@ -65,28 +58,8 @@ class FatDirEntry extends AbstractDirectoryEntry {
     /** Length in bytes of the data of this entry */
     private long length;
     
-    /** Has this entry been changed and not yet flushed to disk? */
-    private boolean _dirty;
-    
     /** FSDirectory this entry is a part of */
     private final AbstractDirectory parent;
-
-    public static AbstractDirectoryEntry create(
-            AbstractDirectory dir, byte[] src, int offset) {
-        
-        int flags = LittleEndian.getUInt8(src, offset + FLAGS_OFFSET);
-        boolean r = (flags & F_READONLY) != 0;
-        boolean h = (flags & F_HIDDEN) != 0;
-        boolean s = (flags & F_SYSTEM) != 0;
-        boolean v = (flags & F_LABEL) != 0;
-
-        if (r && h && s && v) {
-            // this is a LFN entry, don't need to parse it!
-            return new FatLfnDirEntry(dir, src, offset);
-        }
-        
-        return new FatDirEntry(dir, src, offset);
-    }
     
     /**
      * Create a new entry
@@ -100,9 +73,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
         
         this.parent = dir;
         this.shortName = name;
-        this.flags = F_ARCHIVE;
         this.created = this.lastModified = this.lastAccessed = System.currentTimeMillis();
-        this._dirty = false;
     }
 
     /**
@@ -136,7 +107,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
                 new String(nameArr).trim(),
                 new String(extArr).trim());
 
-        this.flags = LittleEndian.getUInt8(src, offset + FLAGS_OFFSET);
+        
         this.created =
                 DosUtils.decodeDateTime(LittleEndian.getUInt16(src, offset + 0x10),
                                         LittleEndian.getUInt16(src, offset + 0x0e));
@@ -147,16 +118,6 @@ class FatDirEntry extends AbstractDirectoryEntry {
                 DosUtils.decodeDateTime(LittleEndian.getUInt16(src, offset + 0x12), 0); // time not stored
         this.startCluster = LittleEndian.getUInt16(src, offset + 0x1a);
         this.length = LittleEndian.getUInt32(src, offset + 0x1c);
-        this._dirty = false;
-    }
-
-    /**
-     * Returns the attribute.
-     * 
-     * @return int
-     */
-    public int getFlags() {
-        return flags;
     }
 
     public long getCreated() {
@@ -220,29 +181,19 @@ class FatDirEntry extends AbstractDirectoryEntry {
         return unused;
     }
 
-    /**
-     * Sets the flags.
-     * 
-     * @param flags
-     */
-    public void setFlags(int flags) {
-        this.flags = flags;
-        setDirty();
-    }
-
     public void setCreated(long created) {
         this.created = created;
-        setDirty();
+        markDirty();
     }
 
     public void setLastModified(long lastModified) {
         this.lastModified = lastModified;
-        setDirty();
+        markDirty();
     }
 
     public void setLastAccessed(long lastAccessed) {
         this.lastAccessed = lastAccessed;
-        setDirty();
+        markDirty();
     }
 
     /**
@@ -252,7 +203,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
      */
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
-        setDirty();
+        markDirty();
     }
 
     /**
@@ -263,7 +214,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
      */
     public void updateLength(long newLength) {
         this.length = newLength;
-        setDirty();
+        markDirty();
     }
 
     /**
@@ -294,13 +245,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
             throw new IOException("Not a directory");
         }
     }
-
-    /**
-     * Gets the single instance of the file connected to this entry. Returns
-     * null if the file is 0 bytes long
-     * 
-     * @return File
-     */
+    
     public FatFile getFatFile() {
         return getDir().getFile(this);
     }
@@ -312,13 +257,13 @@ class FatDirEntry extends AbstractDirectoryEntry {
      */
     public void setName(String name) {
         this.shortName = new ShortName(name);
-        setDirty();
+        markDirty();
     }
 
     public void setName(ShortName sn) {
         if (this.shortName.equals(sn)) return;
         this.shortName = sn;
-        setDirty();
+        markDirty();
     }
 
     /**
@@ -328,7 +273,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
      */
     void setStartCluster(long startCluster) {
         this.startCluster = startCluster;
-        setDirty();
+        markDirty();
     }
 
     /**
@@ -338,35 +283,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
      */
     public void setUnused(boolean unused) {
         this.unused = unused;
-        setDirty();
-    }
-
-    public boolean isReadonly() {
-        return ((flags & F_READONLY) != 0);
-    }
-
-    public void setReadonly() {
-        setFlags(flags | F_READONLY);
-    }
-
-    public boolean isHidden() {
-        return ((flags & F_HIDDEN) != 0);
-    }
-
-    public void setHidden() {
-        setFlags(flags | F_HIDDEN);
-    }
-
-    public boolean isSystem() {
-        return ((flags & F_SYSTEM) != 0);
-    }
-
-    public void setSystem() {
-        setFlags(flags | F_SYSTEM);
-    }
-
-    public boolean isLabel() {
-        return ((flags & F_LABEL) != 0);
+        markDirty();
     }
 
     public void setLabel() {
@@ -382,29 +299,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
     public boolean isFile() {
         return (!(isDirectory() || isLabel()));
     }
-
-    /**
-     * Does this entry refer to a directory?
-     * 
-     * @return 
-     * @see org.jnode.fs.FSDirectoryEntry#isDirectory()
-     */
-    public boolean isDirectory() {
-        return ((flags & F_DIRECTORY) != 0);
-    }
-
-    public void setDirectory() {
-        setFlags(F_DIRECTORY);
-    }
-
-    public boolean isArchive() {
-        return ((flags & F_ARCHIVE) != 0);
-    }
-
-    public void setArchive() {
-        setFlags(flags | F_ARCHIVE);
-    }
-
+    
     /**
      * Write my contents to the given byte-array
      * 
@@ -456,7 +351,6 @@ class FatDirEntry extends AbstractDirectoryEntry {
             dest[offset + 0x08 + i] = (byte) ch;
         }
         
-        LittleEndian.setInt8(dest, offset + FLAGS_OFFSET, flags);
         LittleEndian.setInt16(dest, offset + 0x0e, DosUtils.encodeTime(created));
         LittleEndian.setInt16(dest, offset + 0x10, DosUtils.encodeDate(created));
         LittleEndian.setInt16(dest, offset + 0x12, DosUtils.encodeDate(lastAccessed));
@@ -465,7 +359,6 @@ class FatDirEntry extends AbstractDirectoryEntry {
         if (startCluster > Integer.MAX_VALUE) throw new AssertionError();
         LittleEndian.setInt16(dest, offset + 0x1a, (int) startCluster);
         LittleEndian.setInt32(dest, offset + 0x1c, (int) length);
-        this._dirty = false;
     }
 
     @Override
@@ -511,18 +404,10 @@ class FatDirEntry extends AbstractDirectoryEntry {
 
         return b.toString();
     }
-
-    /**
-     * Returns the dirty.
-     * 
-     * @return boolean
-     */
-    public final boolean isDirty() {
-        return _dirty;
-    }
-
-    protected final void setDirty() {
-        this._dirty = true;
+    
+    @Override
+    protected final void markDirty() {
+        super.markDirty();
         parent.setDirty();
     }
 }
