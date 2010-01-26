@@ -35,6 +35,7 @@ import com.meetwise.fs.FileSystemException;
 public final class FatFileSystem extends AbstractFileSystem {
     
     private final Fat fat;
+    private final FsInfoSector fsiSector;
     private final BootSector bs;
     private final FatLfnDirectory rootDir;
     private final FatType fatType;
@@ -83,12 +84,22 @@ public final class FatFileSystem extends AbstractFileSystem {
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
             ClusterChain rootDirFile = new ClusterChain(fat,
                     f32bs.getRootDirFirstCluster(), isReadOnly());
-            final FatDirectory fd = FatDirectory.read(rootDirFile, readOnly, true);
+            final FatDirectory fd = FatDirectory.read(
+                    rootDirFile, readOnly, true);
+            this.fsiSector = FsInfoSector.read(f32bs);
+
+//            if (fsiSector.getFreeClusterCount() != fat.getFreeClusterCount()) {
+//                throw new IOException("free cluster count mismatch - fat: " +
+//                        fat.getFreeClusterCount() + " - fsinfo: " +
+//                        fsiSector.getFreeClusterCount());
+//            }
+            
             rootDir = new FatLfnDirectory(fd);
         } else {
             final Fat16RootDirectory rd =
                     Fat16RootDirectory.read(fat, readOnly);
             rootDir = new FatLfnDirectory(rd);
+            this.fsiSector = null;
         }
             
     }
@@ -139,6 +150,12 @@ public final class FatFileSystem extends AbstractFileSystem {
         
         if (rootDir.isDirty()) {
             rootDir.flush();
+        }
+
+        if (fsiSector != null) {
+            fsiSector.setFreeClusterCount(fat.getFreeClusterCount());
+            fsiSector.setLastAllocatedCluster(fat.getLastAllocatedCluster());
+            fsiSector.write();
         }
     }
     

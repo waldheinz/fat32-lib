@@ -40,16 +40,20 @@ public abstract class BootSector extends Sector {
     
     protected BootSector(BlockDevice device) throws IOException {
         super(device, 0, SIZE);
+        markDirty();
     }
     
     public static BootSector read(BlockDevice device) throws IOException {
         final ByteBuffer bb = ByteBuffer.allocate(2);
         device.read(Fat16BootSector.SECTORS_PER_FAT_OFFSET, bb);
         bb.flip();
-        
         final int sectorsPerFat = bb.getShort();
-        if (sectorsPerFat == 0) return new Fat32BootSector(device);
-        else return new Fat16BootSector(device);
+        
+        final BootSector result = (sectorsPerFat == 0) ?
+            new Fat32BootSector(device) : new Fat16BootSector(device);
+
+        result.read();
+        return result;
     }
 
     public abstract FatType getFatType();
@@ -80,7 +84,28 @@ public abstract class BootSector extends Sector {
         buffer.position(0);
         buffer.put(bb);
     }
-    
+
+    /**
+     * Returns the number of clusters that are really needed to cover the
+     * data-caontaining portion of the file system.
+     *
+     * @return the number of clusters usable for user data
+     * @see #getDataSize() 
+     */
+    public final long getDataClusterCount() {
+        return getDataSize() / getBytesPerCluster();
+    }
+
+    /**
+     * Returns the size of the data-containing portion of the file system.
+     *
+     * @return the number of bytes usable for storing user data
+     */
+    private final long getDataSize() {
+        return (getSectorCount() * getBytesPerSector()) -
+                FatUtils.getFilesOffset(this);
+    }
+
     /**
      * Gets the OEM name
      * 

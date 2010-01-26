@@ -10,7 +10,6 @@ import java.nio.ByteOrder;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public class Sector {
-
     private final BlockDevice device;
     private final long offset;
 
@@ -19,21 +18,38 @@ public class Sector {
      */
     protected final ByteBuffer buffer;
 
-    protected boolean dirty;
+    private boolean dirty;
     
-    protected Sector(BlockDevice device, long offset, int size) throws IOException {
+    protected Sector(BlockDevice device, long offset, int size) {
         this.offset = offset;
         this.device = device;
         this.buffer = ByteBuffer.allocate(size);
         this.buffer.order(ByteOrder.LITTLE_ENDIAN);
+        this.dirty = true;
+    }
+    
+    /**
+     * Reads the contents of this {@code Sector} from the device into the
+     * internal buffer and resets the "dirty" state.
+     *
+     * @throws IOException on read error
+     * @see #isDirty() 
+     */
+    protected void read() throws IOException {
+        buffer.rewind();
+        buffer.limit(buffer.capacity());
         device.read(offset, buffer);
         this.dirty = false;
     }
-
-    public boolean isDirty() {
+    
+    public final boolean isDirty() {
         return this.dirty;
     }
     
+    protected final void markDirty() {
+        this.dirty = true;
+    }
+
     /**
      * Returns the {@code BlockDevice} where this {@code Sector} is stored.
      *
@@ -43,7 +59,9 @@ public class Sector {
         return this.device;
     }
 
-    public void write() throws IOException {
+    public final void write() throws IOException {
+        if (!isDirty()) {System.out.println("not writing"); return; }
+        
         buffer.rewind();
         buffer.limit(buffer.capacity());
         device.write(offset, buffer);

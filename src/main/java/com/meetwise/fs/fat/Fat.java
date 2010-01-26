@@ -31,7 +31,7 @@ import java.util.Arrays;
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public final class Fat {
+final class Fat {
 
     /**
      * The first cluster that really holds user data in a FAT.
@@ -86,11 +86,11 @@ public final class Fat {
         this.dirty = false;
         this.offset = offset;
         this.lastFreeCluster = FIRST_CLUSTER;
-        
+
         entries = new long[(int) ((nrSectors * sectorSize) /
                 fatType.getEntrySize())];
     }
-
+    
     public FatType getFatType() {
         return fatType;
     }
@@ -278,6 +278,36 @@ public final class Fat {
         return entryIndex;
     }
 
+    /**
+     * Returns the number of clusters that are currently not in use by this FAT.
+     * This estimate does only account for clusters that are really available in
+     * the data portion of the file system, not for clusters that might only
+     * theoretically be stored in the {@code Fat}.
+     *
+     * @return the free cluster count
+     * @see FsInfoSector#setFreeClusterCount(long)
+     * @see FsInfoSector#getFreeClusterCount()
+     * @see BootSector#getDataClusterCount() 
+     */
+    public int getFreeClusterCount() {
+        int result = 0;
+        
+        for (int i=FIRST_CLUSTER; i < bs.getDataClusterCount()+2; i++) {
+            if (isFreeCluster(i)) result++;
+        }
+        
+        return result;
+    }
+
+    /**
+     * Returns the cluster number that was last allocated in this fat.
+     *
+     * @return
+     */
+    public int getLastAllocatedCluster() {
+        return this.lastFreeCluster;
+    }
+    
     /**
      * Allocate a series of clusters for a new file.
      * 

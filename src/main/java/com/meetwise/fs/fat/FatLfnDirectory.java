@@ -56,6 +56,8 @@ final class FatLfnDirectory implements FSDirectory {
      * @throws FileSystemException
      */
     public FatLfnDirectory(AbstractDirectory dir) throws FileSystemException, IOException {
+        if (dir == null) throw new NullPointerException();
+        
         this.dir = dir;
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
         
@@ -91,7 +93,7 @@ final class FatLfnDirectory implements FSDirectory {
             }
         }
     }
-
+    
     void setLabel(String label) throws IOException {
         if (!dir.isRoot()) {
             throw new IOException(

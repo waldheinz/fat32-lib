@@ -127,7 +127,8 @@ public final class SuperFloppyFormatter {
             sectorsPerCluster16(sizeInMB);
 
         final int clusterSize = spc * sectorSize;
-
+        final FsInfoSector fsi;
+        
         if (fatType == FatType.FAT32) {
             bs = new Fat32BootSector(device);
 
@@ -146,10 +147,7 @@ public final class SuperFloppyFormatter {
             f32bs.setVolumeLabel(label);
             
             /* create FS info sector */
-            final long fsiOffset = f32bs.getFsInfoSectorNr() * BootSector.SIZE;
-            FsInfoSector fsi = new FsInfoSector(device, fsiOffset);
-            fsi.init();
-            fsi.write();
+            fsi = FsInfoSector.create(f32bs);
         } else {
             bs = new Fat16BootSector(device);
             final Fat16BootSector f16bs = (Fat16BootSector) bs;
@@ -162,6 +160,7 @@ public final class SuperFloppyFormatter {
             f16bs.setRootDirEntryCount(rootDirEntries);
             f16bs.setSectorsPerFat((Math.round(totalSectors / (spc *
                 (sectorSize / fatType.getEntrySize()))) + 1));
+            fsi = null;
         }
         
         bs.setNrReservedSectors(reservedSectors);
@@ -184,7 +183,13 @@ public final class SuperFloppyFormatter {
         
         final AbstractDirectory rootDirStore;
         if (fatType == FatType.FAT32) {
-            rootDirStore = null;
+            final Fat32BootSector f32bs = (Fat32BootSector) bs;
+            final ClusterChain rootDirChain = new ClusterChain(fat, false);
+            f32bs.setRootDirFirstCluster(rootDirChain.getStartCluster());
+            rootDirStore = FatDirectory.create(rootDirChain, 0, true);
+            fsi.setFreeClusterCount(fat.getFreeClusterCount());
+            fsi.setLastAllocatedCluster(fat.getLastAllocatedCluster());
+            fsi.write();
         } else {
             rootDirStore = Fat16RootDirectory.create(fat);
         }
