@@ -21,7 +21,6 @@
 package com.meetwise.fs.fat;
 
 import java.io.IOException;
-import com.meetwise.fs.FileSystemException;
 import java.nio.ByteBuffer;
 
 /**
@@ -32,14 +31,6 @@ import java.nio.ByteBuffer;
 final class FatDirectory extends AbstractDirectory {
     private final ClusterChain chain;
     
-
-    /**
-     * Constructor for Directory.
-     * 
-     * @param fs
-     * @param chain
-     * @throws FileSystemException 
-     */
     private FatDirectory(ClusterChain chain, boolean readOnly, boolean isRoot) {
         super(chain.getFat(),
                 (int)(chain.getLengthOnDisk() / FatBasicDirEntry.SIZE),
@@ -55,7 +46,17 @@ final class FatDirectory extends AbstractDirectory {
         result.read();
         return result;
     }
+    
+    public static FatDirectory create(ClusterChain cc,
+            long parentCluster, boolean root) throws IOException {
 
+        cc.setChainLength(1);
+        final FatDirectory result = new FatDirectory(cc, false, root);
+        result.initialize(cc.getStartCluster(), parentCluster);
+        result.flush();
+        return result;
+    }
+    
     @Override
     protected void read(ByteBuffer data) throws IOException {
         this.chain.readData(0, data);
@@ -83,5 +84,4 @@ final class FatDirectory extends AbstractDirectory {
         /* TODO: check this */
         return true;
     }
-    
 }
