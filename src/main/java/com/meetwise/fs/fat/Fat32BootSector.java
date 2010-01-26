@@ -163,6 +163,8 @@ public final class Fat32BootSector extends BootSector {
     public void writeCopy(BlockDevice device) throws IOException {
         if (getBootSectorCopySector() > 0) {
             final long offset = getBootSectorCopySector() * SIZE;
+            buffer.rewind();
+            buffer.limit(buffer.capacity());
             device.write(offset, buffer);
         }
     }
