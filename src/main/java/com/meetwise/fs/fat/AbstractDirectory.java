@@ -38,10 +38,9 @@ import java.util.Map;
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-abstract class AbstractDirectory
-        implements Iterable<FSDirectoryEntry> {
+abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
 
-    final Vector<FatBasicDirEntry> entries;
+    final Vector<AbstractDirectoryEntry> entries;
     private final Map<FatDirEntry, FatFile> files;
     private final Fat fat;
     private boolean dirty;
@@ -52,7 +51,7 @@ abstract class AbstractDirectory
     protected AbstractDirectory(Fat fat, int entryCount,
             boolean readOnly, boolean isRoot) {
         
-        this.entries = new Vector<FatBasicDirEntry>(entryCount);
+        this.entries = new Vector<AbstractDirectoryEntry>(entryCount);
         this.entries.setSize(entryCount);
         this.files = new HashMap<FatDirEntry, FatFile>();
         this.fat = fat;
@@ -69,11 +68,11 @@ abstract class AbstractDirectory
 
     protected abstract boolean canChangeSize(int entryCount);
 
-    public final void setEntry(int idx, FatBasicDirEntry entry) {
+    public final void setEntry(int idx, AbstractDirectoryEntry entry) {
         this.entries.set(idx, entry);
     }
 
-    public final FatBasicDirEntry getEntry(int idx) {
+    public final AbstractDirectoryEntry getEntry(int idx) {
         return this.entries.get(idx);
     }
 
@@ -131,7 +130,7 @@ abstract class AbstractDirectory
                 new FatDirEntry(this, new ShortName(nameExt));
         
         for (int i = 0; i < entries.size(); i++) {
-            FatBasicDirEntry e = entries.get(i);
+            AbstractDirectoryEntry e = entries.get(i);
             if (e == null) {
                 entries.set(i, newEntry);
                 setDirty();
@@ -169,7 +168,7 @@ abstract class AbstractDirectory
         final ShortName toFind = new ShortName(nameExt);
 
         for (int i = 0; i < entries.size(); i++) {
-            final FatBasicDirEntry entry = entries.get(i);
+            final AbstractDirectoryEntry entry = entries.get(i);
 
             if (entry != null && entry instanceof FatDirEntry) {
                 final FatDirEntry fde = (FatDirEntry) entry;
@@ -211,7 +210,7 @@ abstract class AbstractDirectory
         public boolean hasNext() {
             
             while (offset < entries.size()) {
-                FatBasicDirEntry e = entries.get(offset);
+                AbstractDirectoryEntry e = entries.get(offset);
                 if ((e != null) && e instanceof FatDirEntry && 
                         !((FatDirEntry) e).isDeleted() &&
                         !((FatDirEntry) e).getName().equals(".") &&
@@ -233,7 +232,7 @@ abstract class AbstractDirectory
         public FSDirectoryEntry next() {
             
             while (offset < entries.size()) {
-                FatBasicDirEntry e = entries.get(offset);
+                AbstractDirectoryEntry e = entries.get(offset);
                 if ((e != null) && (e instanceof FatDirEntry) &&
                         !((FatDirEntry) e).isDeleted() &&
                         !((FatDirEntry) e).getName().equals(".") &&
@@ -268,7 +267,7 @@ abstract class AbstractDirectory
         if (dirty)  return true;
         
         for (int i = 0; i < entries.size(); i++) {
-            FatBasicDirEntry entry = entries.get(i);
+            AbstractDirectoryEntry entry = entries.get(i);
             
             if ((entry != null) && (entry instanceof FatDirEntry)) {
                 if (((FatDirEntry) entry).isDirty()) {
@@ -341,7 +340,7 @@ abstract class AbstractDirectory
      */
     public void flush() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
-                entries.size() * FatBasicDirEntry.SIZE);
+                entries.size() * AbstractDirectoryEntry.SIZE);
 
         final byte[] empty = new byte[32];
 
@@ -351,7 +350,7 @@ abstract class AbstractDirectory
         }
 
         for (int i = 0; i < entries.size(); i++) {
-            final FatBasicDirEntry entry = entries.get(i);
+            final AbstractDirectoryEntry entry = entries.get(i);
 
             if (entry != null) {
                 entry.write(data.array(), i * 32);
@@ -367,7 +366,7 @@ abstract class AbstractDirectory
     
     protected final void read() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
-                entries.size() * FatBasicDirEntry.SIZE);
+                entries.size() * AbstractDirectoryEntry.SIZE);
                 
         read(data);
 
@@ -378,7 +377,7 @@ abstract class AbstractDirectory
             if (src[index] == 0) {
                 entries.set(i, null);
             } else {
-                FatBasicDirEntry entry = FatDirEntry.create(this, src, index);
+                AbstractDirectoryEntry entry = FatDirEntry.create(this, src, index);
                 entries.set(i, entry);
             }
         }

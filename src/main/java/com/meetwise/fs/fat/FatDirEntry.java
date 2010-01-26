@@ -31,7 +31,7 @@ import com.meetwise.fs.util.LittleEndian;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-class FatDirEntry extends FatBasicDirEntry {
+class FatDirEntry extends AbstractDirectoryEntry {
 
     /** Name of this entry */
     private ShortName shortName;
@@ -66,7 +66,7 @@ class FatDirEntry extends FatBasicDirEntry {
     /** FSDirectory this entry is a part of */
     private final AbstractDirectory parent;
 
-    public static FatBasicDirEntry create(
+    public static AbstractDirectoryEntry create(
             AbstractDirectory dir, byte[] src, int offset) {
         
         int flags = LittleEndian.getUInt8(src, offset + 0x0b);

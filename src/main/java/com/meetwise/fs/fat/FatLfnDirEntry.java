@@ -27,7 +27,7 @@ import com.meetwise.fs.util.LittleEndian;
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class FatLfnDirEntry extends FatBasicDirEntry {
+class FatLfnDirEntry extends AbstractDirectoryEntry {
     
     /**
      * @param dir

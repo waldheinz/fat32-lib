@@ -208,12 +208,12 @@ final class FatLfnDirectory implements FSDirectory {
     }
     
     private void updateLFN() throws IOException {
-        ArrayList<FatBasicDirEntry> destination = new ArrayList<FatBasicDirEntry>();
+        ArrayList<AbstractDirectoryEntry> destination = new ArrayList<AbstractDirectoryEntry>();
 
         if (labelEntry != null) destination.add(labelEntry);
         
         for (LfnEntry currentEntry : shortNameIndex.values()) {
-            FatBasicDirEntry[] encoded = currentEntry.compactForm();
+            AbstractDirectoryEntry[] encoded = currentEntry.compactForm();
             for (int i = 0; i < encoded.length; i++) {
                 destination.add(encoded[i]);
             }

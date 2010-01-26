@@ -1,5 +1,5 @@
 /*
- * $Id: FatBasicDirEntry.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: AbstractDirectoryEntry.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -25,7 +25,7 @@ package com.meetwise.fs.fat;
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class FatBasicDirEntry extends FatObject implements FatConstants {
+class AbstractDirectoryEntry extends FatObject implements FatConstants {
 
     /**
      * The size in bytes of an FAT directory entry.
@@ -35,15 +35,15 @@ class FatBasicDirEntry extends FatObject implements FatConstants {
     protected final byte[] rawData = new byte[SIZE];
     private final AbstractDirectory dir;
 
-    FatBasicDirEntry(AbstractDirectory dir) {
+    AbstractDirectoryEntry(AbstractDirectory dir) {
         this.dir = dir;
     }
 
-    FatBasicDirEntry(AbstractDirectory dir, byte[] src, int offset) {
+    AbstractDirectoryEntry(AbstractDirectory dir, byte[] src, int offset) {
         System.arraycopy(src, offset, rawData, 0, SIZE);
         this.dir = dir;
     }
-
+    
     public AbstractDirectory getDir() {
         return dir;
     }

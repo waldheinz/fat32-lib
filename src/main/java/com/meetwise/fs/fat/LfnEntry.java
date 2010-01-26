@@ -60,13 +60,13 @@ class LfnEntry implements FSDirectoryEntry {
         realEntry = (FatDirEntry) entries.get(offset + length - 1);
     }
 
-    public FatBasicDirEntry[] compactForm() {
+    public AbstractDirectoryEntry[] compactForm() {
         int totalEntrySize = (fileName.length() / 13) + 1; // + 1 for the real
 
         if ((fileName.length() % 13) != 0) // there is a remaining part
             totalEntrySize++;
             
-        FatBasicDirEntry[] entries = new FatBasicDirEntry[totalEntrySize];
+        AbstractDirectoryEntry[] entries = new AbstractDirectoryEntry[totalEntrySize];
         int j = 0;
         int checkSum = calculateCheckSum();
         for (int i = totalEntrySize - 2; i > 0; i--) {
