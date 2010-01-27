@@ -162,12 +162,12 @@ class LfnEntry implements FSDirectoryEntry {
 
     @Override
     public FSFile getFile() throws IOException {
-        return realEntry.getFile();
+        return parent.getFile(realEntry);
     }
 
     @Override
     public FSDirectory getDirectory() throws IOException {
-        return realEntry.getDirectory();
+        return parent.getFile(realEntry).getDirectory();
     }
 
     @Override

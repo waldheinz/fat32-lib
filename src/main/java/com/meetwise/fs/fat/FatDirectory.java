@@ -32,13 +32,12 @@ final class FatDirectory extends AbstractDirectory {
     private final ClusterChain chain;
     
     private FatDirectory(ClusterChain chain, boolean readOnly, boolean isRoot) {
-        super(chain.getFat(),
-                (int)(chain.getLengthOnDisk() / AbstractDirectoryEntry.SIZE),
+        super((int)(chain.getLengthOnDisk() / AbstractDirectoryEntry.SIZE),
                 readOnly, isRoot);
         
         this.chain = chain;   
     }
-
+    
     public static FatDirectory read(ClusterChain chain,
             boolean readOnly, boolean root) throws IOException {
         

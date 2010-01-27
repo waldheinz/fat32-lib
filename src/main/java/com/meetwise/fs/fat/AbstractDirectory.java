@@ -30,8 +30,6 @@ import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
 import com.meetwise.fs.ReadOnlyFileSystemException;
 import com.meetwise.fs.util.LittleEndian;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 
@@ -40,23 +38,18 @@ import java.util.Map;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
-
+    
     final Vector<AbstractDirectoryEntry> entries;
-    private final Map<FatDirEntry, FatFile> files;
-    private final Fat fat;
-    private boolean dirty;
-    private final int clusterSize;
     private final boolean readOnly;
     private final boolean isRoot;
     
-    protected AbstractDirectory(Fat fat, int entryCount,
-            boolean readOnly, boolean isRoot) {
+    private boolean dirty;
+    
+    protected AbstractDirectory(
+            int entryCount, boolean readOnly, boolean isRoot) {
         
         this.entries = new Vector<AbstractDirectoryEntry>(entryCount);
         this.entries.setSize(entryCount);
-        this.files = new HashMap<FatDirEntry, FatFile>();
-        this.fat = fat;
-        this.clusterSize = fat.getBootSector().getBytesPerCluster();
         this.readOnly = readOnly;
         this.isRoot = isRoot;
     }
@@ -68,7 +61,7 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
     protected abstract long getStorageCluster();
 
     protected abstract boolean canChangeSize(int entryCount);
-
+    
     public final void setEntry(int idx, AbstractDirectoryEntry entry) {
         this.entries.set(idx, entry);
     }
@@ -83,10 +76,6 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
 
     public final int getEntryCount() {
         return this.entries.size();
-    }
-
-    public final int getClusterSize() {
-        return clusterSize;
     }
     
     /**
@@ -317,24 +306,6 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
         }
     }
     
-    /**
-     * Gets the file for the given entry.
-     * 
-     * @param entry
-     * @return 
-     */
-    FatFile getFile(FatDirEntry entry) {
-        FatFile file = files.get(entry);
-        
-        if (file == null) {
-            file = new FatFile(fat, entry, entry.getStartCluster(),
-                    entry.getLength(), entry.isDirectory(),
-                    isReadOnly());
-            files.put(entry, file);
-        }
-        
-        return file;
-    }
 
     /**
      * Flush the contents of this directory to the persistent storage
@@ -344,12 +315,7 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
                 entries.size() * AbstractDirectoryEntry.SIZE);
 
         final byte[] empty = new byte[32];
-
-
-        for (FatFile f : files.values()) {
-            f.flush();
-        }
-
+        
         for (int i = 0; i < entries.size(); i++) {
             final AbstractDirectoryEntry entry = entries.get(i);
 

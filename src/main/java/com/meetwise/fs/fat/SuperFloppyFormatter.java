@@ -191,10 +191,10 @@ public final class SuperFloppyFormatter {
             fsi.setLastAllocatedCluster(fat.getLastAllocatedCluster());
             fsi.write();
         } else {
-            rootDirStore = Fat16RootDirectory.create(fat);
+            rootDirStore = Fat16RootDirectory.create((Fat16BootSector) bs);
         }
         
-        final FatLfnDirectory rootDir = new FatLfnDirectory(rootDirStore);
+        final FatLfnDirectory rootDir = new FatLfnDirectory(rootDirStore, fat);
         
         rootDir.flush();
         

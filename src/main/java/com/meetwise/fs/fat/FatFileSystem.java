@@ -94,11 +94,11 @@ public final class FatFileSystem extends AbstractFileSystem {
                         fsiSector.getFreeClusterCount());
             }
             
-            rootDir = new FatLfnDirectory(fd);
+            rootDir = new FatLfnDirectory(fd, fat);
         } else {
             final Fat16RootDirectory rd =
-                    Fat16RootDirectory.read(fat, readOnly);
-            rootDir = new FatLfnDirectory(rd);
+                    Fat16RootDirectory.read((Fat16BootSector) bs,readOnly);
+            rootDir = new FatLfnDirectory(rd, fat);
             this.fsiSector = null;
         }
             

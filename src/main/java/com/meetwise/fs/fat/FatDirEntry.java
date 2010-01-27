@@ -224,13 +224,13 @@ class FatDirEntry extends AbstractDirectoryEntry {
      * @return File
      * @throws IOException on read error
      */
-    public FSFile getFile() throws IOException {
-        if (isFile()) {
-            return getFatFile();
-        } else {
-            throw new IOException("Not a file");
-        }
-    }
+//    public FSFile getFile() throws IOException {
+//        if (isFile()) {
+//            return getFatFile();
+//        } else {
+//            throw new IOException("Not a file");
+//        }
+//    }
 
     /**
      * Gets the directory this entry refers to. This method can only be called
@@ -238,17 +238,17 @@ class FatDirEntry extends AbstractDirectoryEntry {
      *
      * @throws IOException on read error
      */
-    public FSDirectory getDirectory() throws IOException {
-        if (isDirectory()) {
-            return getFatFile().getDirectory();
-        } else {
-            throw new IOException("Not a directory");
-        }
-    }
+//    public FSDirectory getDirectory() throws IOException {
+//        if (isDirectory()) {
+//            return getFatFile().getDirectory();
+//        } else {
+//            throw new IOException("Not a directory");
+//        }
+//    }
     
-    public FatFile getFatFile() {
-        return getDir().getFile(this);
-    }
+//    public FatFile getFatFile() {
+//        return getDir().getFile(this);
+//    }
     
     /**
      * Sets the name.

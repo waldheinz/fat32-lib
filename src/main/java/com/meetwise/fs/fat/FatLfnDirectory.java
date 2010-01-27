@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 
 /**
@@ -38,29 +39,56 @@ import java.util.Iterator;
  */
 final class FatLfnDirectory implements FSDirectory {
 
-    private final HashMap<ShortName, LfnEntry> shortNameIndex =
+    private final Map<ShortName, LfnEntry> shortNameIndex =
             new HashMap<ShortName, LfnEntry>();
             
-    private final HashMap<String, LfnEntry> longNameIndex =
+    private final Map<String, LfnEntry> longNameIndex =
             new HashMap<String, LfnEntry>();
+
+    private final Map<FatDirEntry, FatFile> files;
+    private final Map<FatDirEntry, FatDirectory> directories;
 
     private final ShortNameGenerator sng;
 
     private FatDirEntry labelEntry;
     private final AbstractDirectory dir;
+    private final Fat fat;
     
     /**
      * @param fs
      * @param chain
      * @throws FileSystemException
      */
-    public FatLfnDirectory(AbstractDirectory dir) throws FileSystemException, IOException {
+    public FatLfnDirectory(AbstractDirectory dir, Fat fat) {
         if (dir == null) throw new NullPointerException();
         
+        this.fat = fat;
         this.dir = dir;
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
+        this.files = new HashMap<FatDirEntry, FatFile>();
+        this.directories = new HashMap<FatDirEntry, FatDirectory>();
         
         parseLfn();
+    }
+
+
+    /**
+     * Gets the file for the given entry.
+     *
+     * @param entry
+     * @return
+     */
+    FatFile getFile(FatDirEntry entry) {
+        FatFile file = files.get(entry);
+
+        if (file == null) {
+            file = new FatFile(fat, entry, entry.getStartCluster(),
+                    entry.getLength(), entry.isDirectory(),
+                    dir.isReadOnly());
+            files.put(entry, file);
+        }
+        
+        return file;
     }
 
     /**
@@ -143,7 +171,7 @@ final class FatLfnDirectory implements FSDirectory {
         final ShortName sn = sng.generateShortName(name);
         final FatDirEntry realEntry = new FatDirEntry(dir, sn);
         realEntry.setFlags(FatConstants.F_DIRECTORY);
-        final FatFile f = realEntry.getFatFile();
+        final FatFile f = getFile(realEntry);
         final FatDirectory fatDir = FatDirectory.create(f, dir.getStorageCluster(), false);
         realEntry.setStartCluster(fatDir.getStorageCluster());
         
@@ -250,6 +278,10 @@ final class FatLfnDirectory implements FSDirectory {
 
     @Override
     public void flush() throws FileSystemException, IOException {
+        for (FatFile f : files.values()) {
+            f.flush();
+        }
+        
         updateLFN();
         dir.flush();
     }
