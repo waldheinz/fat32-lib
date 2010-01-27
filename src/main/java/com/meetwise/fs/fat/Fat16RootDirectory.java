@@ -21,13 +21,35 @@ final class Fat16RootDirectory extends AbstractDirectory {
         this.device = bs.getDevice();
     }
 
-    public static Fat16RootDirectory read(Fat16BootSector bs, boolean readOnly) throws IOException {
+    /**
+     * Reads a {@code Fat16RootDirectory} as indicated by the specified
+     * {@code Fat16BootSector}.
+     *
+     * @param bs the boot sector that describes the root directory to read
+     * @param readOnly if the directory shold be created read-only
+     * @return the directory that was read
+     * @throws IOException on read error
+     */
+    public static Fat16RootDirectory read(
+            Fat16BootSector bs, boolean readOnly) throws IOException {
+        
         final Fat16RootDirectory result = new Fat16RootDirectory(bs, readOnly);
         result.read();
         return result;
     }
 
-    public static Fat16RootDirectory create(Fat16BootSector bs) throws IOException {
+    /**
+     * Creates a new {@code Fat16RootDirectory} as indicated by the specified
+     * {@code Fat16BootSector}. The directory will always be created in
+     * read-write mode.
+     *
+     * @param bs the boot sector that describes the root directory to create
+     * @return the directory that was created
+     * @throws IOException on write error
+     */
+    public static Fat16RootDirectory create(
+            Fat16BootSector bs) throws IOException {
+        
         final Fat16RootDirectory result = new Fat16RootDirectory(bs, false);
         result.flush();
         return result;
@@ -54,6 +76,13 @@ final class Fat16RootDirectory extends AbstractDirectory {
         return 0;
     }
 
+    /**
+     * Always returns {@code false}, as a FAT12/16 root directory can not
+     * change it's size.
+     *
+     * @param entryCount {@inheritDoc}
+     * @return always {@code false}
+     */
     @Override
     protected boolean canChangeSize(int entryCount) {
         return false;

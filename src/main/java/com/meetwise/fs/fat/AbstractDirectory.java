@@ -69,11 +69,24 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
     public final AbstractDirectoryEntry getEntry(int idx) {
         return this.entries.get(idx);
     }
-
+    
+    /**
+     * Returns the current capacity of this {@code AbstractDirectory}.
+     *
+     * @return the number of entries this directory can hold in its current
+     *      storage space
+     * @see #canChangeSize(int) 
+     */
     public final int getCapacity() {
         return this.entries.capacity();
     }
 
+    /**
+     * The number of entries that are currently stored in this
+     * {@code AbstractDirectory}.
+     *
+     * @return the current number of directory entries
+     */
     public final int getEntryCount() {
         return this.entries.size();
     }
