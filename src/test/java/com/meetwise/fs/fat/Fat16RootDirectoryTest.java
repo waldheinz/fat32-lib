@@ -53,12 +53,18 @@ public class Fat16RootDirectoryTest {
     }
     
     @Test
-    public void testCanChangeSize() throws IOException {
-        System.out.println("canChangeSize");
+    public void testCanChangeSizeOk() throws IOException {
+        System.out.println("canChangeSize (OK)");
 
         Fat16RootDirectory dir = Fat16RootDirectory.create(bs);
-
-        assertEquals(false, dir.canChangeSize(100));
+        dir.changeSize(dir.getCapacity());
     }
     
+    @Test(expected=RootDirectoryFullException.class)
+    public void testCanChangeSizeBad() throws IOException {
+        System.out.println("canChangeSize (bad)");
+
+        Fat16RootDirectory dir = Fat16RootDirectory.create(bs);
+        dir.changeSize(dir.getCapacity() + 1);
+    }
 }

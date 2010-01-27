@@ -63,10 +63,11 @@ final class FatDirectory extends AbstractDirectory {
 
     @Override
     protected void write(ByteBuffer data) throws IOException {
-        final long trueSize = chain.setSize(data.capacity());
+        final int toWrite = data.remaining();
         chain.writeData(0, data);
+        final long trueSize = chain.getLengthOnDisk();
         
-        if (trueSize > data.capacity()) {
+        if (trueSize > toWrite) {
             final int rest = (int) (trueSize - data.capacity());
             final ByteBuffer fill = ByteBuffer.allocate(rest);
             chain.writeData(data.capacity(), fill);
@@ -83,8 +84,9 @@ final class FatDirectory extends AbstractDirectory {
     }
     
     @Override
-    protected boolean canChangeSize(int entryCount) {
-        /* TODO: check this */
-        return true;
+    protected void changeSize(int entryCount) throws IOException {
+        int size = entryCount > 0 ? entryCount * FatDirEntry.SIZE : 1;
+        sizeChanged(chain.setSize(size));
     }
+    
 }

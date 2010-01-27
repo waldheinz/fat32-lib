@@ -122,31 +122,7 @@ final class FatLfnDirectory implements FSDirectory {
     }
     
     void setLabel(String label) throws IOException {
-        if (!dir.isRoot()) {
-            throw new IOException(
-                    "volume name change on non-root directory"); //NOI18N
-        }
-
-        if (label != null) {
-            Iterator<FSDirectoryEntry> i = iterator();
-            FatDirEntry current;
-            while (labelEntry == null && i.hasNext()) {
-                current = (FatDirEntry) i.next();
-                if (current.isLabel() &&
-                        !(current.isHidden() && current.isReadonly() && current.isSystem())) {
-                    labelEntry = current;
-                }
-            }
-
-            if (labelEntry == null) {
-                labelEntry = dir.addFatFile(label);
-                labelEntry.setLabel();
-            }
-
-            labelEntry.setName(label);
-        } else {
-            labelEntry = null;
-        }
+        throw new UnsupportedOperationException();
     }
 
     ShortNameGenerator getShortNameGenerator() {
@@ -248,11 +224,8 @@ final class FatLfnDirectory implements FSDirectory {
         }
 
         final int size = destination.size();
-        if (dir.getCapacity() < size) {
-            if (!dir.canChangeSize(size)) {
-                throw new IOException("root directory is full");
-            }
-        }
+        
+        dir.changeSize(size);
         
         boolean useAdd = false;
         for (int i = 0; i < size; i++) {

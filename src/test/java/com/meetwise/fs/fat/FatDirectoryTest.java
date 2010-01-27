@@ -35,4 +35,14 @@ public class FatDirectoryTest {
 
         assertEquals(0, dir.getStorageCluster());
     }
+
+    @Test
+    public void testCreate() {
+        System.out.println("create");
+
+        assertEquals(
+                chain.getLengthOnDisk() / FatDirEntry.SIZE,
+                dir.getCapacity());
+    }
+    
 }

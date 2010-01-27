@@ -27,8 +27,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.ReadOnlyFileSystemException;
 import com.meetwise.fs.util.LittleEndian;
 
 /**
@@ -60,8 +58,27 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
 
     protected abstract long getStorageCluster();
 
-    protected abstract boolean canChangeSize(int entryCount);
-    
+    /**
+     *
+     * @param entryCount
+     * @throws IOException
+     * @see #sizeChanged(long) 
+     */
+    protected abstract void changeSize(int entryCount) throws IOException;
+
+    /**
+     * 
+     * @param newSize the new storage space for the directory in bytes
+     * @see #changeSize(int) 
+     */
+    protected final void sizeChanged(long newSize) throws IOException {
+        final long newCount = newSize / FatDirEntry.SIZE;
+        if (newCount > Integer.MAX_VALUE)
+            throw new IOException("directory too large");
+        
+        this.entries.setSize((int) newSize);
+    }
+
     public final void setEntry(int idx, AbstractDirectoryEntry entry) {
         this.entries.set(idx, entry);
     }
@@ -75,7 +92,7 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
      *
      * @return the number of entries this directory can hold in its current
      *      storage space
-     * @see #canChangeSize(int) 
+     * @see #changeSize(int)
      */
     public final int getCapacity() {
         return this.entries.capacity();
@@ -108,48 +125,6 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
 
     public final boolean isRoot() {
         return this.isRoot;
-    }
-
-    /**
-     * Add a directory entry.
-     * 
-     * @param nameExt
-     * @return
-     * @throws FileSystemException 
-     */
-    protected FatDirEntry addFatFile(String nameExt)
-            throws FileSystemException {
-        
-        if (isReadOnly()) {
-            throw new ReadOnlyFileSystemException(null);
-        }
-
-        if (getFatEntry(nameExt) != null) {
-            throw new FileSystemException(null,
-                    "file already exists " + nameExt); //NOI18N
-        }
-        
-        final FatDirEntry newEntry =
-                new FatDirEntry(this, new ShortName(nameExt));
-        
-        for (int i = 0; i < entries.size(); i++) {
-            AbstractDirectoryEntry e = entries.get(i);
-            if (e == null) {
-                entries.set(i, newEntry);
-                setDirty();
-                return newEntry;
-            }
-        }
-
-        final int newSize = entries.size() + 512 / 32;
-        if (canChangeSize(newSize)) {
-            entries.setSize(newSize);
-            setDirty();
-            return newEntry;
-        }
-        
-        throw new FileSystemException(null,
-                "directory is full"); //NOI18N
     }
     
     /**

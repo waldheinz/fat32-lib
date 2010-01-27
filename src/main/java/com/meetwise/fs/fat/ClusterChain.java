@@ -118,7 +118,7 @@ class ClusterChain {
             throw new IOException("too many clusters");
 
         setChainLength((int) nrClusters);
-
+        
         return clusterSize * nrClusters;
     }
 
@@ -225,11 +225,13 @@ class ClusterChain {
         
         int len = srcBuf.remaining();
 
-        final long minSize = offset + srcBuf.remaining();
+        if (len == 0) return;
+
+        final long minSize = offset + len;
         if (getLengthOnDisk() < minSize) {
             setSize(minSize);
         }
-
+        
         final long[] chain = fat.getChain(getStartCluster());
 
         int chainIdx = (int) (offset / clusterSize);
