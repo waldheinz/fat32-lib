@@ -62,9 +62,25 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
      *
      * @param entryCount
      * @throws IOException
-     * @see #sizeChanged(long) 
+     * @see #sizeChanged(long)
+     * @see #checkEntryCount(int) 
      */
     protected abstract void changeSize(int entryCount) throws IOException;
+
+    /**
+     * Checks if the entry count passed to {@link #changeSize(int)} is at
+     * least one, as we always have at least the {@link ShortName#DOT dot}
+     * entry.
+     *
+     * @param entryCount the entry count to check for validity
+     * @throws IllegalArgumentException if {@code entryCount <= 0}
+     */
+    protected final void checkEntryCount(int entryCount)
+            throws IllegalArgumentException {
+        
+        if (entryCount <= 0) throw new IllegalArgumentException(
+                "invalid entry count of " + entryCount);
+    }
 
     /**
      * 

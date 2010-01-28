@@ -84,8 +84,12 @@ final class FatDirectory extends AbstractDirectory {
     }
     
     @Override
-    protected void changeSize(int entryCount) throws IOException {
-        int size = entryCount > 0 ? entryCount * FatDirEntry.SIZE : 1;
+    protected void changeSize(int entryCount)
+            throws IOException, IllegalArgumentException {
+        
+        checkEntryCount(entryCount);
+        
+        final int size = entryCount * FatDirEntry.SIZE;
         sizeChanged(chain.setSize(size));
     }
     

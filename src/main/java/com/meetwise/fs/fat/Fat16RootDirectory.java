@@ -90,6 +90,8 @@ final class Fat16RootDirectory extends AbstractDirectory {
     @Override
     protected void changeSize(int entryCount)
             throws RootDirectoryFullException {
+
+        checkEntryCount(entryCount);
         
         if (getCapacity() < entryCount) {
             throw new RootDirectoryFullException();

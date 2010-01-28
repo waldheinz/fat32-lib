@@ -207,7 +207,6 @@ final class FatLfnDirectory implements FSDirectory {
                 longNameIndex.put(current.getName(), current);
             }
         }
-
     }
     
     private void updateLFN() throws IOException {
