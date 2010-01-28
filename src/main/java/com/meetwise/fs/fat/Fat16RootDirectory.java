@@ -17,10 +17,13 @@ final class Fat16RootDirectory extends AbstractDirectory {
     private Fat16RootDirectory(Fat16BootSector bs, boolean readOnly) {
         super(bs.getRootDirEntryCount(), readOnly, true);
 
+        if (bs.getRootDirEntryCount() <= 0) throw new IllegalArgumentException(
+                "root directory size is " + bs.getRootDirEntryCount());
+        
         this.deviceOffset = FatUtils.getRootDirOffset(bs);
         this.device = bs.getDevice();
     }
-
+    
     /**
      * Reads a {@code Fat16RootDirectory} as indicated by the specified
      * {@code Fat16BootSector}.
@@ -51,10 +54,11 @@ final class Fat16RootDirectory extends AbstractDirectory {
             Fat16BootSector bs) throws IOException {
         
         final Fat16RootDirectory result = new Fat16RootDirectory(bs, false);
+        result.initialize(0, 0);
         result.flush();
         return result;
     }
-
+    
     @Override
     protected void read(ByteBuffer data) throws IOException {
         this.device.read(deviceOffset, data);

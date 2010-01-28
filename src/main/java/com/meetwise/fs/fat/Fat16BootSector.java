@@ -12,6 +12,13 @@ import java.io.IOException;
 public class Fat16BootSector extends BootSector {
 
     /**
+     * The default number of entries for the root directory.
+     * @see #getRootDirEntryCount()
+     * @see #setRootDirEntryCount(int) 
+     */
+    public static final int DEFAULT_ROOT_DIR_ENTRY_COUNT = 512;
+
+    /**
      * The maximum number of sectors for a FAT12 file system. This is actually
      * the number of sectors where mkdosfs stop complaining about a FAT16
      * partition having not enough sectors, so it would be misinterpreted
@@ -98,4 +105,12 @@ public class Fat16BootSector extends BootSector {
 
         set16(0x11, v);
     }
+
+    @Override
+    public void init() {
+        super.init();
+        
+        setRootDirEntryCount(DEFAULT_ROOT_DIR_ENTRY_COUNT);
+    }
+    
 }

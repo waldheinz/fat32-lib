@@ -143,7 +143,7 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
      * @return FatDirEntry null == not found
      */
     protected FatDirEntry getFatEntry(String nameExt) {
-        final ShortName toFind = new ShortName(nameExt);
+        final ShortName toFind = ShortName.get(nameExt);
 
         for (int i = 0; i < entries.size(); i++) {
             final AbstractDirectoryEntry entry = entries.get(i);
@@ -279,7 +279,7 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
      */
     protected void initialize(long myCluster, long parentCluster) {
         final FatDirEntry dot = new FatDirEntry(
-                this, new ShortName(".", "")); //NOI18N
+                this, ShortName.DOT);
         
         dot.setFlags(FatConstants.F_DIRECTORY);
         dot.setStartCluster((int) myCluster);
@@ -287,7 +287,7 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
 
         if (!isRoot) {
             final FatDirEntry dotDot = new FatDirEntry(
-                    this, new ShortName("..", "")); //NOI18N
+                    this, ShortName.DOT_DOT);
             dotDot.setFlags(FatConstants.F_DIRECTORY);
             dotDot.setStartCluster((int) parentCluster);
             entries.set(1, dotDot);

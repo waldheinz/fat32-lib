@@ -9,8 +9,11 @@ public final class ShortName {
 
     private final String name;
     private final String ext;
-
-    public ShortName(String nameExt) {
+    
+    public final static ShortName DOT = new ShortName(".", "");
+    public final static ShortName DOT_DOT = new ShortName("..", "");
+    
+    private ShortName(String nameExt) {
         if (nameExt.length() > 12) throw
                 new IllegalArgumentException("name too long");
         
@@ -27,13 +30,19 @@ public final class ShortName {
         checkValidName(name);
         checkValidExt(ext);
     }
-
+    
     ShortName(String name, String ext) {
         checkValidName(name);
         checkValidExt(ext);
-
+        
         this.name = name;
         this.ext = ext;
+    }
+
+    public static ShortName get(String name) {
+        if (name.equals(".")) return DOT;
+        else if (name.equals("..")) return DOT_DOT;
+        else return new ShortName(name);
     }
 
     @Override

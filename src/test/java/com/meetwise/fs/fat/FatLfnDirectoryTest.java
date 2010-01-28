@@ -34,7 +34,20 @@ public class FatLfnDirectoryTest {
         this.fat = Fat.read(bs, 0);
         this.dir = new FatLfnDirectory(rootDirStore, fat);
     }
-    
+
+    @Test
+    public void testGeneratedEntries() throws IOException {
+        System.out.println("generatedEntries");
+
+        final int orig = rootDirStore.getEntryCount();
+        System.out.println("orig=" + orig);
+        dir.flush();
+        assertEquals(orig, rootDirStore.getEntryCount());
+        dir.addFile("hallo");
+        dir.flush();
+        assertTrue(orig < rootDirStore.getEntryCount());
+    }
+
     @Test
     public void testGetFile() throws IOException {
         System.out.println("getFile");

@@ -20,13 +20,9 @@
  
 package com.meetwise.fs.fat;
 
-import java.io.IOException;
-import java.util.Date;
-
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSFile;
 import com.meetwise.fs.util.DosUtils;
 import com.meetwise.fs.util.LittleEndian;
+import java.util.Date;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
@@ -256,10 +252,10 @@ class FatDirEntry extends AbstractDirectoryEntry {
      * @param name The name to set
      */
     public void setName(String name) {
-        this.shortName = new ShortName(name);
+        this.shortName = ShortName.get(name);
         markDirty();
     }
-
+    
     public void setName(ShortName sn) {
         if (this.shortName.equals(sn)) return;
         this.shortName = sn;

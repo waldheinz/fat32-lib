@@ -161,11 +161,11 @@ final class FatLfnDirectory implements FSDirectory {
     @Override
     public FSDirectoryEntry getEntry(String name) {
         name = name.trim();
-
+        
         final FSDirectoryEntry entry = longNameIndex.get(name);
         
         if (entry == null)
-            return shortNameIndex.get(new ShortName(name));
+            return shortNameIndex.get(ShortName.get(name));
         else
             return entry;
 
