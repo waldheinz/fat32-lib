@@ -23,7 +23,6 @@ package com.meetwise.fs.fat;
 import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FileSystemException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -292,23 +291,7 @@ final class FatLfnDirectory implements FSDirectory {
      */
     @Override
     public void remove(String name) throws IOException {
-        name = name.trim();
-        LfnEntry byLongName = longNameIndex.get(name);
-        
-        if (byLongName != null) {
-            longNameIndex.remove(name);
-            shortNameIndex.remove(byLongName.getRealEntry().getShortName());
-            return;
-        }
-        
-        LfnEntry byShortName = shortNameIndex.get(new ShortName(name));
-
-        if (byShortName != null) {
-            longNameIndex.remove(byShortName.getName());
-            shortNameIndex.remove(new ShortName(name));
-        }
-        
-        throw new FileNotFoundException(name);
+        throw new UnsupportedOperationException();
     }
 
     @Override
