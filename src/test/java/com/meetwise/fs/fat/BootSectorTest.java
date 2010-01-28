@@ -11,7 +11,18 @@ import static org.junit.Assert.*;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public class BootSectorTest {
-    
+
+    @Test
+    public void testGetDataClusterCount() throws IOException {
+        System.out.println("getDataClusterCount");
+
+        RamDisk rd = new RamDisk(1024 * 1024);
+        BootSector bs = new Fat16BootSector(rd);
+        bs.init();
+
+        assertTrue(bs.getDataClusterCount() > 0);
+    }
+
     @Test
     public void testNrFats() throws IOException {
         System.out.println("setNrFats");
@@ -26,7 +37,7 @@ public class BootSectorTest {
         assertTrue(bs instanceof Fat32BootSector);
         assertEquals(2, bs.getNrFats());
     }
-
+    
     @Test(expected=IllegalArgumentException.class)
     public void testSetSectorsPerClusterInvalid() throws IOException {
         System.out.println("setSectorsPerCluster (invalid)");

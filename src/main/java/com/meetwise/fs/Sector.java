@@ -60,7 +60,7 @@ public class Sector {
     }
 
     public final void write() throws IOException {
-        if (!isDirty()) {System.out.println("not writing"); return; }
+        if (!isDirty()) return;
         
         buffer.rewind();
         buffer.limit(buffer.capacity());
