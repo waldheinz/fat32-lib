@@ -112,6 +112,7 @@ public enum FatType {
     private final long maxReservedEntry;
     private final long eofCluster;
     private final long eofMarker;
+    private final long bitMask;
     private final int maxClusters;
     private final String label;
     private final float entrySize;
@@ -126,6 +127,7 @@ public enum FatType {
         this.entrySize = entrySize;
         this.label = label;
         this.maxClusters = maxClusters;
+        this.bitMask = bitMask;
     }
 
     abstract long readEntry(byte[] data, int index);
@@ -165,5 +167,9 @@ public enum FatType {
 
     float getEntrySize() {
         return entrySize;
+    }
+    
+    public long getBitMask() {
+        return bitMask;
     }
 }

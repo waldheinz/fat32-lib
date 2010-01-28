@@ -155,9 +155,11 @@ final class Fat {
     public BlockDevice getDevice() {
         return device;
     }
-
+    
     private void init(int mediumDescriptor) {
-        entries[0] = (mediumDescriptor & 0xFF) | 0xFFFFF00L;
+        entries[0] = 
+                (mediumDescriptor & 0xFF) |
+                (0xFFFFF00L & fatType.getBitMask());
         entries[1] = fatType.getEofMarker();
     }
     
