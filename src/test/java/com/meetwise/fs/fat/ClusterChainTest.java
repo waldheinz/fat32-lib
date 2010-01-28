@@ -29,6 +29,22 @@ public class ClusterChainTest {
         fat = Fat.read(bs, 0);
         cc = new ClusterChain(fat, false);
     }
+
+    @Test
+    public void testWriteBufferLimit() throws IOException {
+        System.out.println("writeBufferLimit");
+
+        ByteBuffer data = ByteBuffer.allocate(4096);
+        
+        for (int i=0, off=0; i < 4096; i += 13, off += 7) {
+            data.limit(i);
+            data.position(off);
+            cc.writeData(off, data);
+
+            assertEquals(i, data.limit());
+            assertEquals(i, data.position());
+        }
+    }
     
     @Test
     public void testWriteData() throws IOException {

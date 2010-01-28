@@ -214,14 +214,16 @@ class ClusterChain {
     
     /**
      * Writes data to this cluster chain, possibly growing the chain so it
-     * can store the additional data.
+     * can store the additional data. When this method returns without throwing
+     * an exception, the buffer's {@link ByteBuffer#position() position} will
+     * equal it's {@link ByteBuffer#limit() limit}, and the limit will not
+     * have changed. This is not guaranteed if writing fails.
      *
      * @param offset the offset where to write the first byte from the buffer
      * @param srcBuf the buffer to write to this {@code ClusterChain}
      * @throws IOException on write error
      */
-    public void writeData(long offset, ByteBuffer srcBuf)
-            throws IOException {
+    public void writeData(long offset, ByteBuffer srcBuf) throws IOException {
         
         int len = srcBuf.remaining();
 
