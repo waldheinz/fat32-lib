@@ -61,6 +61,10 @@ final class Fat {
     public static Fat create(BootSector bs, int fatNr) throws IOException {
         final long fatOffset = FatUtils.getFatOffset(bs, fatNr);
         final Fat result = new Fat(bs, fatOffset);
+
+        if (bs.getDataClusterCount() > result.getNrEntries())
+            throw new IOException("FAT too small for device");
+        
         result.init(bs.getMediumDescriptor());
         result.write();
         return result;
@@ -181,7 +185,7 @@ final class Fat {
     public int getNrEntries() {
         return entries.length;
     }
-
+    
     /**
      * Gets the entry at a given offset
      * 

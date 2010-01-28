@@ -22,20 +22,60 @@ public class ClusterChainTest {
     @Before
     public void setUp() throws IOException {
         final RamDisk rd = new RamDisk(512 * 2048);
-        bs = new Fat16BootSector(rd);
-        bs.init();
-        bs.setSectorsPerFat(20);
-        bs.setSectorsPerCluster(2);
-        bs.write();
+        SuperFloppyFormatter sf = new SuperFloppyFormatter(rd);
+        sf.format();
         
-        fat = Fat.create(bs, 0);
+        bs = BootSector.read(rd);
+        fat = Fat.read(bs, 0);
         cc = new ClusterChain(fat, false);
+    }
+    
+    @Test
+    public void testWriteData() throws IOException {
+        System.out.println("writeData");
+        final int chunkSize = 123;
+
+        ByteBuffer data = ByteBuffer.allocate(chunkSize);
+        for (int i=0; i < chunkSize; i++) {
+            data.put(i, (byte)(i & 0xff));
+        }
+        
+        final int writes = 10;
+
+        for (int i=0; i < writes; i++) {
+            cc.writeData(i * chunkSize, data);
+            data.rewind();
+        }
+
+        ByteBuffer read = ByteBuffer.allocate(writes * chunkSize);
+        cc.readData(0, read);
+
+        byte expected = 0;
+        for (int i=0; i < writes * chunkSize; i++) {
+            assertEquals(expected & 0xff, read.get(i));
+            
+            expected = (byte)(++expected % chunkSize);
+        }
     }
 
     @Test
-    public void testWrite() throws IOException {
-        System.out.println("write");
+    public void testClustersInSync() throws IOException {
+        System.out.println("clustersInSync");
 
+        final int clusters = fat.getFreeClusterCount();
+
+        cc.setChainLength(1);
+        assertEquals(clusters - 1, fat.getFreeClusterCount());
+
+        cc.setChainLength(0);
+        assertEquals(clusters, fat.getFreeClusterCount());
+    }
+    
+    @Test
+    public void testWrite() throws IOException {
+        System.out.println("write (bytes per cluster=" +
+                bs.getBytesPerCluster() + ")");
+                
         final ByteBuffer buff = ByteBuffer.allocate(256);
         cc.writeData(0, buff);
         assertEquals(0, buff.remaining());

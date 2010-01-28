@@ -238,9 +238,9 @@ class ClusterChain {
         if (offset % clusterSize != 0) {
             int clusOfs = (int) (offset % clusterSize);
             int size = Math.min(len,
-                    (int) (clusterSize - (offset % clusterSize) - 1));
+                    (int) (clusterSize - (offset % clusterSize)));
             srcBuf.limit(srcBuf.position() + size);
-
+            
             device.write(getDevOffset(chain[chainIdx], clusOfs), srcBuf);
             
             offset += size;
