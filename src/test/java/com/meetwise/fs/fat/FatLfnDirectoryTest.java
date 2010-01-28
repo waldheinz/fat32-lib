@@ -34,7 +34,7 @@ public class FatLfnDirectoryTest {
         this.fat = Fat.read(bs, 0);
         this.dir = new FatLfnDirectory(rootDirStore, fat);
     }
-
+    
     @Test
     public void testGeneratedEntries() throws IOException {
         System.out.println("generatedEntries");

@@ -2,16 +2,24 @@
 package com.meetwise.fs.fat;
 
 /**
+ * Represents a "short" (8.3) file name as used by DOS.
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public final class ShortName {
+final class ShortName {
+    
+    /**
+     * The name of the "current directory" (".") entry of a FAT directory.
+     */
+    public final static ShortName DOT = new ShortName(".", ""); //NOI18N
 
+    /**
+     * The name of the "parent directory" ("..") entry of a FAT directory.
+     */
+    public final static ShortName DOT_DOT = new ShortName("..", ""); //NOI18N
+    
     private final String name;
     private final String ext;
-    
-    public final static ShortName DOT = new ShortName(".", "");
-    public final static ShortName DOT_DOT = new ShortName("..", "");
     
     private ShortName(String nameExt) {
         if (nameExt.length() > 12) throw
@@ -39,7 +47,15 @@ public final class ShortName {
         this.ext = ext;
     }
 
-    public static ShortName get(String name) {
+    /**
+     * Parses the specified string into a {@code ShortName}.
+     *
+     * @param name the name+extension of the {@code ShortName} to get
+     * @return the {@code ShortName} representing the specified name
+     * @throws IllegalArgumentException if the specified name can not be parsed
+     *      into a {@code ShortName}
+     */
+    public static ShortName get(String name) throws IllegalArgumentException {
         if (name.equals(".")) return DOT;
         else if (name.equals("..")) return DOT_DOT;
         else return new ShortName(name);
@@ -50,11 +66,11 @@ public final class ShortName {
         return name + "." + ext;
     }
     
-    public static void checkValidName(String name) {
+    private static void checkValidName(String name) {
         checkString(name, "name", 1, 8);
     }
 
-    public static void checkValidExt(String ext) {
+    private static void checkValidExt(String ext) {
         checkString(ext, "extension", 0, 3);
     }
 
@@ -109,5 +125,4 @@ public final class ShortName {
     String getExt() {
         return this.ext;
     }
-    
 }

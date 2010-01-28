@@ -278,16 +278,14 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
      * @param parentCluster
      */
     protected void initialize(long myCluster, long parentCluster) {
-        final FatDirEntry dot = new FatDirEntry(
-                this, ShortName.DOT);
+        final FatDirEntry dot = new FatDirEntry(this, ShortName.DOT);
         
         dot.setFlags(FatConstants.F_DIRECTORY);
         dot.setStartCluster((int) myCluster);
         entries.set(0, dot);
 
         if (!isRoot) {
-            final FatDirEntry dotDot = new FatDirEntry(
-                    this, ShortName.DOT_DOT);
+            final FatDirEntry dotDot = new FatDirEntry(this, ShortName.DOT_DOT);
             dotDot.setFlags(FatConstants.F_DIRECTORY);
             dotDot.setStartCluster((int) parentCluster);
             entries.set(1, dotDot);
