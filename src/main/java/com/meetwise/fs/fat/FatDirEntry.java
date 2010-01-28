@@ -25,10 +25,12 @@ import com.meetwise.fs.util.LittleEndian;
 import java.util.Date;
 
 /**
+ * 
+ *
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 class FatDirEntry extends AbstractDirectoryEntry {
-
     
     /** Name of this entry */
     private ShortName shortName;
@@ -54,9 +56,6 @@ class FatDirEntry extends AbstractDirectoryEntry {
     /** Length in bytes of the data of this entry */
     private long length;
     
-    /** FSDirectory this entry is a part of */
-    private final AbstractDirectory parent;
-    
     /**
      * Create a new entry
      * 
@@ -67,7 +66,6 @@ class FatDirEntry extends AbstractDirectoryEntry {
     public FatDirEntry(AbstractDirectory dir, ShortName name) {
         super(dir);
         
-        this.parent = dir;
         this.shortName = name;
         this.created = this.lastModified = this.lastAccessed = System.currentTimeMillis();
     }
@@ -81,8 +79,7 @@ class FatDirEntry extends AbstractDirectoryEntry {
      */
     public FatDirEntry(AbstractDirectory dir, byte[] src, int offset) {
         super(dir, src, offset);
-
-        this.parent = dir;
+        
         unused = (src[offset] == 0);
         deleted = (LittleEndian.getUInt8(src, offset) == 0xe5);
 
@@ -212,39 +209,6 @@ class FatDirEntry extends AbstractDirectoryEntry {
         this.length = newLength;
         markDirty();
     }
-
-    /**
-     * Gets the single instance of the file connected to this entry. Returns
-     * null if the file is 0 bytes long
-     * 
-     * @return File
-     * @throws IOException on read error
-     */
-//    public FSFile getFile() throws IOException {
-//        if (isFile()) {
-//            return getFatFile();
-//        } else {
-//            throw new IOException("Not a file");
-//        }
-//    }
-
-    /**
-     * Gets the directory this entry refers to. This method can only be called
-     * if <code>isDirectory</code> returns true.
-     *
-     * @throws IOException on read error
-     */
-//    public FSDirectory getDirectory() throws IOException {
-//        if (isDirectory()) {
-//            return getFatFile().getDirectory();
-//        } else {
-//            throw new IOException("Not a directory");
-//        }
-//    }
-    
-//    public FatFile getFatFile() {
-//        return getDir().getFile(this);
-//    }
     
     /**
      * Sets the name.
@@ -399,11 +363,5 @@ class FatDirEntry extends AbstractDirectoryEntry {
         }
 
         return b.toString();
-    }
-    
-    @Override
-    protected final void markDirty() {
-        super.markDirty();
-        parent.setDirty();
     }
 }

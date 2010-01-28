@@ -132,6 +132,7 @@ class AbstractDirectoryEntry extends FatObject implements FatConstants {
 
     protected void markDirty() {
         this.dirty = true;
+        this.dir.setDirty();
     }
 
     public final boolean isDirty() {
