@@ -223,13 +223,13 @@ abstract class AbstractDirectory {
     protected void initialize(long myCluster, long parentCluster) {
         final FatDirEntry dot = new FatDirEntry(this, ShortName.DOT);
         
-        dot.setFlags(FatConstants.F_DIRECTORY);
+        dot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
         dot.setStartCluster((int) myCluster);
         entries.set(0, dot);
 
         if (!isRoot) {
             final FatDirEntry dotDot = new FatDirEntry(this, ShortName.DOT_DOT);
-            dotDot.setFlags(FatConstants.F_DIRECTORY);
+            dotDot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
             dotDot.setStartCluster((int) parentCluster);
             entries.set(1, dotDot);
         }
@@ -264,10 +264,10 @@ abstract class AbstractDirectory {
         final int flags = LittleEndian.getUInt8(
                 src, offset + AbstractDirectoryEntry.FLAGS_OFFSET);
         
-        boolean r = (flags & FatConstants.F_READONLY) != 0;
-        boolean h = (flags & FatConstants.F_HIDDEN) != 0;
-        boolean s = (flags & FatConstants.F_SYSTEM) != 0;
-        boolean v = (flags & FatConstants.F_LABEL) != 0;
+        boolean r = (flags & AbstractDirectoryEntry.F_READONLY) != 0;
+        boolean h = (flags & AbstractDirectoryEntry.F_HIDDEN) != 0;
+        boolean s = (flags & AbstractDirectoryEntry.F_SYSTEM) != 0;
+        boolean v = (flags & AbstractDirectoryEntry.F_LABEL) != 0;
 
         if (r && h && s && v) {
             // this is a LFN entry, don't need to parse it!

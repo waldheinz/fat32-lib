@@ -145,7 +145,7 @@ final class FatLfnDirectory implements FSDirectory {
         name = name.trim();
         final ShortName sn = sng.generateShortName(name);
         final FatDirEntry realEntry = new FatDirEntry(dir, sn);
-        realEntry.setFlags(FatConstants.F_DIRECTORY);
+        realEntry.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
         final FatFile f = getFile(realEntry);
         final FatDirectory fatDir = FatDirectory.create(f, dir.getStorageCluster(), false);
         realEntry.setStartCluster(fatDir.getStorageCluster());

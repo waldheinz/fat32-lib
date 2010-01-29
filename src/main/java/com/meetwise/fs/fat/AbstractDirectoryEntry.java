@@ -27,8 +27,15 @@ import com.meetwise.fs.util.LittleEndian;
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class AbstractDirectoryEntry extends FatObject implements FatConstants {
-    
+class AbstractDirectoryEntry extends FatObject {
+
+    public static final int F_READONLY = 0x01;
+    public static final int F_HIDDEN = 0x02;
+    public static final int F_SYSTEM = 0x04;
+    public static final int F_LABEL = 0x08;
+    public static final int F_DIRECTORY = 0x10;
+    public static final int F_ARCHIVE = 0x20;
+
     /**
      * The offset to the flags byte in a directory entry.
      */
