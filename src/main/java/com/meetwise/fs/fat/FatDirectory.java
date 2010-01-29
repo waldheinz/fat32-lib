@@ -65,7 +65,9 @@ final class FatDirectory extends AbstractDirectory {
      * @param myCluster
      * @param parentCluster
      */
-    protected void addDotEntries(long myCluster, long parentCluster) {
+    protected void addDotEntries(long myCluster, long parentCluster)
+            throws IOException {
+        
         final AbstractDirectoryEntry dot = new AbstractDirectoryEntry(this);
         dot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
         final FatDirEntry dotEntry = new FatDirEntry(dot);

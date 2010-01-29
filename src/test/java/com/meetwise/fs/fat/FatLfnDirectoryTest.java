@@ -2,7 +2,6 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
-import com.meetwise.fs.FileSystemException;
 import com.meetwise.fs.fat.FatLfnDirectory.LfnEntry;
 import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
@@ -35,7 +34,24 @@ public class FatLfnDirectoryTest {
         this.fat = Fat.read(bs, 0);
         this.dir = new FatLfnDirectory(rootDirStore, fat);
     }
-    
+
+    @Test
+    public void testAddTooManyDirectories() throws IOException {
+        System.out.println("addTooManyDirectories");
+
+        int count = 0;
+        
+        do {
+            int freeBeforeAdd = fat.getFreeClusterCount();
+            try {
+                dir.addDirectory("this is test directory with index " + count);
+            } catch (RootDirectoryFullException ex) {
+                assertEquals(freeBeforeAdd, fat.getFreeClusterCount());
+                return;
+            }
+        } while (true);
+    }
+
     @Test
     public void testGeneratedEntries() throws IOException {
         System.out.println("generatedEntries");
@@ -68,7 +84,7 @@ public class FatLfnDirectoryTest {
     }
     
     @Test
-    public void testIsDirty() throws FileSystemException {
+    public void testIsDirty() throws IOException {
         System.out.println("isDirty");
         
         assertFalse(dir.isDirty());
@@ -107,7 +123,7 @@ public class FatLfnDirectoryTest {
     }
     
     @Test
-    public void testGetEntry() throws FileSystemException {
+    public void testGetEntry() throws IOException {
         System.out.println("getEntry");
         
         final String NAME = "A fine File";

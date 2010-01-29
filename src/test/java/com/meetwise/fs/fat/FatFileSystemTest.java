@@ -64,7 +64,6 @@ public class FatFileSystemTest {
      * @throws Exception
      */
     @Test
-    @Ignore
     public void testFat16Read() throws Exception {
         System.out.println("testFat16Read");
 

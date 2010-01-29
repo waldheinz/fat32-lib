@@ -5,7 +5,6 @@ import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.util.RamDisk;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -44,7 +43,6 @@ public class ConformanceTest {
     }
 
     @Test
-    @Ignore
     public void testMaxRootEntries() throws Exception {
         System.out.println("testMaxRootEntries");
         

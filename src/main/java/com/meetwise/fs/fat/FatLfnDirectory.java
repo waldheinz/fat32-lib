@@ -108,13 +108,16 @@ final class FatLfnDirectory implements FSDirectory {
     }
 
     @Override
-    public LfnEntry addFile(String name) throws FileSystemException {
+    public LfnEntry addFile(String name) throws IOException {
         name = name.trim();
         final ShortName shortName = sng.generateShortName(name);
         final AbstractDirectoryEntry entryData = new AbstractDirectoryEntry(dir);
         FatDirEntry realEntry = new FatDirEntry(entryData);
         realEntry.setName(shortName);
-        LfnEntry entry = new LfnEntry(realEntry, name);
+        final LfnEntry entry = new LfnEntry(realEntry, name);
+
+        dir.addEntries(entry.compactForm());
+
         shortNameIndex.put(shortName, entry);
         longNameIndex.put(name, entry);
         dir.setDirty();
@@ -137,6 +140,14 @@ final class FatLfnDirectory implements FSDirectory {
         realEntry.setStartCluster(fatDir.getStorageCluster());
 
         final LfnEntry entry = new LfnEntry(realEntry, name);
+
+        try {
+            dir.addEntries(entry.compactForm());
+        } catch (IOException ex) {
+            f.setChainLength(0);
+            throw ex;
+        }
+        
         shortNameIndex.put(sn, entry);
         longNameIndex.put(name, entry);
         dir.setDirty();
@@ -292,12 +303,14 @@ final class FatLfnDirectory implements FSDirectory {
             }
         }
         
-        public AbstractDirectoryEntry[] compactForm() {
-            int totalEntrySize = (fileName.length() / 13) + 1; // + 1 for the real
+        public int totalEntrySize() {
+            int result = (fileName.length() / 13) + 1;
+            if ((fileName.length() % 13) != 0) result++;
+            return result;
+        }
 
-            if ((fileName.length() % 13) != 0) {
-                totalEntrySize++;
-            }
+        public AbstractDirectoryEntry[] compactForm() {
+            int totalEntrySize = totalEntrySize();
             
             final AbstractDirectoryEntry[] entries =
                     new AbstractDirectoryEntry[totalEntrySize];

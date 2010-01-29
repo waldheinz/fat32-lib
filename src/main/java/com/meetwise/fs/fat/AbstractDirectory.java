@@ -23,6 +23,7 @@ package com.meetwise.fs.fat;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -57,11 +58,13 @@ abstract class AbstractDirectory {
     /**
      *
      * @param entryCount
-     * @throws IOException
+     * @throws IOException on write error
+     * @throws RootDirectoryFullException if the FAT12/16 root directory is full
      * @see #sizeChanged(long)
      * @see #checkEntryCount(int) 
      */
-    protected abstract void changeSize(int entryCount) throws IOException;
+    protected abstract void changeSize(int entryCount)
+            throws RootDirectoryFullException, IOException;
 
     /**
      * Checks if the entry count passed to {@link #changeSize(int)} is at
@@ -209,10 +212,23 @@ abstract class AbstractDirectory {
         }
     }
 
-    void addEntry(AbstractDirectoryEntry e) {
-        if (entries.size() == capacity)
-            throw new IllegalStateException("directory is full");
+    void addEntry(AbstractDirectoryEntry e) throws IOException {
+        if (e == null) throw new NullPointerException();
+        
+        if (getSize() == getCapacity()) {
+            changeSize(capacity + 1);
+        }
 
         entries.add(e);
+    }
+
+    public void addEntries(AbstractDirectoryEntry[] entries)
+            throws IOException {
+        
+        if (getSize() + entries.length > getCapacity()) {
+            changeSize(getSize() + entries.length);
+        }
+
+        this.entries.addAll(Arrays.asList(entries));
     }
 }
