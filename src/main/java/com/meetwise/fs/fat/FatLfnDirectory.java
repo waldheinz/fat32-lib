@@ -355,9 +355,9 @@ final class FatLfnDirectory implements FSDirectory {
 
         @Override
         public boolean isDirectory() {
-            return realEntry.getEntry().isFile();
+            return realEntry.getEntry().isDirectory();
         }
-
+        
         @Override
         public void setName(String newName) {
             fileName = newName;
