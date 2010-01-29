@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class ClusterChain {
+class ClusterChain extends FatObject {
     protected final Fat fat;
     private final BlockDevice device;
     private final int clusterSize;

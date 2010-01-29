@@ -89,7 +89,7 @@ final class FatDirectory extends AbstractDirectory {
         
         checkEntryCount(entryCount);
         
-        final int size = entryCount * FatDirEntry.SIZE;
+        final int size = entryCount * AbstractDirectoryEntry.SIZE;
         sizeChanged(chain.setSize(size));
     }
     

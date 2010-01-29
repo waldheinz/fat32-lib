@@ -29,10 +29,12 @@ public class Fat16RootDirectoryTest {
     public void testRead() throws Exception {
         System.out.println("read");
         
+        Fat16RootDirectory.create(bs);
+        
         Fat16RootDirectory dir = Fat16RootDirectory.read(bs, true);
         assertEquals(bs.getRootDirEntryCount(), dir.getCapacity());
-        assertEquals(Fat16BootSector.DEFAULT_ROOT_DIR_ENTRY_COUNT,
-                dir.getEntryCount());
+        assertEquals(1, dir.getEntryCount());
+        assertEquals(ShortName.DOT, ShortName.parse(dir.getEntry(0)));
     }
     
     @Test
@@ -42,9 +44,8 @@ public class Fat16RootDirectoryTest {
         Fat16RootDirectory dir = Fat16RootDirectory.create(bs);
         assertEquals(bs.getRootDirEntryCount(), dir.getCapacity());
         assertEquals(Fat16BootSector.DEFAULT_ROOT_DIR_ENTRY_COUNT,
-                dir.getEntryCount());
-        assertNotNull(dir.getFatEntry("."));
-        assertNull(dir.getFatEntry(".."));
+                dir.getCapacity());
+        assertEquals(1, dir.getEntryCount());
     }
     
     @Test

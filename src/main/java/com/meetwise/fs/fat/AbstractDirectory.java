@@ -20,11 +20,10 @@
  
 package com.meetwise.fs.fat;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Vector;
-import com.meetwise.fs.util.LittleEndian;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -33,18 +32,18 @@ import com.meetwise.fs.util.LittleEndian;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 abstract class AbstractDirectory {
-    
-    final Vector<AbstractDirectoryEntry> entries;
+    private final List<AbstractDirectoryEntry> entries;
     private final boolean readOnly;
     private final boolean isRoot;
     
     private boolean dirty;
+    private int capacity;
     
     protected AbstractDirectory(
-            int entryCount, boolean readOnly, boolean isRoot) {
+            int capacity, boolean readOnly, boolean isRoot) {
         
-        this.entries = new Vector<AbstractDirectoryEntry>(entryCount);
-        this.entries.setSize(entryCount);
+        this.entries = new ArrayList<AbstractDirectoryEntry>();
+        this.capacity = capacity;
         this.readOnly = readOnly;
         this.isRoot = isRoot;
     }
@@ -79,17 +78,25 @@ abstract class AbstractDirectory {
                 "invalid entry count of " + entryCount);
     }
 
+    public void setEntries(List<AbstractDirectoryEntry> newEntries) {
+        if (newEntries.size() > capacity)
+            throw new IllegalArgumentException("too many entries");
+        
+        this.entries.clear();
+        this.entries.addAll(newEntries);
+    }
+    
     /**
      * 
      * @param newSize the new storage space for the directory in bytes
      * @see #changeSize(int) 
      */
     protected final void sizeChanged(long newSize) throws IOException {
-        final long newCount = newSize / FatDirEntry.SIZE;
+        final long newCount = newSize / AbstractDirectoryEntry.SIZE;
         if (newCount > Integer.MAX_VALUE)
             throw new IOException("directory too large");
         
-        this.entries.setSize((int) newSize);
+        this.capacity = (int) newCount;
     }
 
     public final void setEntry(int idx, AbstractDirectoryEntry entry) {
@@ -108,7 +115,7 @@ abstract class AbstractDirectory {
      * @see #changeSize(int)
      */
     public final int getCapacity() {
-        return this.entries.capacity();
+        return this.capacity;
     }
 
     /**
@@ -137,47 +144,6 @@ abstract class AbstractDirectory {
     public int getSize() {
         return entries.size();
     }
-
-    /**
-     * Search for an entry with a given name.ext
-     * 
-     * @param nameExt
-     * @return FatDirEntry null == not found
-     */
-    protected FatDirEntry getFatEntry(String nameExt) {
-        final ShortName toFind = ShortName.get(nameExt);
-
-        for (int i = 0; i < entries.size(); i++) {
-            final AbstractDirectoryEntry entry = entries.get(i);
-
-            if (entry != null && entry instanceof FatDirEntry) {
-                final FatDirEntry fde = (FatDirEntry) entry;
-                
-                if (fde.getShortName().equals(toFind)) return fde;
-            }
-        }
-        
-        return null;
-    }
-
-    /**
-     * Remove a chain or directory with a given name
-     * 
-     * @param nameExt
-     */
-    public void remove(String nameExt) throws IOException {
-        final FatDirEntry entry = getFatEntry(nameExt);
-
-        if (entry == null) throw new FileNotFoundException(nameExt);
-        
-        for (int i = 0; i < entries.size(); i++) {
-            if (entries.get(i) == entry) {
-                entries.set(i, null);
-                setDirty();
-                return;
-            }
-        }
-    }
     
     /**
      * Returns the dirty.
@@ -188,13 +154,8 @@ abstract class AbstractDirectory {
         if (dirty)  return true;
         
         for (int i = 0; i < entries.size(); i++) {
-            AbstractDirectoryEntry entry = entries.get(i);
-            
-            if ((entry != null) && (entry instanceof FatDirEntry)) {
-                if (((FatDirEntry) entry).isDirty()) {
-                    return true;
-                }
-            }
+            final AbstractDirectoryEntry entry = entries.get(i);
+            if (entry != null && entry.isDirty()) return true;
         }
         
         return false;
@@ -221,77 +182,55 @@ abstract class AbstractDirectory {
      * @param parentCluster
      */
     protected void initialize(long myCluster, long parentCluster) {
-        final FatDirEntry dot = new FatDirEntry(this, ShortName.DOT);
-        
+        final AbstractDirectoryEntry dot = new AbstractDirectoryEntry(this);
         dot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
-        dot.setStartCluster((int) myCluster);
-        entries.set(0, dot);
-
+        final FatDirEntry dotEntry = new FatDirEntry(dot);
+        dotEntry.setName(ShortName.DOT);
+        dotEntry.setStartCluster((int) myCluster);
+        entries.add(dot);
+        
         if (!isRoot) {
-            final FatDirEntry dotDot = new FatDirEntry(this, ShortName.DOT_DOT);
+            final AbstractDirectoryEntry dotDot =
+                    new AbstractDirectoryEntry(this);
             dotDot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
-            dotDot.setStartCluster((int) parentCluster);
-            entries.set(1, dotDot);
+            final FatDirEntry dotDotEntry = new FatDirEntry(dotDot);
+            dotDotEntry.setName(ShortName.DOT_DOT);
+            dotDotEntry.setStartCluster((int) parentCluster);
+            entries.add(dotDot);
         }
     }
     
-
     /**
      * Flush the contents of this directory to the persistent storage
      */
     public void flush() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
-                entries.size() * AbstractDirectoryEntry.SIZE);
-
-        final byte[] empty = new byte[32];
-        
-        for (int i = 0; i < entries.size(); i++) {
+                capacity * AbstractDirectoryEntry.SIZE);
+                
+        for (int i=0; i < entries.size(); i++) {
             final AbstractDirectoryEntry entry = entries.get(i);
 
             if (entry != null) {
                 entry.write(data.array(), i * 32);
-            } else {
-                System.arraycopy(empty, 0, data.array(), i * 32, 32);
             }
         }
-
+        
         write(data);
-
         resetDirty();
-    }
-
-    private AbstractDirectoryEntry parseEntry(byte[] src, int offset) {
-        final int flags = LittleEndian.getUInt8(
-                src, offset + AbstractDirectoryEntry.FLAGS_OFFSET);
-        
-        boolean r = (flags & AbstractDirectoryEntry.F_READONLY) != 0;
-        boolean h = (flags & AbstractDirectoryEntry.F_HIDDEN) != 0;
-        boolean s = (flags & AbstractDirectoryEntry.F_SYSTEM) != 0;
-        boolean v = (flags & AbstractDirectoryEntry.F_LABEL) != 0;
-
-        if (r && h && s && v) {
-            // this is a LFN entry, don't need to parse it!
-            return new FatLfnDirEntry(this, src, offset);
-        }
-        
-        return new FatDirEntry(this, src, offset);
     }
     
     protected final void read() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
-                entries.size() * AbstractDirectoryEntry.SIZE);
+                getCapacity() * AbstractDirectoryEntry.SIZE);
                 
         read(data);
-
+        
         final byte[] src = data.array();
 
-        for (int i = 0; i < entries.size(); i++) {
+        for (int i = 0; i < getCapacity(); i++) {
             int index = i * 32;
-            if (src[index] == 0) {
-                entries.set(i, null);
-            } else {
-                entries.set(i, parseEntry(src, index));
-            }
+            if (src[index] != 0)
+                entries.add(new AbstractDirectoryEntry(this, src, index));
         }
     }
 }

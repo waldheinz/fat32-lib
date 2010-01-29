@@ -41,7 +41,7 @@ public class FatDirectoryTest {
         System.out.println("create");
 
         assertEquals(
-                chain.getLengthOnDisk() / FatDirEntry.SIZE,
+                chain.getLengthOnDisk() / AbstractDirectoryEntry.SIZE,
                 dir.getCapacity());
     }
     

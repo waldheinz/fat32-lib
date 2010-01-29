@@ -1,6 +1,8 @@
 
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.util.LittleEndian;
+
 /**
  * Represents a "short" (8.3) file name as used by DOS.
  *
@@ -48,6 +50,35 @@ final class ShortName {
     }
 
     /**
+     * Calculates the checksum that is used to test a long file name for
+     * it's validity.
+     *
+     * @return the {@code ShortName}'s checksum
+     */
+    public byte checkSum() {
+        final char[] fullName = new char[] {
+            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+            ' ', ' ', ' '};
+
+        final char[] nameChars = getName().toCharArray();
+        final char[] extChars = getExt().toCharArray();
+        
+        System.arraycopy(nameChars, 0, fullName, 0, nameChars.length);
+        System.arraycopy(extChars, 0, fullName, 8, extChars.length);
+
+        final byte[] dest = new byte[11];
+        for (int i = 0; i < 11; i++)
+            dest[i] = (byte) fullName[i];
+
+        int sum = dest[0];
+        for (int i = 1; i < 11; i++) {
+            sum = dest[i] + (((sum & 1) << 7) + ((sum & 0xfe) >> 1));
+        }
+        
+        return (byte) (sum & 0xff);
+    }
+
+    /**
      * Parses the specified string into a {@code ShortName}.
      *
      * @param name the name+extension of the {@code ShortName} to get
@@ -61,9 +92,74 @@ final class ShortName {
         else return new ShortName(name);
     }
 
+    public static ShortName parse(AbstractDirectoryEntry entry) {
+        final char[] nameArr = new char[8];
+        
+        for (int i = 0; i < nameArr.length; i++) {
+            nameArr[i] = (char) LittleEndian.getUInt8(entry.getData(), i);
+        }
+
+        if (LittleEndian.getUInt8(entry.getData(), 0) == 0x05) {
+            nameArr[0] = (char) 0xe5;
+        }
+        
+        final char[] extArr = new char[3];
+        for (int i = 0; i < extArr.length; i++) {
+            extArr[i] = (char) LittleEndian.getUInt8(entry.getData(), 0x08 + i);
+        }
+
+        return new ShortName(
+                new String(nameArr).trim(),
+                new String(extArr).trim());
+    }
+
+    public void write(AbstractDirectoryEntry entry) {
+        final byte[] dest = entry.getData();
+        
+        for (int i = 0; i < 8; i++) {
+            char ch;
+            if (i < name.length()) {
+//                if (!isLabel()) {
+//                    ch = Character.toUpperCase(name.charAt(i));
+//                } else {
+                    ch = name.charAt(i);
+//                }
+                if (ch == 0xe5) {
+                    ch = (char) 0x05;
+                }
+            } else {
+                ch = ' ';
+            }
+
+            dest[i] = (byte) ch;
+        }
+
+        for (int i = 0; i < 3; i++) {
+            final char ch;
+            if (i < ext.length()) {
+//                if (!isLabel()) {
+//                    ch = Character.toUpperCase(ext.charAt(i));
+//                } else {
+                    ch = ext.charAt(i);
+//                }
+            } else {
+                ch = ' ';
+            }
+
+            dest[0x08 + i] = (byte) ch;
+        }
+
+        entry.markDirty();
+    }
+
+    public String asSimpleString() {
+        return name + "." + ext; //NOI18N
+    }
+    
     @Override
     public String toString() {
-        return name + "." + ext;
+        return getClass().getSimpleName() +
+                " [" + asSimpleString() + "]"; //NOI18N
     }
     
     private static void checkValidName(String name) {

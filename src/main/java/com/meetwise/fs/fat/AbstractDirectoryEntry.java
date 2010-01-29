@@ -27,8 +27,7 @@ import com.meetwise.fs.util.LittleEndian;
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class AbstractDirectoryEntry extends FatObject {
-
+final class AbstractDirectoryEntry extends FatObject {
     public static final int F_READONLY = 0x01;
     public static final int F_HIDDEN = 0x02;
     public static final int F_SYSTEM = 0x04;
@@ -46,13 +45,12 @@ class AbstractDirectoryEntry extends FatObject {
      */
     public final static int SIZE = 32;
     
-    protected final byte[] rawData = new byte[SIZE];
+    private final byte[] rawData = new byte[SIZE];
     private final AbstractDirectory dir;
-
-    private int flags;
+    
     private boolean dirty;
 
-    protected AbstractDirectoryEntry(AbstractDirectory dir) {
+    public AbstractDirectoryEntry(AbstractDirectory dir) {
         this.dir = dir;
     }
 
@@ -60,18 +58,22 @@ class AbstractDirectoryEntry extends FatObject {
             byte[] src, int offset) {
         
         System.arraycopy(src, offset, rawData, 0, SIZE);
-        this.flags = LittleEndian.getUInt8(src, offset + FLAGS_OFFSET);
+        
         this.dir = dir;
         this.dirty = false;
     }
     
+    public byte[] getData() {
+        return this.rawData;
+    }
+
     public AbstractDirectory getDir() {
         return dir;
     }
     
     public void write(byte[] dest, int offset) {
         System.arraycopy(rawData, 0, dest, offset, SIZE);
-        LittleEndian.setInt8(dest, offset + FLAGS_OFFSET, flags);
+        this.dirty = false;
     }
     
     /**
@@ -80,7 +82,7 @@ class AbstractDirectoryEntry extends FatObject {
      * @return int
      */
     public int getFlags() {
-        return flags;
+        return LittleEndian.getUInt8(rawData, FLAGS_OFFSET);
     }
     
     /**
@@ -89,52 +91,66 @@ class AbstractDirectoryEntry extends FatObject {
      * @param flags
      */
     public void setFlags(int flags) {
-        this.flags = flags;
+        LittleEndian.setInt8(rawData, FLAGS_OFFSET, flags);
         markDirty();
     }
-
+    
     public boolean isReadonly() {
-        return ((flags & F_READONLY) != 0);
+        return ((getFlags() & F_READONLY) != 0);
     }
 
     public void setReadonly() {
-        setFlags(flags | F_READONLY);
+        setFlags(getFlags() | F_READONLY);
     }
 
     public boolean isHidden() {
-        return ((flags & F_HIDDEN) != 0);
+        return ((getFlags() & F_HIDDEN) != 0);
     }
 
     public void setHidden() {
-        setFlags(flags | F_HIDDEN);
+        setFlags(getFlags() | F_HIDDEN);
     }
 
     public boolean isSystem() {
-        return ((flags & F_SYSTEM) != 0);
+        return ((getFlags() & F_SYSTEM) != 0);
     }
 
     public void setSystem() {
-        setFlags(flags | F_SYSTEM);
+        setFlags(getFlags() | F_SYSTEM);
     }
 
     public boolean isLabel() {
-        return ((flags & F_LABEL) != 0);
+        return ((getFlags() & F_LABEL) != 0);
     }
 
     public boolean isDirectory() {
-        return ((flags & F_DIRECTORY) != 0);
+        return ((getFlags() & F_DIRECTORY) != 0);
     }
 
     public void setDirectory() {
         setFlags(F_DIRECTORY);
     }
 
+    public void setLabel() {
+        setFlags(F_LABEL);
+    }
+    
+    /**
+     * Does this entry refer to a file?
+     *
+     * @return
+     * @see org.jnode.fs.FSDirectoryEntry#isFile()
+     */
+    public boolean isFile() {
+        return (!(isDirectory() || isLabel()));
+    }
+    
     public boolean isArchive() {
-        return ((flags & F_ARCHIVE) != 0);
+        return ((getFlags() & F_ARCHIVE) != 0);
     }
 
     public void setArchive() {
-        setFlags(flags | F_ARCHIVE);
+        setFlags(getFlags() | F_ARCHIVE);
     }
 
     protected void markDirty() {
@@ -145,4 +161,24 @@ class AbstractDirectoryEntry extends FatObject {
     public final boolean isDirty() {
         return this.dirty;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(getClass().getSimpleName());
+        sb.append(" ["); //NOI18N
+
+        for (int i=0; i < SIZE; i++) {
+            final byte val = rawData[i];
+            if (val < 16) sb.append("0"); //NOI18N
+            sb.append(Integer.toHexString(val));
+            if (i < SIZE-1) sb.append(" "); //NOI18N
+        }
+        
+        sb.append("]"); //NOI18N
+        
+        return sb.toString();
+    }
+    
 }

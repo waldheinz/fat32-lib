@@ -34,20 +34,15 @@ import java.nio.ByteBuffer;
 final class FatFile extends ClusterChain implements FSFile {
 
     private final FatDirEntry myEntry;
-
-    private long length;
-    private FatLfnDirectory dir;
-    private boolean isDir;
-    private boolean valid;
+    private final boolean isDir;
     
-    FatFile(Fat fat, FatDirEntry myEntry,
-            long startCluster, long length, boolean isDir, boolean readOnly) {
-
-        super(fat, startCluster, readOnly);
+    private FatLfnDirectory dir;
+    
+    FatFile(Fat fat, FatDirEntry myEntry, boolean readOnly) {
+        super(fat, myEntry.getStartCluster(), readOnly);
 
         this.myEntry = myEntry;
-        this.length = length;
-        this.isDir = isDir;
+        this.isDir = myEntry.getEntry().isDirectory();
     }
 
     /**
@@ -57,7 +52,7 @@ final class FatFile extends ClusterChain implements FSFile {
      */
     @Override
     public long getLength() {
-        return length;
+        return myEntry.getLength();
     }
 
     /**
@@ -96,7 +91,7 @@ final class FatFile extends ClusterChain implements FSFile {
 
     @Override
     public void setLength(long length) throws FileSystemException {
-        if (this.length == length) return;
+        if (getLength() == length) return;
         
         try {
             super.setSize(length);
@@ -104,13 +99,8 @@ final class FatFile extends ClusterChain implements FSFile {
             throw new FileSystemException(null, ex);
         }
 
-        if (myEntry != null)
-            this.myEntry.setStartCluster(super.getStartCluster());
-
-        this.length = length;
-        
-        if (myEntry != null)
-            this.myEntry.updateLength(length);
+        this.myEntry.setStartCluster(super.getStartCluster());    
+        this.myEntry.setLength(length);
     }
 
     @Override
@@ -147,11 +137,5 @@ final class FatFile extends ClusterChain implements FSFile {
             throw new FileSystemException(null, ex);
         }
     }
-
-    @Override
-    public boolean isValid() {
-        return this.valid;
-    }
-    
     
 }

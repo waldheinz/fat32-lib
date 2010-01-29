@@ -3,6 +3,7 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
 import com.meetwise.fs.FileSystemException;
+import com.meetwise.fs.fat.FatLfnDirectory.LfnEntry;
 import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
 import org.junit.Before;

@@ -27,21 +27,18 @@ import com.meetwise.fs.util.LittleEndian;
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class FatLfnDirEntry extends AbstractDirectoryEntry {
-    
-    /**
-     * @param dir
-     * @param src
-     * @param offset
-     */
-    public FatLfnDirEntry(AbstractDirectory dir, byte[] src, int offset) {
-        super(dir, src, offset);
-    }
+final class FatLfnDirEntry {
 
-    public FatLfnDirEntry(AbstractDirectory dir, String subName, int ordinal, byte checkSum,
-            boolean isLast) {
+    private FatLfnDirEntry() { /* no instances */ }
+
+    public static boolean isLfnEntry(AbstractDirectoryEntry entry) {
+        return entry.isReadonly() && entry.isSystem() &&
+                entry.isHidden() && entry.isLabel();
+    }
+    
+    public static void set(AbstractDirectoryEntry entry, String subName,
+            int ordinal, byte checkSum, boolean isLast) {
         
-        super(dir);
         final char[] unicodechar = new char[13];
         subName.getChars(0, subName.length(), unicodechar, 0);
 
@@ -52,12 +49,11 @@ class FatLfnDirEntry extends AbstractDirectoryEntry {
                 unicodechar[i] = 0xffff;
             }
         }
-        
+
+        final byte[] rawData = entry.getData();
+
         if (isLast) {
-            LittleEndian.setInt8(rawData, 0, ordinal + (1 << 6)); // set the
-                                                                    // 6th
-            // security ending
-            // bit
+            LittleEndian.setInt8(rawData, 0, ordinal + (1 << 6));
         } else {
             LittleEndian.setInt8(rawData, 0, ordinal);
         }
@@ -84,16 +80,11 @@ class FatLfnDirEntry extends AbstractDirectoryEntry {
 
     }
 
-    public byte getOrdinal() {
-        return (byte) LittleEndian.getUInt8(rawData, 0);
-    }
-
-    public byte getCheckSum() {
-        return (byte) LittleEndian.getUInt8(rawData, 13);
-    }
-
-    public String getSubstring() {
-        char[] unicodechar = new char[13];
+    public static String getSubstring(AbstractDirectoryEntry entry) {
+        final byte[] rawData = entry.getData();
+        
+        final char[] unicodechar = new char[13];
+        
         unicodechar[0] = (char) LittleEndian.getUInt16(rawData, 1);
         unicodechar[1] = (char) LittleEndian.getUInt16(rawData, 3);
         unicodechar[2] = (char) LittleEndian.getUInt16(rawData, 5);
@@ -107,15 +98,13 @@ class FatLfnDirEntry extends AbstractDirectoryEntry {
         unicodechar[10] = (char) LittleEndian.getUInt16(rawData, 24);
         unicodechar[11] = (char) LittleEndian.getUInt16(rawData, 28);
         unicodechar[12] = (char) LittleEndian.getUInt16(rawData, 30);
-        int index = 0;
-        while (index < 13 && unicodechar[index] != '\0')
-            index++;
-        return new String(unicodechar).substring(0, index);
-    }
-
-    @Override
-    public String toString() {
-        return "LFN ordinal " + getOrdinal() + " subString = " + getSubstring() + "CheckSum = " +
-                getCheckSum();
+        
+        int end = 0;
+        
+        while ((end < 13) && (unicodechar[end] != '\0')) {
+            end++;
+        }
+        
+        return new String(unicodechar).substring(0, end);
     }
 }
