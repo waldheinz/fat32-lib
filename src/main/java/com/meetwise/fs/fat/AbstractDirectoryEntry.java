@@ -170,7 +170,7 @@ final class AbstractDirectoryEntry extends FatObject {
         sb.append(" ["); //NOI18N
 
         for (int i=0; i < SIZE; i++) {
-            final byte val = rawData[i];
+            final int val = rawData[i] & 0xff;
             if (val < 16) sb.append("0"); //NOI18N
             sb.append(Integer.toHexString(val));
             if (i < SIZE-1) sb.append(" "); //NOI18N

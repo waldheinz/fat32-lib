@@ -33,8 +33,7 @@ public class Fat16RootDirectoryTest {
         
         Fat16RootDirectory dir = Fat16RootDirectory.read(bs, true);
         assertEquals(bs.getRootDirEntryCount(), dir.getCapacity());
-        assertEquals(1, dir.getEntryCount());
-        assertEquals(ShortName.DOT, ShortName.parse(dir.getEntry(0)));
+        assertEquals(0, dir.getEntryCount());
     }
     
     @Test
@@ -45,7 +44,7 @@ public class Fat16RootDirectoryTest {
         assertEquals(bs.getRootDirEntryCount(), dir.getCapacity());
         assertEquals(Fat16BootSector.DEFAULT_ROOT_DIR_ENTRY_COUNT,
                 dir.getCapacity());
-        assertEquals(1, dir.getEntryCount());
+        assertEquals(0, dir.getEntryCount());
     }
     
     @Test

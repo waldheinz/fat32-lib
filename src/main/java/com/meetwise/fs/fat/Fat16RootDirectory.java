@@ -54,7 +54,6 @@ final class Fat16RootDirectory extends AbstractDirectory {
             Fat16BootSector bs) throws IOException {
         
         final Fat16RootDirectory result = new Fat16RootDirectory(bs, false);
-        result.initialize(0, 0);
         result.flush();
         return result;
     }

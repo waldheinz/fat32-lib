@@ -51,11 +51,37 @@ final class FatDirectory extends AbstractDirectory {
 
         cc.setChainLength(1);
         final FatDirectory result = new FatDirectory(cc, false, root);
-        result.initialize(cc.getStartCluster(), parentCluster);
+
+        if (!root)
+            result.addDotEntries(cc.getStartCluster(), parentCluster);
+        
         result.flush();
         return result;
     }
     
+    /**
+     * Sets the first two entries '.' and '..' in the directory
+     *
+     * @param myCluster
+     * @param parentCluster
+     */
+    protected void addDotEntries(long myCluster, long parentCluster) {
+        final AbstractDirectoryEntry dot = new AbstractDirectoryEntry(this);
+        dot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
+        final FatDirEntry dotEntry = new FatDirEntry(dot);
+        dotEntry.setName(ShortName.DOT);
+        dotEntry.setStartCluster((int) myCluster);
+        addEntry(dot);
+
+        final AbstractDirectoryEntry dotDot =
+                new AbstractDirectoryEntry(this);
+        dotDot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
+        final FatDirEntry dotDotEntry = new FatDirEntry(dotDot);
+        dotDotEntry.setName(ShortName.DOT_DOT);
+        dotDotEntry.setStartCluster((int) parentCluster);
+        addEntry(dotDot);
+    }
+
     @Override
     protected void read(ByteBuffer data) throws IOException {
         this.chain.readData(0, data);
@@ -86,11 +112,11 @@ final class FatDirectory extends AbstractDirectory {
     @Override
     protected void changeSize(int entryCount)
             throws IOException, IllegalArgumentException {
-        
+            
         checkEntryCount(entryCount);
         
         final int size = entryCount * AbstractDirectoryEntry.SIZE;
-        sizeChanged(chain.setSize(size));
+        sizeChanged(chain.setSize(Math.max(size, chain.getClusterSize())));
     }
     
 }

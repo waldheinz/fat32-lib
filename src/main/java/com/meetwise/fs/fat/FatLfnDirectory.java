@@ -125,13 +125,15 @@ final class FatLfnDirectory implements FSDirectory {
     public FSDirectoryEntry addDirectory(String name) throws IOException {
         name = name.trim();
         final ShortName sn = sng.generateShortName(name);
-        final AbstractDirectoryEntry entryData = new AbstractDirectoryEntry(dir);
+        final AbstractDirectoryEntry entryData =
+                new AbstractDirectoryEntry(dir);
         
         final FatDirEntry realEntry = new FatDirEntry(entryData);
         realEntry.setName(sn);
         realEntry.getEntry().setFlags(AbstractDirectoryEntry.F_DIRECTORY);
         final FatFile f = getFile(realEntry);
-        final FatDirectory fatDir = FatDirectory.create(f, dir.getStorageCluster(), false);
+        final FatDirectory fatDir = FatDirectory.create(
+                f, dir.getStorageCluster(), false);
         realEntry.setStartCluster(fatDir.getStorageCluster());
 
         final LfnEntry entry = new LfnEntry(realEntry, name);
@@ -190,8 +192,6 @@ final class FatLfnDirectory implements FSDirectory {
                 longNameIndex.put(current.getName(), current);
             }
         }
-
-        assert(shortNameIndex.containsKey(ShortName.DOT));
     }
 
     private void updateLFN() throws IOException {

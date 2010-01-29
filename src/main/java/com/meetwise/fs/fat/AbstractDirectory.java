@@ -74,7 +74,7 @@ abstract class AbstractDirectory {
     protected final void checkEntryCount(int entryCount)
             throws IllegalArgumentException {
         
-        if (entryCount <= 0) throw new IllegalArgumentException(
+        if (entryCount < 0) throw new IllegalArgumentException(
                 "invalid entry count of " + entryCount);
     }
 
@@ -176,31 +176,6 @@ abstract class AbstractDirectory {
     }
     
     /**
-     * Sets the first two entries '.' and '..' in the directory
-     * 
-     * @param myCluster 
-     * @param parentCluster
-     */
-    protected void initialize(long myCluster, long parentCluster) {
-        final AbstractDirectoryEntry dot = new AbstractDirectoryEntry(this);
-        dot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
-        final FatDirEntry dotEntry = new FatDirEntry(dot);
-        dotEntry.setName(ShortName.DOT);
-        dotEntry.setStartCluster((int) myCluster);
-        entries.add(dot);
-        
-        if (!isRoot) {
-            final AbstractDirectoryEntry dotDot =
-                    new AbstractDirectoryEntry(this);
-            dotDot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
-            final FatDirEntry dotDotEntry = new FatDirEntry(dotDot);
-            dotDotEntry.setName(ShortName.DOT_DOT);
-            dotDotEntry.setStartCluster((int) parentCluster);
-            entries.add(dotDot);
-        }
-    }
-    
-    /**
      * Flush the contents of this directory to the persistent storage
      */
     public void flush() throws IOException {
@@ -232,5 +207,12 @@ abstract class AbstractDirectory {
             if (src[index] != 0)
                 entries.add(new AbstractDirectoryEntry(this, src, index));
         }
+    }
+
+    void addEntry(AbstractDirectoryEntry e) {
+        if (entries.size() == capacity)
+            throw new IllegalStateException("directory is full");
+
+        entries.add(e);
     }
 }
