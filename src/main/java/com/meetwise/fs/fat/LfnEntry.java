@@ -30,6 +30,7 @@ import com.meetwise.fs.FSFile;
 /**
  * 
  * @author gbin
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 class LfnEntry implements FSDirectoryEntry {
     private String fileName;

@@ -23,10 +23,7 @@ package com.meetwise.fs.fat;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Vector;
-import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.util.LittleEndian;
 
 /**
@@ -35,7 +32,7 @@ import com.meetwise.fs.util.LittleEndian;
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
+abstract class AbstractDirectory {
     
     final Vector<AbstractDirectoryEntry> entries;
     private final boolean readOnly;
@@ -124,17 +121,6 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
         return this.entries.size();
     }
     
-    /**
-     * Gets an iterator to iterate over all entries. The iterated objects are
-     * all instance DirEntry.
-     * 
-     * @return Iterator
-     */
-    @Override
-    public Iterator<FSDirectoryEntry> iterator() {
-        return new DirIterator();
-    }
-
     public boolean isReadOnly() {
         return readOnly;
     }
@@ -193,65 +179,6 @@ abstract class AbstractDirectory implements Iterable<FSDirectoryEntry> {
         }
     }
     
-    private class DirIterator implements Iterator<FSDirectoryEntry> {
-
-        private int offset = 0;
-
-        /**
-         * @see java.util.Iterator#hasNext()
-         */
-        @Override
-        public boolean hasNext() {
-            
-            while (offset < entries.size()) {
-                AbstractDirectoryEntry e = entries.get(offset);
-                if ((e != null) && e instanceof FatDirEntry && 
-                        !((FatDirEntry) e).isDeleted() &&
-                        !((FatDirEntry) e).getName().equals(".") &&
-                        !((FatDirEntry) e).getName().equals("..")) {
-
-                    return true;
-                } else {
-                    offset++;
-                }
-            }
-            
-            return false;
-        }
-
-        /**
-         * @see java.util.Iterator#next()
-         */
-        @Override
-        public FSDirectoryEntry next() {
-            
-            while (offset < entries.size()) {
-                AbstractDirectoryEntry e = entries.get(offset);
-                if ((e != null) && (e instanceof FatDirEntry) &&
-                        !((FatDirEntry) e).isDeleted() &&
-                        !((FatDirEntry) e).getName().equals(".") &&
-                        !((FatDirEntry) e).getName().equals("..")) {
-
-                    offset++;
-                    
-                    return (FSDirectoryEntry) e;
-                } else {
-                    offset++;
-                }
-            }
-            
-            throw new NoSuchElementException();
-        }
-
-        /**
-         * @see java.util.Iterator#remove()
-         */
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
-
     /**
      * Returns the dirty.
      * 
