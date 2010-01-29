@@ -323,14 +323,9 @@ final class Fat {
     public int getFreeClusterCount() {
         int result = 0;
 
-        System.out.println("last: " + lastClusterIndex);
-
         for (int i=FIRST_CLUSTER; i < lastClusterIndex; i++) {
             if (isFreeCluster(i)) result++;
-//            else System.out.println(i);
         }
-
-        System.out.println("free: " + result);
 
         return result;
     }

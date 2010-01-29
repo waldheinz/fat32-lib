@@ -38,7 +38,6 @@ public class SuperFloppyFormatterTest {
         System.out.println("fat32Format");
 
         BlockDevice dev = new RamDisk(50 * 1024 * 1024);
-        dev = FileDisk.create(new File("/tmp/fat32-test.img"), 40960000);
         SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
         f.setFatType(FatType.FAT32);
 //        f.setVolumeLabel("test");
