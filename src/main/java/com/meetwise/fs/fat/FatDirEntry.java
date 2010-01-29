@@ -210,16 +210,6 @@ class FatDirEntry extends AbstractDirectoryEntry {
         markDirty();
     }
     
-    /**
-     * Sets the name.
-     * 
-     * @param name The name to set
-     */
-    public void setName(String name) {
-        this.shortName = ShortName.get(name);
-        markDirty();
-    }
-    
     public void setName(ShortName sn) {
         if (this.shortName.equals(sn)) return;
         this.shortName = sn;
