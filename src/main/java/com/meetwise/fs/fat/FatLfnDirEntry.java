@@ -32,7 +32,7 @@ final class FatLfnDirEntry {
     private FatLfnDirEntry() { /* no instances */ }
 
     public static boolean isLfnEntry(AbstractDirectoryEntry entry) {
-        return entry.isReadonly() && entry.isSystem() &&
+        return entry.isReadonlyFlag() && entry.isSystem() &&
                 entry.isHidden() && entry.isLabel();
     }
     

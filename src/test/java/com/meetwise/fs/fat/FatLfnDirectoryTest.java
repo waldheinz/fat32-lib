@@ -64,17 +64,6 @@ public class FatLfnDirectoryTest {
         dir.flush();
         assertTrue(orig < rootDirStore.getEntryCount());
     }
-
-    @Test
-    public void testGetFile() throws IOException {
-        System.out.println("getFile");
-        
-        final LfnEntry fentry = dir.addFile(
-                "I have problems making up file names");
-        final FatFile file = dir.getFile(fentry.getRealEntry());
-        
-        assertEquals(fentry.getFile(), file);
-    }
     
     @Test
     public void testGetStorageDirectory() {

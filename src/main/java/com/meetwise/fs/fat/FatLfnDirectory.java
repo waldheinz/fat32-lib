@@ -36,11 +36,10 @@ import java.util.Map;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 final class FatLfnDirectory implements FSDirectory {
-
     private final Map<ShortName, LfnEntry> shortNameIndex;
     private final Map<String, LfnEntry> longNameIndex;
     private final Map<FatDirEntry, FatFile> files;
-    private final Map<FatDirEntry, FatDirectory> directories;
+    private final Map<FatDirEntry, FSDirectory> directories;
     private final ShortNameGenerator sng;
     private final AbstractDirectory dir;
     private final Fat fat;
@@ -51,9 +50,7 @@ final class FatLfnDirectory implements FSDirectory {
      * @throws FileSystemException
      */
     public FatLfnDirectory(AbstractDirectory dir, Fat fat) {
-        if (dir == null) {
-            throw new NullPointerException();
-        }
+        if ((dir == null) || (fat == null)) throw new NullPointerException();
 
         this.fat = fat;
         this.dir = dir;
@@ -61,7 +58,7 @@ final class FatLfnDirectory implements FSDirectory {
         this.longNameIndex = new HashMap<String, LfnEntry>();
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
         this.files = new HashMap<FatDirEntry, FatFile>();
-        this.directories = new HashMap<FatDirEntry, FatDirectory>();
+        this.directories = new HashMap<FatDirEntry, FSDirectory>();
 
         parseLfn();
     }
@@ -72,7 +69,7 @@ final class FatLfnDirectory implements FSDirectory {
      * @param entry
      * @return
      */
-    FatFile getFile(FatDirEntry entry) {
+    private FatFile getFile(FatDirEntry entry) {
         FatFile file = files.get(entry);
 
         if (file == null) {
@@ -83,10 +80,18 @@ final class FatLfnDirectory implements FSDirectory {
         return file;
     }
 
-    /**
-     * TODO: get rid of this method
-     * @return
-     */
+    private FSDirectory getDirectory(FatDirEntry entry) throws IOException {
+        FSDirectory result = directories.get(entry);
+
+        if (result == null) {
+            final FatDirectory storage = FatDirectory.read(entry, fat);
+            result = new FatLfnDirectory(storage, fat);
+            directories.put(entry, result);
+        }
+        
+        return result;
+    }
+    
     public AbstractDirectory getStorageDirectory() {
         return this.dir;
     }
@@ -123,34 +128,27 @@ final class FatLfnDirectory implements FSDirectory {
         dir.setDirty();
         return entry;
     }
-
+    
     @Override
-    public FSDirectoryEntry addDirectory(String name) throws IOException {
+    public LfnEntry addDirectory(String name) throws IOException {
         name = name.trim();
         final ShortName sn = sng.generateShortName(name);
-        final AbstractDirectoryEntry entryData =
-                new AbstractDirectoryEntry(dir);
+        final FatDirectory newDir = FatDirectory.create(dir, fat);
+        final FatDirEntry realEntry = newDir.getEntry();
         
-        final FatDirEntry realEntry = new FatDirEntry(entryData);
         realEntry.setName(sn);
-        realEntry.getEntry().setFlags(AbstractDirectoryEntry.F_DIRECTORY);
-        final FatFile f = getFile(realEntry);
-        final FatDirectory fatDir = FatDirectory.create(
-                f, dir.getStorageCluster(), false);
-        realEntry.setStartCluster(fatDir.getStorageCluster());
-
+        
         final LfnEntry entry = new LfnEntry(realEntry, name);
-
+        
         try {
             dir.addEntries(entry.compactForm());
         } catch (IOException ex) {
-            f.setChainLength(0);
+            newDir.delete();
             throw ex;
         }
         
         shortNameIndex.put(sn, entry);
         longNameIndex.put(name, entry);
-        dir.setDirty();
         flush();
         return entry;
     }
@@ -227,7 +225,7 @@ final class FatLfnDirectory implements FSDirectory {
         for (FatFile f : files.values()) {
             f.flush();
         }
-
+        
         updateLFN();
         dir.flush();
     }
@@ -397,7 +395,7 @@ final class FatLfnDirectory implements FSDirectory {
 
         @Override
         public FSDirectory getDirectory() throws IOException {
-            return FatLfnDirectory.this.getFile(realEntry).getDirectory();
+            return FatLfnDirectory.this.getDirectory(realEntry);
         }
 
         @Override

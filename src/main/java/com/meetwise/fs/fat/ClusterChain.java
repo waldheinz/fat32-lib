@@ -3,6 +3,7 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
 import com.meetwise.fs.FileSystemException;
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -146,7 +147,9 @@ class ClusterChain extends FatObject {
         if (nrClusters < 0) throw new IllegalArgumentException(
                 "negative cluster count"); //NOI18N
                 
-        if ((this.startCluster == 0) && (nrClusters > 0)) {
+        if ((this.startCluster == 0) && (nrClusters == 0)) {
+            /* nothing to do */
+        } else if ((this.startCluster == 0) && (nrClusters > 0)) {
             final long[] chain = fat.allocNew(nrClusters);
             this.startCluster = chain[0];
         } else {
@@ -184,6 +187,9 @@ class ClusterChain extends FatObject {
             throws IOException {
 
         int len = dest.remaining();
+
+        if ((startCluster == 0 && len > 0)) throw new EOFException();
+        
         final long[] chain = getFat().getChain(startCluster);
         final BlockDevice dev = getDevice();
 

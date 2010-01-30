@@ -17,7 +17,7 @@ public class FatDirectoryTest {
     private Fat32BootSector bs;
     private Fat fat;
     private ClusterChain chain;
-    private FatDirectory dir;
+    private ClusterChainDirectory dir;
 
     @Before
     public void setUp() throws IOException {
@@ -26,7 +26,7 @@ public class FatDirectoryTest {
         this.bs.init();
         this.fat = Fat.create(bs, 0);
         this.chain = new ClusterChain(fat, false);
-        this.dir = FatDirectory.create(chain, 0, true);
+        this.dir = ClusterChainDirectory.create(chain, 0, true);
     }
 
     @Test

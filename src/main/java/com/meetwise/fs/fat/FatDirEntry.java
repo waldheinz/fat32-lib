@@ -26,7 +26,7 @@ import com.meetwise.fs.util.LittleEndian;
 /**
  * 
  *
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 final class FatDirEntry {
@@ -91,7 +91,7 @@ final class FatDirEntry {
                 DosUtils.encodeDate(lastAccessed));
         entry.markDirty();
     }
-
+    
     /**
      * Returns the deleted.
      * 
@@ -150,15 +150,6 @@ final class FatDirEntry {
 
         LittleEndian.setInt16(entry.getData(), 0x1a, (int) startCluster);
         entry.markDirty();
-    }
-    
-    /**
-     * Returns the unused.
-     * 
-     * @return boolean
-     */
-    public boolean isUnused() {
-        return (entry.getData()[0] == 0);
     }
     
 }

@@ -34,15 +34,14 @@ import java.nio.ByteBuffer;
 final class FatFile extends ClusterChain implements FSFile {
 
     private final FatDirEntry myEntry;
-    private final boolean isDir;
-    
-    private FatLfnDirectory dir;
     
     FatFile(Fat fat, FatDirEntry myEntry, boolean readOnly) {
         super(fat, myEntry.getStartCluster(), readOnly);
 
+        if (myEntry.getEntry().isDirectory())
+            throw new IllegalArgumentException(myEntry + " is a directory");
+
         this.myEntry = myEntry;
-        this.isDir = myEntry.getEntry().isDirectory();
     }
 
     /**
@@ -54,35 +53,7 @@ final class FatFile extends ClusterChain implements FSFile {
     public long getLength() {
         return myEntry.getLength();
     }
-
-    /**
-     * Gets the directory contained in this file.
-     * 
-     * @return Directory
-     * @throws IOException on read error
-     */
-    FatLfnDirectory getDirectory() throws IOException {
-        if (!isDir) throw new UnsupportedOperationException();
-        
-        if (dir == null) {
-            final FatDirectory fatDir = FatDirectory.read(this, isReadOnly(), false);
-            dir = new FatLfnDirectory(fatDir, fat);
-        }
-        
-        return dir;
-    }
     
-    /**
-     * Flush any changes in this file to persistent storage
-     * @throws IOException
-     */
-    @Override
-    public void flush() throws IOException {
-        if (dir != null) {
-            dir.flush();
-        }
-    }
-
     @Override
     public String toString() {
         return getClass().getSimpleName() + " [length=" + getLength() +
@@ -106,9 +77,8 @@ final class FatFile extends ClusterChain implements FSFile {
     @Override
     public void read(long offset, ByteBuffer dest) throws FileSystemException {
         final int len = dest.remaining();
-        final long max = isDir ? getLengthOnDisk() : getLength();
 
-        if (offset + len > max)
+        if (offset + len > getLength())
             throw new FileSystemException(null,
                     "can not read beyond EOF"); //NOI18N
 
@@ -123,19 +93,19 @@ final class FatFile extends ClusterChain implements FSFile {
     public void write(long offset, ByteBuffer srcBuf)
             throws FileSystemException {
             
-        final long max = (isDir) ? getLengthOnDisk() : getLength();
-        if (offset > max)
-            throw new FileSystemException(null,
-                    "can not write beyond EOF"); //NOI18N
-                    
         int len = srcBuf.remaining();
-        if (offset + len > max)
+        if (offset + len > getLength())
             setLength(offset + len);
         try {
             writeData(offset, srcBuf);
         } catch (IOException ex) {
             throw new FileSystemException(null, ex);
         }
+    }
+
+    @Override
+    public void flush() throws IOException {
+        /* nothing to do */
     }
     
 }

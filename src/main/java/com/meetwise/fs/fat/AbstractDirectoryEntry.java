@@ -94,12 +94,16 @@ final class AbstractDirectoryEntry extends FatObject {
         LittleEndian.setInt8(rawData, FLAGS_OFFSET, flags);
         markDirty();
     }
-    
-    public boolean isReadonly() {
+
+    public boolean isReadOnly() {
+        return dir.isReadOnly() || isReadonlyFlag();
+    }
+
+    public boolean isReadonlyFlag() {
         return ((getFlags() & F_READONLY) != 0);
     }
 
-    public void setReadonly() {
+    public void setReadonlyFlag() {
         setFlags(getFlags() | F_READONLY);
     }
 
