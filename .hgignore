@@ -1,6 +1,12 @@
+syntax: regexp
+
 \.orig$
 \.orig\..*$
 \.chg\..*$
 \.rej$
 \.conflict\~$
 ^nb-configuration\.xml$
+
+syntax: glob
+
+target/*
