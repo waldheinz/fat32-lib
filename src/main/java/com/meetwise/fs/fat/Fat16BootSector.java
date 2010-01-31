@@ -21,7 +21,7 @@ final class Fat16BootSector extends BootSector {
     /**
      * The default volume label.
      */
-    public static final String DEFAULT_VOLUME_LABEL = "New Volume"; //NOI18N
+    public static final String DEFAULT_VOLUME_LABEL = "NO NAME"; //NOI18N
     
     /**
      * The maximum number of sectors for a FAT12 file system. This is actually
