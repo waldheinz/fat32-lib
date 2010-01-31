@@ -2,22 +2,27 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
-import java.io.IOException;
 
 /**
  * The boot sector layout as used by the FAT12 / FAT16 variants.
  *
  * @author Matthias Treydte &lt;matthias.treydte at meetwise.com&gt;
  */
-public class Fat16BootSector extends BootSector {
+final class Fat16BootSector extends BootSector {
 
     /**
      * The default number of entries for the root directory.
+     * 
      * @see #getRootDirEntryCount()
      * @see #setRootDirEntryCount(int) 
      */
     public static final int DEFAULT_ROOT_DIR_ENTRY_COUNT = 512;
 
+    /**
+     * The default volume label.
+     */
+    public static final String DEFAULT_VOLUME_LABEL = "New Volume"; //NOI18N
+    
     /**
      * The maximum number of sectors for a FAT12 file system. This is actually
      * the number of sectors where mkdosfs stop complaining about a FAT16
@@ -32,9 +37,70 @@ public class Fat16BootSector extends BootSector {
      * The offset to the sectors per FAT value.
      */
     public static final int SECTORS_PER_FAT_OFFSET = 0x16;
-    
-    Fat16BootSector(BlockDevice device) throws IOException {
+
+    /**
+     * The offset to the root directory entry count value.
+     *
+     * @see #getRootDirEntryCount()
+     * @see #setRootDirEntryCount(int) 
+     */
+    public static final int ROOT_DIR_ENTRIES_OFFSET = 0x11;
+
+    /**
+     * The offset to the first byte of the volume label.
+     */
+    public static final int VOLUME_LABEL_OFFSET = 0x2b;
+
+    /**
+     * The maximum length of the volume label.
+     */
+    public static final int MAX_VOLUME_LABEL_LENGTH = 11;
+
+    /**
+     * Creates a new {@code Fat16BootSector} for the specified device.
+     *
+     * @param device the {@code BlockDevice} holding the boot sector
+     */
+    public Fat16BootSector(BlockDevice device) {
         super(device);
+    }
+
+    /**
+     * Returns the volume label that is stored in this boot sector.
+     *
+     * @return the volume label
+     */
+    public String getVolumeLabel() {
+        final StringBuilder sb = new StringBuilder();
+
+        for (int i=0; i < MAX_VOLUME_LABEL_LENGTH; i++) {
+            final char c = (char) get8(VOLUME_LABEL_OFFSET + i);
+
+            if (c != 0) {
+                sb.append(c);
+            } else {
+                break;
+            }
+        }
+        
+        return sb.toString();
+    }
+
+    /**
+     * Sets the volume label that is stored in this boot sector.
+     *
+     * @param label the new volume label
+     * @throws IllegalArgumentException if the specified label is longer
+     *      than {@link #MAX_VOLUME_LABEL_LENGTH}
+     */
+    public void setVolumeLabel(String label) throws IllegalArgumentException {
+        if (label.length() > MAX_VOLUME_LABEL_LENGTH)
+            throw new IllegalArgumentException("volume label too long");
+
+        for (int i = 0; i < MAX_VOLUME_LABEL_LENGTH; i++) {
+            set8(VOLUME_LABEL_OFFSET + i,
+                    i < label.length() ? label.charAt(i) : 0);
+        }
     }
     
     /**
@@ -83,34 +149,36 @@ public class Fat16BootSector extends BootSector {
         if (getNrLogicalSectors() == 0) return getNrTotalSectors();
         else return getNrLogicalSectors();
     }
-
-
+    
     /**
-     * Gets the number of entries in the root directory
+     * Gets the number of entries in the root directory.
      *
-     * @return int
+     * @return int the root directory entry count
      */
     @Override
     public int getRootDirEntryCount() {
-        return get16(0x11);
+        return get16(ROOT_DIR_ENTRIES_OFFSET);
     }
-
+    
     /**
      * Sets the number of entries in the root directory
      *
      * @param v the new number of entries in the root directory
+     * @throws IllegalArgumentException for negative values
      */
-    public void setRootDirEntryCount(int v) {
+    public void setRootDirEntryCount(int v) throws IllegalArgumentException {
+        if (v < 0) throw new IllegalArgumentException();
         if (v == getRootDirEntryCount()) return;
-
-        set16(0x11, v);
+        
+        set16(ROOT_DIR_ENTRIES_OFFSET, v);
     }
-
+    
     @Override
     public void init() {
         super.init();
         
         setRootDirEntryCount(DEFAULT_ROOT_DIR_ENTRY_COUNT);
+        setVolumeLabel(DEFAULT_VOLUME_LABEL);
     }
     
 }

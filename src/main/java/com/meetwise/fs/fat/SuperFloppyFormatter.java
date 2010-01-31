@@ -160,6 +160,7 @@ public final class SuperFloppyFormatter {
             f16bs.setRootDirEntryCount(rootDirEntries);
             f16bs.setSectorsPerFat((Math.round(totalSectors / (spc *
                 (sectorSize / fatType.getEntrySize()))) + 1));
+            if (label != null) f16bs.setVolumeLabel(label);
             fsi = null;
         }
         

@@ -38,7 +38,7 @@ public abstract class BootSector extends Sector {
      */
     public final static int SIZE = 512;
     
-    protected BootSector(BlockDevice device) throws IOException {
+    protected BootSector(BlockDevice device) {
         super(device, 0, SIZE);
         markDirty();
     }

@@ -120,7 +120,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     public String getVolumeLabel() {
         return rootDir.getLabel();
     }
-
+    
     /**
      * Sets the volume label for this file system.
      *
@@ -130,7 +130,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     public void setVolumeLabel(String label) throws IOException {
         rootDir.setLabel(label);
     }
-
+    
     /**
      * Flush all changed structures to the device.
      * 

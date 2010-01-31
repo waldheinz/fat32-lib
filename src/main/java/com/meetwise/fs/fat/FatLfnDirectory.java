@@ -107,11 +107,7 @@ final class FatLfnDirectory implements FSDirectory {
     void setLabel(String label) throws IOException {
         throw new UnsupportedOperationException();
     }
-
-    ShortNameGenerator getShortNameGenerator() {
-        return sng;
-    }
-
+    
     @Override
     public LfnEntry addFile(String name) throws IOException {
         name = name.trim();
