@@ -129,7 +129,7 @@ final class FatLfnDirectory implements FSDirectory {
     public LfnEntry addDirectory(String name) throws IOException {
         name = name.trim();
         final ShortName sn = sng.generateShortName(name);
-        final FatDirectory newDir = FatDirectory.create(dir, fat);
+        final FatDirectory newDir = FatDirectory.createSub(dir, fat);
         final FatDirEntry realEntry = newDir.getEntry();
         
         realEntry.setName(sn);
@@ -152,7 +152,7 @@ final class FatLfnDirectory implements FSDirectory {
     @Override
     public FSDirectoryEntry getEntry(String name) {
         name = name.trim();
-
+        
         final FSDirectoryEntry entry = longNameIndex.get(name);
 
         if (entry == null) {
@@ -161,10 +161,11 @@ final class FatLfnDirectory implements FSDirectory {
             return entry;
         }
     }
-
+    
     private void parseLfn() {
         int i = 0;
         final int size = dir.getEntryCount();
+        
         while (i < size) {
             // jump over empty entries
             while (i < size && dir.getEntry(i) == null) {

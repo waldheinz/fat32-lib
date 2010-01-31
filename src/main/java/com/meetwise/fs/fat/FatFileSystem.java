@@ -84,8 +84,8 @@ public final class FatFileSystem extends AbstractFileSystem {
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
             ClusterChain rootDirFile = new ClusterChain(fat,
                     f32bs.getRootDirFirstCluster(), isReadOnly());
-            final ClusterChainDirectory fd = ClusterChainDirectory.read(
-                    rootDirFile, true);
+            final ClusterChainDirectory fd =
+                    ClusterChainDirectory.readRoot(rootDirFile);
             this.fsiSector = FsInfoSector.read(f32bs);
             
             if (fsiSector.getFreeClusterCount() != fat.getFreeClusterCount()) {

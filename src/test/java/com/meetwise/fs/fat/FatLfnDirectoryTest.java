@@ -2,6 +2,8 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
+import com.meetwise.fs.FSDirectory;
+import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.fat.FatLfnDirectory.LfnEntry;
 import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
@@ -33,6 +35,23 @@ public class FatLfnDirectoryTest {
                 (Fat16BootSector) bs, false);
         this.fat = Fat.read(bs, 0);
         this.dir = new FatLfnDirectory(rootDirStore, fat);
+    }
+
+    @Test
+    @Ignore
+    public void testSubDirectoryTimeStamps() throws IOException {
+        System.out.println("subDirectoryTimeStamps");
+        
+        final LfnEntry subDirEntry = dir.addDirectory("testDir");
+        assertTrue(subDirEntry.isDirectory());
+        
+        final FSDirectory subDir = subDirEntry.getDirectory();
+        final FSDirectoryEntry dot = subDir.getEntry(".");
+
+        assertNotNull(dot);
+        assertEquals(subDirEntry.getCreated(), dot.getCreated());
+        assertEquals(subDirEntry.getLastModified(), dot.getLastModified());
+        assertEquals(subDirEntry.getLastAccessed(), dot.getLastAccessed());
     }
 
     @Test
@@ -107,8 +126,12 @@ public class FatLfnDirectoryTest {
     @Test
     public void testAddDirectory() throws Exception {
         System.out.println("addDirectory");
-
-        assertNotNull(dir.addDirectory("A nice directory"));
+        
+        final String name = "A nice directory";
+        final LfnEntry newDir = dir.addDirectory(name);
+        assertNotNull(newDir);
+        assertTrue(newDir == dir.getEntry(name));
+        assertTrue(newDir.getDirectory() == dir.getEntry(name).getDirectory());
     }
     
     @Test

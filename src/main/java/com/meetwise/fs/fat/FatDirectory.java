@@ -33,23 +33,51 @@ final class FatDirectory extends ClusterChainDirectory {
         return result;
     }
 
-    public static FatDirectory create(AbstractDirectory parent, Fat fat)
-            throws IOException {
+
+    public static FatDirectory createSub(
+            AbstractDirectory parent, Fat fat) throws IOException {
+
+        final ClusterChain chain = new ClusterChain(fat, false);
+        chain.setChainLength(1);
         
         final AbstractDirectoryEntry entryData =
                 new AbstractDirectoryEntry(parent);
+        
         final FatDirEntry realEntry = new FatDirEntry(entryData);
         realEntry.getEntry().setFlags(AbstractDirectoryEntry.F_DIRECTORY);
-        final ClusterChain chain = new ClusterChain(fat, false);
-        chain.setChainLength(1);
-        final FatDirectory fatDir = new FatDirectory(chain, realEntry);
-        fatDir.flush();
-        realEntry.setStartCluster(fatDir.getStorageCluster());
-        return fatDir;
+        realEntry.setStartCluster(chain.getStartCluster());
+        
+        final FatDirectory result = new FatDirectory(chain, realEntry);
+        
+        final AbstractDirectoryEntry dot = new AbstractDirectoryEntry(result);
+        dot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
+        final FatDirEntry dotEntry = new FatDirEntry(dot);
+        dotEntry.setName(ShortName.DOT);
+        dotEntry.setStartCluster((int) result.getStorageCluster());
+        copyDateTimeFields(realEntry, dotEntry);
+        result.addEntry(dot);
+
+        final AbstractDirectoryEntry dotDot =
+                new AbstractDirectoryEntry(result);
+        dotDot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
+        final FatDirEntry dotDotEntry = new FatDirEntry(dotDot);
+        dotDotEntry.setName(ShortName.DOT_DOT);
+        dotDotEntry.setStartCluster((int) parent.getStorageCluster());
+        copyDateTimeFields(realEntry, dotDotEntry);
+        result.addEntry(dotDot);
+
+        result.flush();
+
+        return result;
     }
     
     public FatDirEntry getEntry() {
         return entry;
     }
     
+    private static void copyDateTimeFields(FatDirEntry src, FatDirEntry dst) {
+        dst.setCreated(src.getCreated());
+        dst.setLastAccessed(src.getLastAccessed());
+        dst.setLastModified(src.getLastModified());
+    }
 }

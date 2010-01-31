@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public class FatDirectoryTest {
+public class ClusterChainDirectoryTest {
 
     private RamDisk rd;
     private Fat32BootSector bs;
@@ -26,9 +26,9 @@ public class FatDirectoryTest {
         this.bs.init();
         this.fat = Fat.create(bs, 0);
         this.chain = new ClusterChain(fat, false);
-        this.dir = ClusterChainDirectory.create(chain, 0, true);
+        this.dir = ClusterChainDirectory.createRoot(chain);
     }
-
+    
     @Test
     public void testGetStorageCluster() {
         System.out.println("getStorageCluster");
