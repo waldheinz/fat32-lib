@@ -39,7 +39,7 @@ final class FatLfnDirectory implements FSDirectory {
     private final Map<ShortName, LfnEntry> shortNameIndex;
     private final Map<String, LfnEntry> longNameIndex;
     private final Map<FatDirEntry, FatFile> files;
-    private final Map<FatDirEntry, FSDirectory> directories;
+    private final Map<FatDirEntry, FatLfnDirectory> directories;
     private final ShortNameGenerator sng;
     private final AbstractDirectory dir;
     private final Fat fat;
@@ -58,7 +58,7 @@ final class FatLfnDirectory implements FSDirectory {
         this.longNameIndex = new HashMap<String, LfnEntry>();
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
         this.files = new HashMap<FatDirEntry, FatFile>();
-        this.directories = new HashMap<FatDirEntry, FSDirectory>();
+        this.directories = new HashMap<FatDirEntry, FatLfnDirectory>();
 
         parseLfn();
     }
@@ -81,7 +81,7 @@ final class FatLfnDirectory implements FSDirectory {
     }
 
     private FSDirectory getDirectory(FatDirEntry entry) throws IOException {
-        FSDirectory result = directories.get(entry);
+        FatLfnDirectory result = directories.get(entry);
 
         if (result == null) {
             final FatDirectory storage = FatDirectory.read(entry, fat);
@@ -220,6 +220,10 @@ final class FatLfnDirectory implements FSDirectory {
     public void flush() throws FileSystemException, IOException {
         for (FatFile f : files.values()) {
             f.flush();
+        }
+        
+        for (FatLfnDirectory d : directories.values()) {
+            d.flush();
         }
         
         updateLFN();
