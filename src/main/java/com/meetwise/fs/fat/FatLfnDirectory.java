@@ -113,7 +113,7 @@ final class FatLfnDirectory implements FSDirectory {
         name = name.trim();
         final ShortName shortName = sng.generateShortName(name);
         final AbstractDirectoryEntry entryData = new AbstractDirectoryEntry(dir);
-        FatDirEntry realEntry = new FatDirEntry(entryData);
+        FatDirEntry realEntry = FatDirEntry.create(entryData);
         realEntry.setName(shortName);
         final LfnEntry entry = new LfnEntry(realEntry, name);
 
@@ -286,7 +286,7 @@ final class FatLfnDirectory implements FSDirectory {
         public LfnEntry(int offset, int length) {
             /* this is just an old plain 8.3 entry */
             if (length == 1) {
-                realEntry = new FatDirEntry(dir.getEntry(offset));
+                realEntry = FatDirEntry.read(dir.getEntry(offset));
                 fileName = realEntry.getName().asSimpleString();
             } else {
                 /* stored in reverse order */
@@ -298,7 +298,7 @@ final class FatLfnDirectory implements FSDirectory {
                 }
                 
                 fileName = name.toString().trim();
-                realEntry = new FatDirEntry(dir.getEntry(offset + length - 1));
+                realEntry = FatDirEntry.read(dir.getEntry(offset + length - 1));
             }
         }
         

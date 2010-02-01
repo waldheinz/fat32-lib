@@ -7,6 +7,7 @@ import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.fat.FatLfnDirectory.LfnEntry;
 import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -38,7 +39,6 @@ public class FatLfnDirectoryTest {
     }
 
     @Test
-    @Ignore
     public void testSubDirectoryTimeStamps() throws IOException {
         System.out.println("subDirectoryTimeStamps");
         
@@ -47,9 +47,11 @@ public class FatLfnDirectoryTest {
         
         final FSDirectory subDir = subDirEntry.getDirectory();
         final FSDirectoryEntry dot = subDir.getEntry(".");
-
+        
         assertNotNull(dot);
-        assertEquals(subDirEntry.getCreated(), dot.getCreated());
+        assertEquals(
+                new Date(subDirEntry.getCreated()),
+                new Date(dot.getCreated()));
         assertEquals(subDirEntry.getLastModified(), dot.getLastModified());
         assertEquals(subDirEntry.getLastAccessed(), dot.getLastAccessed());
     }

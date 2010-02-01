@@ -43,24 +43,28 @@ final class FatDirectory extends ClusterChainDirectory {
         final AbstractDirectoryEntry entryData =
                 new AbstractDirectoryEntry(parent);
         
-        final FatDirEntry realEntry = new FatDirEntry(entryData);
+        final FatDirEntry realEntry = FatDirEntry.create(entryData);
         realEntry.getEntry().setFlags(AbstractDirectoryEntry.F_DIRECTORY);
         realEntry.setStartCluster(chain.getStartCluster());
         
         final FatDirectory result = new FatDirectory(chain, realEntry);
+
+        /* add "." entry */
         
         final AbstractDirectoryEntry dot = new AbstractDirectoryEntry(result);
         dot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
-        final FatDirEntry dotEntry = new FatDirEntry(dot);
+        final FatDirEntry dotEntry = FatDirEntry.create(dot);
         dotEntry.setName(ShortName.DOT);
         dotEntry.setStartCluster((int) result.getStorageCluster());
         copyDateTimeFields(realEntry, dotEntry);
         result.addEntry(dot);
 
+        /* add ".." entry */
+
         final AbstractDirectoryEntry dotDot =
                 new AbstractDirectoryEntry(result);
         dotDot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
-        final FatDirEntry dotDotEntry = new FatDirEntry(dotDot);
+        final FatDirEntry dotDotEntry = FatDirEntry.create(dotDot);
         dotDotEntry.setName(ShortName.DOT_DOT);
         dotDotEntry.setStartCluster((int) parent.getStorageCluster());
         copyDateTimeFields(realEntry, dotDotEntry);

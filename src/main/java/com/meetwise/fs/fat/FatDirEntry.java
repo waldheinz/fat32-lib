@@ -22,6 +22,7 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.util.DosUtils;
 import com.meetwise.fs.util.LittleEndian;
+import java.util.Date;
 
 /**
  * 
@@ -42,8 +43,24 @@ final class FatDirEntry {
      * @param src
      * @param offset
      */
-    public FatDirEntry(AbstractDirectoryEntry entry) {
+    private FatDirEntry(AbstractDirectoryEntry entry) {
         this.entry = entry;
+    }
+
+    public static FatDirEntry read(AbstractDirectoryEntry e) {
+        return new FatDirEntry(e);
+    }
+
+    public static FatDirEntry create(AbstractDirectoryEntry e) {
+        final FatDirEntry result = new FatDirEntry(e);
+
+        final long now = System.currentTimeMillis();
+
+        result.setCreated(now);
+        result.setLastAccessed(now);
+        result.setLastModified(now);
+
+        return result;
     }
 
     public AbstractDirectoryEntry getEntry() {
