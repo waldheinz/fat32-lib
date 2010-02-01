@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class ClusterChain extends FatObject {
+final class ClusterChain extends FatObject {
     protected final Fat fat;
     private final BlockDevice device;
     private final int clusterSize;
@@ -267,4 +267,35 @@ class ClusterChain extends FatObject {
         }
         
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof ClusterChain)) return false;
+        
+        final ClusterChain other = (ClusterChain) obj;
+        
+        if (this.fat != other.fat &&
+                (this.fat == null || !this.fat.equals(other.fat))) {
+
+            return false;
+        }
+        
+        if (this.startCluster != other.startCluster) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 79 * hash +
+                (this.fat != null ? this.fat.hashCode() : 0);
+        hash = 79 * hash +
+                (int) (this.startCluster ^ (this.startCluster >>> 32));
+        return hash;
+    }
+    
 }

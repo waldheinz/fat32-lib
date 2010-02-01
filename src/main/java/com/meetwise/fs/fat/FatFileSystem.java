@@ -160,7 +160,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     }
     
     @Override
-    public FSDirectory getRoot() {
+    public FatLfnDirectory getRoot() {
         return rootDir;
     }
     

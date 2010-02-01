@@ -14,11 +14,11 @@ import java.nio.ByteBuffer;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 final class FatFile extends FatObject implements FSFile {
-    private final FatDirEntry myEntry;
+    private final FatDirEntry entry;
     private final ClusterChain chain;
     
     private FatFile(FatDirEntry myEntry, ClusterChain chain) {
-        this.myEntry = myEntry;
+        this.entry = myEntry;
         this.chain = chain;
     }
     
@@ -46,7 +46,7 @@ final class FatFile extends FatObject implements FSFile {
      */
     @Override
     public long getLength() {
-        return myEntry.getLength();
+        return entry.getLength();
     }
     
     @Override
@@ -71,8 +71,8 @@ final class FatFile extends FatObject implements FSFile {
             throw new FileSystemException(null, ex);
         }
         
-        this.myEntry.setStartCluster(chain.getStartCluster());
-        this.myEntry.setLength(length);
+        this.entry.setStartCluster(chain.getStartCluster());
+        this.entry.setLength(length);
     }
 
     /**
@@ -146,16 +146,54 @@ final class FatFile extends FatObject implements FSFile {
     
     private void updateTimeStamps(boolean write) {
         final long now = System.currentTimeMillis();
-        myEntry.setLastAccessed(now);
+        entry.setLastAccessed(now);
         
         if (write) {
-            myEntry.setLastModified(now);
+            entry.setLastModified(now);
         }
     }
     
     @Override
     public void flush() throws IOException {
         /* nothing to do */
+    }
+    
+    /**
+     * Returns the {@code ClusterChain} that holds the contents of
+     * this {@code FatFile}.
+     *
+     * @return the file's {@code ClusterChain}
+     */
+    public ClusterChain getChain() {
+        return chain;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof FatFile)) return false;
+        
+        final FatFile other = (FatFile) obj;
+        
+        if (this.entry != other.entry &&
+                (this.entry == null || !this.entry.equals(other.entry))) {
+            return false;
+        }
+        
+        if (this.chain != other.chain &&
+                (this.chain == null || !this.chain.equals(other.chain))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + (this.entry != null ? this.entry.hashCode() : 0);
+        hash = 97 * hash + (this.chain != null ? this.chain.hashCode() : 0);
+        return hash;
     }
     
 }
