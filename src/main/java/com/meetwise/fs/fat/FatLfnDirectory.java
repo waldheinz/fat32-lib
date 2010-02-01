@@ -69,14 +69,14 @@ final class FatLfnDirectory implements FSDirectory {
      * @param entry
      * @return
      */
-    private FatFile getFile(FatDirEntry entry) {
+    private FatFile getFile(FatDirEntry entry) throws IOException {
         FatFile file = files.get(entry);
 
         if (file == null) {
-            file = new FatFile(fat, entry, dir.isReadOnly());
+            file = FatFile.get(fat, entry);
             files.put(entry, file);
         }
-
+        
         return file;
     }
 

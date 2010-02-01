@@ -57,7 +57,7 @@ public class FatFileSystemTest {
             System.out.println("     - " + e);
         }
     }
-
+    
     /**
      * $ cat fat16-test.img.gz | gunzip | hexdump -C
      *

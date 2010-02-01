@@ -31,7 +31,7 @@ final class AbstractDirectoryEntry extends FatObject {
     public static final int F_READONLY = 0x01;
     public static final int F_HIDDEN = 0x02;
     public static final int F_SYSTEM = 0x04;
-    public static final int F_LABEL = 0x08;
+    public static final int F_VOLUME_ID = 0x08;
     public static final int F_DIRECTORY = 0x10;
     public static final int F_ARCHIVE = 0x20;
 
@@ -124,7 +124,7 @@ final class AbstractDirectoryEntry extends FatObject {
     }
 
     public boolean isLabel() {
-        return ((getFlags() & F_LABEL) != 0);
+        return ((getFlags() & F_VOLUME_ID) != 0);
     }
 
     public boolean isDirectory() {
@@ -136,7 +136,7 @@ final class AbstractDirectoryEntry extends FatObject {
     }
 
     public void setLabel() {
-        setFlags(F_LABEL);
+        setFlags(F_VOLUME_ID);
     }
     
     /**

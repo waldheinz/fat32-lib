@@ -1,53 +1,48 @@
-/*
- * $Id: FatFile.java 4975 2009-02-02 08:30:52Z lsantha $
- *
- * Copyright (C) 2003-2009 JNode.org
- *
- * This library is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public 
- * License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; If not, write to the Free Software Foundation, Inc., 
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
  
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.FileSystemException;
 import java.io.IOException;
 import com.meetwise.fs.FSFile;
+import com.meetwise.fs.ReadOnlyFileSystemException;
 import java.nio.ByteBuffer;
 
 /**
  * A File instance is the in-memory representation of a single file (chain of
  * clusters).
  * 
- * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-final class FatFile extends ClusterChain implements FSFile {
-
+final class FatFile extends FatObject implements FSFile {
     private final FatDirEntry myEntry;
+    private final ClusterChain chain;
     
-    FatFile(Fat fat, FatDirEntry myEntry, boolean readOnly) {
-        super(fat, myEntry.getStartCluster(), readOnly);
-
-        if (myEntry.getEntry().isDirectory())
-            throw new IllegalArgumentException(myEntry + " is a directory");
-
+    private FatFile(FatDirEntry myEntry, ClusterChain chain) {
         this.myEntry = myEntry;
+        this.chain = chain;
     }
-
+    
+    public static FatFile get(Fat fat, FatDirEntry entry)
+            throws IOException {
+        
+        if (entry.getEntry().isDirectory())
+            throw new IllegalArgumentException(entry + " is a directory");
+            
+        final ClusterChain cc = new ClusterChain(
+                fat, entry.getStartCluster(), entry.getEntry().isReadOnly());
+                
+        if (entry.getLength() > cc.getLengthOnDisk()) throw new IOException(
+                "entry is largen than associated cluster chain");
+                
+        return new FatFile(entry, cc);
+    }
+    
     /**
-     * Returns the length.
+     * Returns the length of this file. This is actually the length that
+     * is stored in the {@link FatDirEntry} that is associated with this file.
      * 
-     * @return long
+     * @return long the length that is recorded for this file
+     * @see #getChainLength() 
      */
     @Override
     public long getLength() {
@@ -57,23 +52,43 @@ final class FatFile extends ClusterChain implements FSFile {
     @Override
     public String toString() {
         return getClass().getSimpleName() + " [length=" + getLength() +
-                ", first cluster=" + getStartCluster() + "]";
+                ", first cluster=" + chain.getStartCluster() + "]";
     }
 
     @Override
     public void setLength(long length) throws FileSystemException {
         if (getLength() == length) return;
-        
+
+        if (!chain.isReadOnly()) {
+            updateTimeStamps(true);
+        } else {
+            throw new ReadOnlyFileSystemException(null);
+        }
+
         try {
-            super.setSize(length);
+            chain.setSize(length);
         } catch (IOException ex) {
             throw new FileSystemException(null, ex);
         }
-
-        this.myEntry.setStartCluster(super.getStartCluster());    
+        
+        this.myEntry.setStartCluster(chain.getStartCluster());
         this.myEntry.setLength(length);
     }
 
+    /**
+     * <p>
+     * {@inheritDoc}
+     * </p><p>
+     * Unless this file is read-ony, this method also updates the
+     * "last accessed" field in the {@link FatDirEntry} that is associated with
+     * this file.
+     * </p>
+     * 
+     * @param offset {@inheritDoc}
+     * @param dest {@inheritDoc}
+     * @throws FileSystemException {@inheritDoc}
+     * @see FatDirEntry#setLastAccessed(long) 
+     */
     @Override
     public void read(long offset, ByteBuffer dest) throws FileSystemException {
         final int len = dest.remaining();
@@ -82,27 +97,62 @@ final class FatFile extends ClusterChain implements FSFile {
             throw new FileSystemException(null,
                     "can not read beyond EOF"); //NOI18N
 
-        try {
-            readData(offset, dest);
-        } catch (IOException ex) {
-            throw new FileSystemException(null, ex);
+        if (!chain.isReadOnly()) {
+            updateTimeStamps(false);
         }
-    }
-    
-    @Override
-    public void write(long offset, ByteBuffer srcBuf)
-            throws FileSystemException {
-            
-        int len = srcBuf.remaining();
-        if (offset + len > getLength())
-            setLength(offset + len);
+
         try {
-            writeData(offset, srcBuf);
+            chain.readData(offset, dest);
         } catch (IOException ex) {
             throw new FileSystemException(null, ex);
         }
     }
 
+    /**
+     * <p>
+     * {@inheritDoc}
+     * </p><p>
+     * Unless this file is read-ony, this method also updates the
+     * "last accessed" and "last modified" fields in the {@link FatDirEntry}
+     * that is associated with this file.
+     * </p>
+     *
+     * @param offset {@inheritDoc}
+     * @param srcBuf {@inheritDoc}
+     * @throws FileSystemException {@inheritDoc}
+     */
+    @Override
+    public void write(long offset, ByteBuffer srcBuf)
+            throws FileSystemException {
+        
+        if (!chain.isReadOnly()) {
+            updateTimeStamps(true);
+        } else {
+            throw new ReadOnlyFileSystemException(null);
+        }
+        
+        final long lastByte = offset + srcBuf.remaining();
+
+        if (lastByte > getLength()) {
+            setLength(lastByte);
+        }
+        
+        try {
+            chain.writeData(offset, srcBuf);
+        } catch (IOException ex) {
+            throw new FileSystemException(null, ex);
+        }
+    }
+    
+    private void updateTimeStamps(boolean write) {
+        final long now = System.currentTimeMillis();
+        myEntry.setLastAccessed(now);
+        
+        if (write) {
+            myEntry.setLastModified(now);
+        }
+    }
+    
     @Override
     public void flush() throws IOException {
         /* nothing to do */
