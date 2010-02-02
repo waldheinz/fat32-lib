@@ -192,7 +192,6 @@ public class FatFileSystemTest {
     }
     
     @Test
-    @Ignore
     public void testFat32Write() throws Exception {
         System.out.println("testFat32Write");
 

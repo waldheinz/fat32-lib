@@ -24,11 +24,9 @@ public class ShortNameTest {
 
         ShortName name = ShortName.get("TEST.TXT");
         assertNotNull(name);
-        assertEquals(11, name.asSimpleString().length());
 
         name = ShortName.get("TEST");
         assertNotNull(name);
-        assertEquals(11, name.asSimpleString().length());
     }
     
     @Test(expected=IllegalArgumentException.class)

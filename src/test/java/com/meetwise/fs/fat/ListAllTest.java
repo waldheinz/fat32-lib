@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 public class ListAllTest {
     
     @Test
-    @Ignore
     public void testListComplex() throws Exception {
         System.out.println("testListComplex");
 
@@ -40,6 +39,9 @@ public class ListAllTest {
             final FSDirectoryEntry e = i.next();
             
             if (e.isDirectory()) {
+                if (e.getName().equals(".") || e.getName().equals(".."))
+                    continue;
+                
                 System.out.println(ident + "- " + e.getName());
                 listDirectories(e.getDirectory(), ident + "   ");
             } else {
@@ -47,7 +49,7 @@ public class ListAllTest {
             }
         }
     }
-
+    
     private void checkFile(FSDirectoryEntry fe, String ident) throws IOException {
         System.out.print(ident + " + " + fe.getName());
         final FSFile f = fe.getFile();

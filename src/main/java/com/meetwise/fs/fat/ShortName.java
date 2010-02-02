@@ -122,7 +122,7 @@ final class ShortName {
     }
 
     public String asSimpleString() {
-        return new String(this.name);
+        return new String(this.name).trim();
     }
     
     @Override
