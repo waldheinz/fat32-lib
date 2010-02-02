@@ -37,7 +37,46 @@ public class FatLfnDirectoryTest {
         this.fat = Fat.read(bs, 0);
         this.dir = new FatLfnDirectory(rootDirStore, fat);
     }
+    
+    @Test
+    public void testRemoveFile() throws IOException {
+        System.out.println("remove (file)");
 
+        final int freeBefore = fat.getFreeClusterCount();
+        final int entriesBefore = rootDirStore.getEntryCount();
+
+        final String dirName = "testDirectory";
+        final LfnEntry fileEntry = dir.addFile(dirName);
+        fileEntry.getFile().setLength(100000);
+        assertTrue(fat.getFreeClusterCount() < freeBefore);
+        assertEquals(entriesBefore + 2, rootDirStore.getEntryCount());
+        assertNotNull(dir.getEntry(dirName));
+        
+        dir.remove(dirName);
+        assertEquals(freeBefore, fat.getFreeClusterCount());
+        assertEquals(entriesBefore, rootDirStore.getEntryCount());
+        assertNull(dir.getEntry(dirName));
+    }
+
+    @Test
+    public void testRemoveDirectory() throws IOException {
+        System.out.println("remove (directory)");
+
+        final int freeBefore = fat.getFreeClusterCount();
+        final int entriesBefore = rootDirStore.getEntryCount();
+        
+        final String dirName = "testDirectory";
+        dir.addDirectory(dirName);
+        assertEquals(freeBefore - 1, fat.getFreeClusterCount());
+        assertEquals(entriesBefore + 2, rootDirStore.getEntryCount());
+        assertNotNull(dir.getEntry(dirName));
+        
+        dir.remove(dirName);
+        assertEquals(freeBefore, fat.getFreeClusterCount());
+        assertEquals(entriesBefore, rootDirStore.getEntryCount());
+        assertNull(dir.getEntry(dirName));
+    }
+    
     @Test
     public void testSubDirectoryTimeStamps() throws IOException {
         System.out.println("subDirectoryTimeStamps");

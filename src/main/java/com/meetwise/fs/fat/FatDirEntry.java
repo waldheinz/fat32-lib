@@ -22,7 +22,7 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.util.DosUtils;
 import com.meetwise.fs.util.LittleEndian;
-import java.util.Date;
+import java.io.IOException;
 
 /**
  * 
@@ -167,6 +167,10 @@ final class FatDirEntry {
 
         LittleEndian.setInt16(entry.getData(), 0x1a, (int) startCluster);
         entry.markDirty();
+    }
+
+    void remove() throws IOException {
+        entry.remove();
     }
     
 }

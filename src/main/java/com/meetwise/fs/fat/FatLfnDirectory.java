@@ -21,8 +21,8 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FSFile;
 import com.meetwise.fs.FileSystemException;
+import com.meetwise.fs.ReadOnlyFileSystemException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -148,14 +148,14 @@ final class FatLfnDirectory implements FSDirectory {
         flush();
         return entry;
     }
-
-    @Override
-    public FSDirectoryEntry getEntry(String name) {
+    
+    private LfnEntry getEntryImpl(String name) {
         name = name.trim();
         
-        final FSDirectoryEntry entry = longNameIndex.get(name);
+        final LfnEntry entry = longNameIndex.get(name);
 
         if (entry == null) {
+            if (!ShortName.canConvert(name)) return null;
             return shortNameIndex.get(ShortName.get(name));
         } else {
             return entry;
@@ -260,18 +260,26 @@ final class FatLfnDirectory implements FSDirectory {
     /**
      * Remove the entry with the given name from this directory.
      * 
-     * @param name
-     * @throws IOException
+     * @param name the name of the entry to remove
+     * @throws IOException on error removing the entry
      */
     @Override
     public void remove(String name) throws IOException {
-        throw new UnsupportedOperationException();
+        if (dir.isReadOnly()) throw new ReadOnlyFileSystemException(null);
+        final LfnEntry entry = getEntryImpl(name);
+        if (entry == null) return;
+        entry.remove();
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName() +
                 " [size=" + shortNameIndex.size() + "]";
+    }
+
+    @Override
+    public FSDirectoryEntry getEntry(String name) throws IOException {
+        return getEntryImpl(name);
     }
 
     class LfnEntry implements FSDirectoryEntry {
@@ -390,10 +398,10 @@ final class FatLfnDirectory implements FSDirectory {
         }
 
         @Override
-        public FSFile getFile() throws IOException {
+        public FatFile getFile() throws IOException {
             return FatLfnDirectory.this.getFile(realEntry);
         }
-
+        
         @Override
         public FSDirectory getDirectory() throws IOException {
             return FatLfnDirectory.this.getDirectory(realEntry);
@@ -428,6 +436,25 @@ final class FatLfnDirectory implements FSDirectory {
         @Override
         public boolean isDirty() {
             return true;
+        }
+
+        private void remove() throws IOException {
+            final ClusterChain cc = new ClusterChain(
+                    fat, realEntry.getStartCluster(), false);
+            
+            cc.setChainLength(0);
+            
+            longNameIndex.remove(this.getName());
+            shortNameIndex.remove(realEntry.getName());
+            
+            if (isFile()) {
+                files.remove(this.realEntry);
+            } else {
+                files.remove(this.realEntry);
+            }
+            
+            realEntry.remove();
+            updateLFN();
         }
     }
 }
