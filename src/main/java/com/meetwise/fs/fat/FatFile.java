@@ -92,7 +92,9 @@ final class FatFile extends FatObject implements FSFile {
     @Override
     public void read(long offset, ByteBuffer dest) throws FileSystemException {
         final int len = dest.remaining();
-
+        
+        if (len == 0) return;
+        
         if (offset + len > getLength())
             throw new FileSystemException(null,
                     "can not read beyond EOF"); //NOI18N
