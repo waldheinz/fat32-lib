@@ -213,7 +213,7 @@ abstract class AbstractDirectory {
     }
 
     void addEntry(AbstractDirectoryEntry e) throws IOException {
-        if (e == null) throw new NullPointerException();
+        assert (e != null);
         
         if (getSize() == getCapacity()) {
             changeSize(capacity + 1);
@@ -230,5 +230,12 @@ abstract class AbstractDirectory {
         }
 
         this.entries.addAll(Arrays.asList(entries));
+    }
+
+    void removeEntry(AbstractDirectoryEntry entry) throws IOException {
+        assert (entry != null);
+        
+        this.entries.remove(entry);
+        changeSize(getSize());
     }
 }

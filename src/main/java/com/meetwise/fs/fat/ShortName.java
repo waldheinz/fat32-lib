@@ -85,13 +85,31 @@ final class ShortName {
      * @return the {@code ShortName} representing the specified name
      * @throws IllegalArgumentException if the specified name can not be parsed
      *      into a {@code ShortName}
+     * @see #canConvert(java.lang.String) 
      */
     public static ShortName get(String name) throws IllegalArgumentException {
         if (name.equals(".")) return DOT;
         else if (name.equals("..")) return DOT_DOT;
         else return new ShortName(name);
     }
-
+    
+    /**
+     * Tests if the specified string can be converted to a {@code ShortName}.
+     *
+     * @param nameExt the string to test
+     * @return if the string can be converted
+     * @see #get(java.lang.String) 
+     */
+    public static boolean canConvert(String nameExt) {
+        /* TODO: do this without exceptions */
+        try {
+            ShortName.get(nameExt);
+            return true;
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
+    }
+    
     public static ShortName parse(AbstractDirectoryEntry entry) {
         final char[] nameArr = new char[8];
         

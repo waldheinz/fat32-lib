@@ -21,6 +21,7 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.util.LittleEndian;
+import java.io.IOException;
 
 /**
  * 
@@ -183,6 +184,10 @@ final class AbstractDirectoryEntry extends FatObject {
         sb.append("]"); //NOI18N
         
         return sb.toString();
+    }
+
+    void remove() throws IOException {
+        dir.removeEntry(this);
     }
     
 }
