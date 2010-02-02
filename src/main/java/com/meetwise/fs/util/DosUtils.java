@@ -40,8 +40,8 @@ public class DosUtils {
      * @return long
      */
     public static long decodeDateTime(int dosDate, int dosTime) {
-        Calendar cal = Calendar.getInstance();
-
+        final Calendar cal = Calendar.getInstance();
+        
         cal.set(Calendar.MILLISECOND, 0);
         cal.set(Calendar.SECOND, (dosTime & 0x1f) * 2);
         cal.set(Calendar.MINUTE, (dosTime >> 5) & 0x3f);
@@ -50,7 +50,7 @@ public class DosUtils {
         cal.set(Calendar.DATE, dosDate & 0x1f);
         cal.set(Calendar.MONTH, ((dosDate >> 5) & 0x0f) - 1);
         cal.set(Calendar.YEAR, 1980 + (dosDate >> 9));
-
+        
         return cal.getTimeInMillis();
     }
 
