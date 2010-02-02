@@ -21,11 +21,16 @@ public class ShortNameTest {
     @Test
     public void testGetValid() {
         System.out.println("getValid");
-        
-        assertNotNull(ShortName.get("TEST.TXT"));
-        assertNotNull(ShortName.get("TEST"));
-    }
 
+        ShortName name = ShortName.get("TEST.TXT");
+        assertNotNull(name);
+        assertEquals(11, name.asSimpleString().length());
+
+        name = ShortName.get("TEST");
+        assertNotNull(name);
+        assertEquals(11, name.asSimpleString().length());
+    }
+    
     @Test(expected=IllegalArgumentException.class)
     public void testGetTooLong() {
         System.out.println("getTooLong");

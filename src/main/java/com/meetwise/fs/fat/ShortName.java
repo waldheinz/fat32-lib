@@ -2,6 +2,7 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.util.LittleEndian;
+import java.util.Arrays;
 
 /**
  * Represents a "short" (8.3) file name as used by DOS.
@@ -20,33 +21,40 @@ final class ShortName {
      */
     public final static ShortName DOT_DOT = new ShortName("..", ""); //NOI18N
     
-    private final String name;
-    private final String ext;
+    private final char[] name;
     
     private ShortName(String nameExt) {
         if (nameExt.length() > 12) throw
                 new IllegalArgumentException("name too long");
         
         final int i = nameExt.indexOf('.');
-
+        final String nameString, extString;
+        
         if (i < 0) {
-            this.name = nameExt.toUpperCase();
-            this.ext = "";
+            nameString = nameExt.toUpperCase();
+            extString = "";
         } else {
-            this.name = nameExt.substring(0, i).toUpperCase();
-            this.ext = nameExt.substring(i + 1).toUpperCase();
+            nameString = nameExt.substring(0, i).toUpperCase();
+            extString = nameExt.substring(i + 1).toUpperCase();
         }
 
-        checkValidName(name);
-        checkValidExt(ext);
+        this.name = toCharArray(nameString, extString);
     }
     
     ShortName(String name, String ext) {
+        this.name = toCharArray(name, ext);
+    }
+
+    private char[] toCharArray(String name, String ext) {
         checkValidName(name);
         checkValidExt(ext);
+
+        final char[] result = new char[11];
+        Arrays.fill(result, ' ');
+        System.arraycopy(name.toCharArray(), 0, result, 0, name.length());
+        System.arraycopy(ext.toCharArray(), 0, result, 8, ext.length());
         
-        this.name = name;
-        this.ext = ext;
+        return result;
     }
 
     /**
@@ -56,19 +64,9 @@ final class ShortName {
      * @return the {@code ShortName}'s checksum
      */
     public byte checkSum() {
-        final char[] fullName = new char[] {
-            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-            ' ', ' ', ' '};
-
-        final char[] nameChars = getName().toCharArray();
-        final char[] extChars = getExt().toCharArray();
-        
-        System.arraycopy(nameChars, 0, fullName, 0, nameChars.length);
-        System.arraycopy(extChars, 0, fullName, 8, extChars.length);
-
         final byte[] dest = new byte[11];
         for (int i = 0; i < 11; i++)
-            dest[i] = (byte) fullName[i];
+            dest[i] = (byte) name[i];
 
         int sum = dest[0];
         for (int i = 1; i < 11; i++) {
@@ -116,44 +114,15 @@ final class ShortName {
     public void write(AbstractDirectoryEntry entry) {
         final byte[] dest = entry.getData();
         
-        for (int i = 0; i < 8; i++) {
-            char ch;
-            if (i < name.length()) {
-//                if (!isLabel()) {
-//                    ch = Character.toUpperCase(name.charAt(i));
-//                } else {
-                    ch = name.charAt(i);
-//                }
-                if (ch == 0xe5) {
-                    ch = (char) 0x05;
-                }
-            } else {
-                ch = ' ';
-            }
-
-            dest[i] = (byte) ch;
-        }
-
-        for (int i = 0; i < 3; i++) {
-            final char ch;
-            if (i < ext.length()) {
-//                if (!isLabel()) {
-//                    ch = Character.toUpperCase(ext.charAt(i));
-//                } else {
-                    ch = ext.charAt(i);
-//                }
-            } else {
-                ch = ' ';
-            }
-
-            dest[0x08 + i] = (byte) ch;
+        for (int i = 0; i < 11; i++) {
+            dest[i] = (byte) name[i];
         }
 
         entry.markDirty();
     }
 
     public String asSimpleString() {
-        return name + "." + ext; //NOI18N
+        return new String(this.name);
     }
     
     @Override
@@ -193,32 +162,11 @@ final class ShortName {
         }
 
         final ShortName other = (ShortName) obj;
-        if ((this.name == null) ? (other.name != null) :
-            !this.name.equals(other.name)) {
-            return false;
-        }
-
-        if ((this.ext == null) ? (other.ext != null) :
-            !this.ext.equals(other.ext)) {
-            return false;
-        }
-        
-        return true;
+        return Arrays.equals(name, other.name);
     }
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 41 * hash + (this.name != null ? this.name.hashCode() : 0);
-        hash = 41 * hash + (this.ext != null ? this.ext.hashCode() : 0);
-        return hash;
-    }
-
-    String getName() {
-        return this.name;
-    }
-
-    String getExt() {
-        return this.ext;
+        return Arrays.hashCode(this.name);
     }
 }
