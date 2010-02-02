@@ -10,6 +10,14 @@ import java.util.Arrays;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 final class ShortName {
+
+    /**
+     * These are taken from the FAT specification.
+     */
+    private final static byte[] ILLEGAL_CHARS = {
+        0x22, 0x2A, 0x2B, 0x2C, 0x2E, 0x2F, 0x3A, 0x3B,
+        0x3C, 0x3D, 0x3E, 0x3F, 0x5B, 0x5C, 0x5D, 0x7C
+    };
     
     /**
      * The name of the "current directory" (".") entry of a FAT directory.
@@ -20,7 +28,7 @@ final class ShortName {
      * The name of the "parent directory" ("..") entry of a FAT directory.
      */
     public final static ShortName DOT_DOT = new ShortName("..", ""); //NOI18N
-    
+
     private final char[] name;
     
     private ShortName(String nameExt) {
@@ -39,16 +47,17 @@ final class ShortName {
         }
 
         this.name = toCharArray(nameString, extString);
+        checkValidChars(this.name);
     }
     
     ShortName(String name, String ext) {
         this.name = toCharArray(name, ext);
     }
-
-    private char[] toCharArray(String name, String ext) {
+    
+    private static char[] toCharArray(String name, String ext) {
         checkValidName(name);
         checkValidExt(ext);
-
+        
         final char[] result = new char[11];
         Arrays.fill(result, ' ');
         System.arraycopy(name.toCharArray(), 0, result, 0, name.length());
@@ -186,5 +195,35 @@ final class ShortName {
     @Override
     public int hashCode() {
         return Arrays.hashCode(this.name);
+    }
+
+    /**
+     * Checks if the specified char array consists only of "valid" byte values
+     * according to the FAT specification.
+     *
+     * @param chars the char array to test
+     * @throws IllegalArgumentException if invalid chars are contained
+     */
+    private static void checkValidChars(char[] chars)
+            throws IllegalArgumentException {
+
+        if (chars[0] == 0x20) throw new IllegalArgumentException(
+                "0x20 can not be the first character");
+
+        for (int i=0; i < chars.length; i++) {
+            if ((chars[i] & 0xff) != chars[i]) throw new
+                    IllegalArgumentException("multi-byte character at " + i);
+
+            final byte toTest = (byte) (chars[i] & 0xff);
+            
+            if (toTest < 0x20 && toTest != 0x05) throw new
+                    IllegalArgumentException("caracter < 0x20 at" + i);
+
+            for (int j=0; j < ILLEGAL_CHARS.length; j++) {
+                if (toTest == ILLEGAL_CHARS[j]) throw new
+                        IllegalArgumentException("illegal character " +
+                        ILLEGAL_CHARS[j] + " at " + i);
+            }
+        }
     }
 }

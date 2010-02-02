@@ -18,6 +18,13 @@ public class ShortNameTest {
         assertEquals(ShortName.DOT_DOT, ShortName.get(".."));
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void testValidChars() {
+        System.out.println("validChars");
+
+        ShortName.get("\u003D");
+    }
+    
     @Test
     public void testGetValid() {
         System.out.println("getValid");
