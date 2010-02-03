@@ -30,6 +30,16 @@ import java.nio.ByteBuffer;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 class ClusterChainDirectory extends AbstractDirectory {
+
+    /**
+     * According to the FAT specification, this is the maximum size a FAT
+     * directory may occupy on disk. The {@code ClusterChainDirectory} takes
+     * care not to grow beyond this limit.
+     *
+     * @see #changeSize(int) 
+     */
+    public final static int MAX_SIZE = 65536 * 32;
+    
     private final ClusterChain chain;
     
     protected ClusterChainDirectory(ClusterChain chain, boolean isRoot) {
@@ -99,6 +109,11 @@ class ClusterChainDirectory extends AbstractDirectory {
         checkEntryCount(entryCount);
         
         final int size = entryCount * AbstractDirectoryEntry.SIZE;
+
+        if (size > MAX_SIZE) throw new DirectoryFullException(
+                "directory would grow beyond " + MAX_SIZE + " bytes",
+                getCapacity(), entryCount);
+        
         sizeChanged(chain.setSize(Math.max(size, chain.getClusterSize())));
     }
     

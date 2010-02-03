@@ -64,7 +64,7 @@ public class Fat16RootDirectoryTest {
         dir.changeSize(dir.getCapacity());
     }
     
-    @Test(expected=RootDirectoryFullException.class)
+    @Test(expected=DirectoryFullException.class)
     public void testCanChangeSizeBad() throws IOException {
         System.out.println("canChangeSize (bad)");
 

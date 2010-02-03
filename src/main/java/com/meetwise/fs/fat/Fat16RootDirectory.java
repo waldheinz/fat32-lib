@@ -81,19 +81,19 @@ final class Fat16RootDirectory extends AbstractDirectory {
 
     /**
      * As a FAT12/16 root directory can not change it's size, this method
-     * throws a {@code RootDirectoryFullException} if the requested size is
+     * throws a {@code DirectoryFullException} if the requested size is
      * larger than {@link #getCapacity()} and does nothing else.
      *
      * @param entryCount {@inheritDoc}
      */
     @Override
     protected void changeSize(int entryCount)
-            throws RootDirectoryFullException {
+            throws DirectoryFullException {
 
         checkEntryCount(entryCount);
         
         if (getCapacity() < entryCount) {
-            throw new RootDirectoryFullException();
+            throw new DirectoryFullException(getCapacity(), entryCount);
         }
     }
     

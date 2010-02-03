@@ -61,7 +61,7 @@ public class ConformanceTest {
         try {
             root.addFile("fails");
             fail("added too many files to root directory: " + ++i);
-        } catch (RootDirectoryFullException ex) {
+        } catch (DirectoryFullException ex) {
             /* fine */
         }
     }

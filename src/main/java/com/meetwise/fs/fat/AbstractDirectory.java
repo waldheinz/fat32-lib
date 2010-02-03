@@ -59,12 +59,12 @@ abstract class AbstractDirectory {
      *
      * @param entryCount
      * @throws IOException on write error
-     * @throws RootDirectoryFullException if the FAT12/16 root directory is full
+     * @throws DirectoryFullException if the FAT12/16 root directory is full
      * @see #sizeChanged(long)
      * @see #checkEntryCount(int) 
      */
     protected abstract void changeSize(int entryCount)
-            throws RootDirectoryFullException, IOException;
+            throws DirectoryFullException, IOException;
 
     /**
      * Checks if the entry count passed to {@link #changeSize(int)} is at

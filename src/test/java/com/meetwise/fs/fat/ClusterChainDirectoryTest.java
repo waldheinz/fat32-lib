@@ -21,14 +21,28 @@ public class ClusterChainDirectoryTest {
 
     @Before
     public void setUp() throws IOException {
-        this.rd = new RamDisk(512 * 2048);
+        this.rd = new RamDisk(2048 * 2048);
         this.bs = new Fat32BootSector(rd);
         this.bs.init();
         this.fat = Fat.create(bs, 0);
         this.chain = new ClusterChain(fat, false);
         this.dir = ClusterChainDirectory.createRoot(chain);
     }
-    
+
+    @Test(expected=DirectoryFullException.class)
+    public void testMaximumSize() throws IOException {
+        System.out.println("maximumSize");
+        
+        while (true) {
+            AbstractDirectoryEntry e = new AbstractDirectoryEntry(dir);
+            FatDirEntry fe = FatDirEntry.create(e);
+            dir.addEntry(e);
+            
+            assertTrue(
+                    chain.getLengthOnDisk() <= ClusterChainDirectory.MAX_SIZE);
+        }
+    }
+
     @Test
     public void testGetStorageCluster() {
         System.out.println("getStorageCluster");

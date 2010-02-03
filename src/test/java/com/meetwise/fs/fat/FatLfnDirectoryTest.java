@@ -105,7 +105,7 @@ public class FatLfnDirectoryTest {
             int freeBeforeAdd = fat.getFreeClusterCount();
             try {
                 dir.addDirectory("this is test directory with index " + count);
-            } catch (RootDirectoryFullException ex) {
+            } catch (DirectoryFullException ex) {
                 assertEquals(freeBeforeAdd, fat.getFreeClusterCount());
                 return;
             }
