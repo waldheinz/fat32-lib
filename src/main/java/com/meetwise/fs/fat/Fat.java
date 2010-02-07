@@ -133,7 +133,9 @@ final class Fat {
         entries = new long[(int) ((sectorCount * sectorSize) /
                 fatType.getEntrySize())];
 
-        assert (lastClusterIndex <= entries.length);
+        assert (lastClusterIndex <= entries.length) :
+            "last cluster idx=" + lastClusterIndex +
+            ", entries=" + entries.length;
     }
     
     public FatType getFatType() {

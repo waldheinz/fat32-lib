@@ -34,6 +34,34 @@ public class SuperFloppyFormatterTest {
     }
 
     @Test
+    public void testFat12FormatInvalid() throws IOException {
+        System.out.println("fat12Format (invalid)");
+
+        BlockDevice dev = new RamDisk(16699393);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.setFatType(FatType.FAT12);
+        f.format();
+    }
+
+    @Test
+    public void testFat12FormatValid() throws IOException {
+        System.out.println("fat12Format (valid)");
+
+        BlockDevice dev = new RamDisk(16699392);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.setFatType(FatType.FAT12);
+        f.format();
+        
+        FatFileSystem fs = new FatFileSystem(dev, false);
+        final BootSector bs = fs.getBootSector();
+        System.out.println("sectors=" + bs.getNrTotalSectors());
+        System.out.println("sectors per cluster=" + bs.getSectorsPerCluster());
+        System.out.println("clusters=" +
+                bs.getNrTotalSectors() / bs.getSectorsPerCluster());
+        assertEquals(FatType.FAT12, fs.getFatType());
+    }
+    
+    @Test
     public void testFat32Format() throws IOException {
         System.out.println("fat32Format");
 

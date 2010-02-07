@@ -34,7 +34,6 @@ public class BootSectorTest {
         bs.write();
 
         bs = BootSector.read(rd);
-        assertTrue(bs instanceof Fat32BootSector);
         assertEquals(2, bs.getNrFats());
     }
     

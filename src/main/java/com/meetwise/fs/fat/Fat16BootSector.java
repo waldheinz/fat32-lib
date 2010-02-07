@@ -24,14 +24,16 @@ final class Fat16BootSector extends BootSector {
     public static final String DEFAULT_VOLUME_LABEL = "NO NAME"; //NOI18N
     
     /**
-     * The maximum number of sectors for a FAT12 file system. This is actually
-     * the number of sectors where mkdosfs stop complaining about a FAT16
+     * The maximum number of clusters for a FAT12 file system. This is actually
+     * the number of clusters where mkdosfs stop complaining about a FAT16
      * partition having not enough sectors, so it would be misinterpreted
      * as FAT12 without special handling.
      *
      * @see #getNrLogicalSectors()
      */
-    public static final int MAX_FAT12_SECTORS = 8202;
+    public static final int MAX_FAT12_CLUSTERS = 4084;
+
+    public static final int MAX_FAT16_CLUSTERS = 65524;
 
     /**
      * The offset to the sectors per FAT value.
@@ -64,7 +66,7 @@ final class Fat16BootSector extends BootSector {
     public Fat16BootSector(BlockDevice device) {
         super(device);
     }
-
+    
     /**
      * Returns the volume label that is stored in this boot sector.
      *
@@ -129,7 +131,17 @@ final class Fat16BootSector extends BootSector {
 
     @Override
     public FatType getFatType() {
-        return getSectorCount() > MAX_FAT12_SECTORS ?
+        final long rootDirSectors = ((getRootDirEntryCount() * 32) +
+                (getBytesPerSector() - 1)) / getBytesPerSector();
+        final long dataSectors = getSectorCount() -
+                (getNrReservedSectors() + (getNrFats() * getSectorsPerFat()) +
+                rootDirSectors);
+        final long clusterCount = dataSectors / getSectorsPerCluster();
+        
+        if (clusterCount > MAX_FAT16_CLUSTERS) throw new IllegalStateException(
+                "too many clusters for FAT12/16: " + clusterCount);
+        
+        return clusterCount > MAX_FAT12_CLUSTERS ?
             FatType.FAT16 : FatType.FAT12;
     }
     

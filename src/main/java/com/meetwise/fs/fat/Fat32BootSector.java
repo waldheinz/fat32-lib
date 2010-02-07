@@ -17,6 +17,11 @@ public final class Fat32BootSector extends BootSector {
      */
     public final static int ROOT_DIR_FIRST_CLUSTER_OFFSET = 0x2c;
 
+    /**
+     * The offset to the 4 bytes specifying the sectors per FAT value.
+     */
+    public static final int SECTORS_PER_FAT_OFFSET = 36;
+    
     public Fat32BootSector(BlockDevice device) throws IOException {
         super(device);
     }
@@ -106,17 +111,17 @@ public final class Fat32BootSector extends BootSector {
 
         set16(0x30, offset);
     }
-
+    
     @Override
     public void setSectorsPerFat(long v) {
         if (getSectorsPerFat() == v) return;
         
-        set32(0x24, v);
+        set32(SECTORS_PER_FAT_OFFSET, v);
     }
-
+    
     @Override
     public long getSectorsPerFat() {
-        return get32(0x24);
+        return get32(SECTORS_PER_FAT_OFFSET);
     }
 
     @Override

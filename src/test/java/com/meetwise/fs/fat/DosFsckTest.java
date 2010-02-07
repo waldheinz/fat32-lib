@@ -23,18 +23,41 @@ public class DosFsckTest {
     @Before
     public void setUp() throws IOException {
         this.file = File.createTempFile("fat32-lib-test", ".img");
-        this.dev = FileDisk.create(file, 100 * 1024);
     }
 
     @After
     public void tearDown() throws IOException {
         this.dev.close();
+        this.dev = null;
+        
         this.file.delete();
+        this.file = null;
     }
 
     @Test
+    public void testFat32Write() throws Exception {
+        System.out.println("fat32Write");
+
+        this.dev = FileDisk.create(file, 128 * 1024 * 1024);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.setFatType(FatType.FAT32);
+        f.format();
+
+        FatFileSystem fs = new FatFileSystem(dev, false);
+        final FatLfnDirectory rootDir = fs.getRoot();
+
+        for (int i=0; i < 1024; i++) {
+            rootDir.addFile("This is file number " + i);
+        }
+        
+        runFsck();
+    }
+    
+    @Test
     public void testCreateFat32() throws Exception {
         System.out.println("createFat32");
+
+        this.dev = FileDisk.create(file, 128 * 1024 * 1024);
 
         SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
         f.setFatType(FatType.FAT32);
@@ -47,6 +70,8 @@ public class DosFsckTest {
     public void testCreateFat16() throws Exception {
         System.out.println("createFat16");
 
+        this.dev = FileDisk.create(file, 16 * 1024 * 1024);
+
         SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
         f.setFatType(FatType.FAT16);
         f.format();
@@ -57,6 +82,8 @@ public class DosFsckTest {
     @Test
     public void testCreateFat12() throws Exception {
         System.out.println("createFat12");
+
+        this.dev = FileDisk.create(file, 2 * 1024 * 1024);
 
         SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
         f.setFatType(FatType.FAT12);

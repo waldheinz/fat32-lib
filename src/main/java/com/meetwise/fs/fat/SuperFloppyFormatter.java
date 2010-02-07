@@ -30,19 +30,12 @@ public final class SuperFloppyFormatter {
      * The default number of heads.
      */
     public final static int DEFULT_HEADS = 64;
-
-    /**
-     * The minimum number of clusters for FAT32.
-     */
-    public final static int FAT32_MIN_CLUSTERS = 65529;
-
+    
     /**
      * The default OEM name for file systems created by this class.
      */
     public final static String DEFAULT_OEM_NAME = "fat32lib"; //NOI18N
-
-    public final static int DEFAULT_RESERVED_SECTORS = 32;
-
+    
     private static final int MAX_DIRECTORY = 512;
     
     private final BlockDevice device;
@@ -50,6 +43,7 @@ public final class SuperFloppyFormatter {
     private String label;
     private String oemName;
     private FatType fatType;
+    private int sectorsPerCluster;
     private int reservedSectors;
     private int fatCount;
 
@@ -63,10 +57,8 @@ public final class SuperFloppyFormatter {
     public SuperFloppyFormatter(BlockDevice device) throws IOException {
         this.device = device;
         this.oemName = DEFAULT_OEM_NAME;
-        this.reservedSectors = DEFAULT_RESERVED_SECTORS;
         this.fatCount = DEFAULT_FAT_COUNT;
-        
-        setFatType(defaultFatType());
+        setFatType(fatTypeFromDevice());
     }
 
     /**
@@ -114,33 +106,18 @@ public final class SuperFloppyFormatter {
      * @throws IOException on write error
      */
     public void format() throws IOException {
-
-        final BootSector bs;
-
         final int sectorSize = device.getSectorSize();
         final int totalSectors = (int)(device.getSize() / sectorSize);
-        final long dataSectors = totalSectors - reservedSectors;
-        final long sizeInMB = (totalSectors * sectorSize) / (1024 * 1024);
-
-        final int spc = fatType == FatType.FAT32 ?
-            sectorsPerCluster32(sizeInMB) :
-            sectorsPerCluster16(sizeInMB);
-
-        final int clusterSize = spc * sectorSize;
-        final FsInfoSector fsi;
         
+        final FsInfoSector fsi;
+        final BootSector bs;
         if (fatType == FatType.FAT32) {
             bs = new Fat32BootSector(device);
-
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
-            final long clust32 = (dataSectors * sectorSize + fatCount*8) /
-                (clusterSize + fatCount*4);
-            final long sectorsPerFat =
-                    cdiv((clust32+2) * 4, device.getSectorSize());
-                    
+            
             f32bs.init();
             f32bs.setFsInfoSectorNr(1);
-            f32bs.setSectorsPerFat(sectorsPerFat);
+            f32bs.setSectorsPerFat(sectorsPerFat(0, totalSectors));
             final Random rnd = new Random(System.currentTimeMillis());
             f32bs.setFileSystemId(rnd.nextInt());
             f32bs.setNrFats(fatCount);
@@ -153,13 +130,12 @@ public final class SuperFloppyFormatter {
             final Fat16BootSector f16bs = (Fat16BootSector) bs;
             f16bs.init();
             
-            final int rootDirEntries = calculateDefaultRootDirectorySize(
+            final int rootDirEntries = rootDirectorySize(
                     device.getSectorSize(), totalSectors);
 
             f16bs.setNrFats(fatCount);
             f16bs.setRootDirEntryCount(rootDirEntries);
-            f16bs.setSectorsPerFat((Math.round(totalSectors / (spc *
-                (sectorSize / fatType.getEntrySize()))) + 1));
+            f16bs.setSectorsPerFat(sectorsPerFat(rootDirEntries, totalSectors));
             if (label != null) f16bs.setVolumeLabel(label);
             fsi = null;
         }
@@ -169,7 +145,7 @@ public final class SuperFloppyFormatter {
         bs.setSectorsPerTrack(DEFAULT_SECTORS_PER_TRACK);
         bs.setNrHeads(DEFULT_HEADS);
         bs.setOemName(oemName);
-        bs.setSectorsPerCluster(spc);
+        bs.setSectorsPerCluster(sectorsPerCluster);
         bs.setBytesPerSector(device.getSectorSize());
         bs.setSectorCount(totalSectors);
         bs.write();
@@ -212,18 +188,39 @@ public final class SuperFloppyFormatter {
         device.flush();
     }
 
-    /**
-     * Sets the type of FAT file system that will be created by this formatter.
-     *
-     * @param fatType the new FAT type
-     */
-    public void setFatType(FatType fatType) {
-        /* parameter check */
-        if (this.fatType == fatType) return;
+    private int sectorsPerFat(int rootDirEntries, int totalSectors)
+            throws IOException {
         
-        this.fatType = fatType;
-    }
+        final int bps = device.getSectorSize();
+        final int rootDirSectors =
+                ((rootDirEntries * 32) + (bps - 1)) / bps;
+        final long tmp1 =
+                totalSectors - (this.reservedSectors + rootDirSectors);
+        int tmp2 = (256 * this.sectorsPerCluster) + this.fatCount;
 
+        if (fatType == FatType.FAT32)
+            tmp2 /= 2;
+
+        final int result = (int) ((tmp1 + (tmp2 - 1)) / tmp2);
+        System.out.println("spf=" + result);
+        return result;
+    }
+    
+    /**
+     * Determines a usable FAT type from the {@link #device} by looking at the
+     * {@link BlockDevice#getSize() device size} only. The value returned
+     * matches what's recommended in the FAT specification by MS.
+     *
+     * @return the suggested FAT type
+     * @throws IOException on error determining the device's size
+     */
+    private FatType fatTypeFromDevice() throws IOException {
+        final long sizeInMb = device.getSize() / (1024 * 1024);
+        if (sizeInMb < 4) return FatType.FAT12;
+        else if (sizeInMb < 512) return FatType.FAT16;
+        else return FatType.FAT32;
+    }
+    
     /**
      * Returns the exact type of FAT the will be created by this formatter.
      *
@@ -233,75 +230,104 @@ public final class SuperFloppyFormatter {
         return this.fatType;
     }
 
-    private FatType defaultFatType() throws IOException {
-        final long len = device.getSize();
+    public SuperFloppyFormatter setFatType(FatType fatType) throws IOException {
+        if (fatType == null) throw new NullPointerException();
 
-        if (len < 1024 * 1024 * 1024) return FatType.FAT16;
-        else return FatType.FAT32;
-    }
+        this.fatType = fatType;
+        
+        switch (fatType) {
+            case FAT12: case FAT16:
+                this.reservedSectors = 1;
+                break;
+                
+            case FAT32:
+                this.reservedSectors = 32;
+        }
 
-    /**
-     * Computes ceil(a/b).
-     *
-     * @param a parameter 1
-     * @param b parameter 2
-     * @return {@code ceil(a/b)}
-     */
-    private static long cdiv(long a, long b) {
-        return (a + b - 1) / b;
+        this.sectorsPerCluster = defaultSectorsPerCluster();
+
+        return this;
     }
     
-    private static int calculateDefaultRootDirectorySize(int bps, int nbTotalSectors) {
-        int totalSize = bps * nbTotalSectors;
-        // take a default 1/5 of the size for root max
-        if (totalSize >= MAX_DIRECTORY * 5 * 32) { // ok take the max
+    private static int rootDirectorySize(int bps, int nbTotalSectors) {
+        final int totalSize = bps * nbTotalSectors;
+        if (totalSize >= MAX_DIRECTORY * 5 * 32) {
             return MAX_DIRECTORY;
         } else {
             return totalSize / (5 * 32);
         }
     }
+    
+    private int sectorsPerCluster32() throws IOException {
+        if (this.reservedSectors != 32) throw new IllegalStateException(
+                "number of reserved sectors must be 32");
+        
+        if (this.fatCount != 2) throw new IllegalStateException(
+                "number of FATs must be 2");
 
-    /**
-     * For FAT32, try to do the same as M$'s format command
-     * (see http://www.win.tue.nl/~aeb/linux/fs/fat/fatgen103.pdf p. 20):
-     * {@code
-     * fs size <= 260M: 0.5k clusters
-     * fs size <=   8G: 4k clusters
-     * fs size <=  16G: 8k clusters
-     * fs size >   16G: 16k clusters
-     * }
-     * 
-     * @param size the FS size in MiB
-     * @return the default sectors/cluster for FAT 32
-     */
-    private static int sectorsPerCluster32(long size) {
+        final long sectors = device.getSize() / device.getSectorSize();
+
+        if (sectors <= 66600) throw new IllegalStateException(
+                "disk too small for FAT32");
+                
         return
-            size > 16*1024 ? 32 :
-            size >  8*1024 ? 16 :
-            size >     260 ?  8 : 1;
+                sectors > 67108864 ? 64 :
+                sectors > 33554432 ? 32 :
+                sectors > 16777216 ? 16 :
+                sectors >   532480 ?  8 : 1;
+    }
+    
+    private int sectorsPerCluster16() throws IOException {
+        if (this.reservedSectors != 1) throw new IllegalStateException(
+                "number of reserved sectors must be 1");
+
+        if (this.fatCount != 2) throw new IllegalStateException(
+                "number of FATs must be 2");
+
+        final long sectors = device.getSize() / device.getSectorSize();
+        
+        if (sectors <= 8400) throw new IllegalStateException(
+                "disk too small for FAT16");
+
+        if (sectors > 4194304) throw new IllegalStateException(
+                "disk too large for FAT16");
+
+        return
+                sectors > 2097152 ? 64 :
+                sectors > 1048576 ? 32 :
+                sectors >  524288 ? 16 :
+                sectors >  262144 ?  8 :
+                sectors >   32680 ?  4 : 2;
     }
 
-    private static int sectorsPerCluster16(long sizeInMB) {
-        if (sizeInMB < 32) {
-            return 1;
-        } else if (sizeInMB < 64) {
-            return 2;
-        } else if (sizeInMB < 128) {
-            return 4;
-        } else if (sizeInMB < 256) {
-            return 8;
-        } else if (sizeInMB < 1024) {
-            return 32;
-        } else if (sizeInMB < 2048) {
-            return 64;
-        } else if (sizeInMB < 4096) {
-            return 128;
-        } else if (sizeInMB < 8192) {
-            return 256;
-        } else if (sizeInMB < 16384) {
-            return 512;
-        } else
-            throw new IllegalArgumentException("disk too large for FAT16");
+    private int defaultSectorsPerCluster() throws IOException {
+        switch (this.fatType) {
+            case FAT12:
+                return sectorsPerCluster12();
+
+            case FAT16:
+                return sectorsPerCluster16();
+
+            case FAT32:
+                return sectorsPerCluster32();
+                
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    private int sectorsPerCluster12() throws IOException {
+        int result = 1;
+        
+        final long sectors = device.getSize() / device.getSectorSize();
+
+        while (sectors / result > Fat16BootSector.MAX_FAT12_CLUSTERS) {
+            result *= 2;
+            if (result * device.getSectorSize() > 4096) throw new
+                    IllegalStateException("disk too large for FAT12");
+        }
+        System.out.println("spc12=" + result);
+        return result;
     }
     
 }
