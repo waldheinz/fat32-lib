@@ -32,12 +32,12 @@ public class SuperFloppyFormatterTest {
         fs.close();
         d.close();
     }
-
-    @Test
+    
+    @Test(expected=IllegalStateException.class)
     public void testFat12FormatInvalid() throws IOException {
         System.out.println("fat12Format (invalid)");
 
-        BlockDevice dev = new RamDisk(16699393);
+        BlockDevice dev = new RamDisk(16800000);
         SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
         f.setFatType(FatType.FAT12);
         f.format();
@@ -47,7 +47,7 @@ public class SuperFloppyFormatterTest {
     public void testFat12FormatValid() throws IOException {
         System.out.println("fat12Format (valid)");
 
-        BlockDevice dev = new RamDisk(16699392);
+        BlockDevice dev = new RamDisk(16700000);
         SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
         f.setFatType(FatType.FAT12);
         f.format();
