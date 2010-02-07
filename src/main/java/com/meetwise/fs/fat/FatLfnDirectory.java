@@ -99,14 +99,6 @@ final class FatLfnDirectory implements FSDirectory {
     public boolean isDirty() {
         return dir.isDirty();
     }
-
-    String getLabel() {
-        throw new UnsupportedOperationException();
-    }
-
-    void setLabel(String label) throws IOException {
-        throw new UnsupportedOperationException();
-    }
     
     @Override
     public LfnEntry addFile(String name) throws IOException {

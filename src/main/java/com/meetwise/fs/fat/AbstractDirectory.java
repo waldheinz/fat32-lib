@@ -102,10 +102,6 @@ abstract class AbstractDirectory {
         this.capacity = (int) newCount;
     }
 
-    public final void setEntry(int idx, AbstractDirectoryEntry entry) {
-        this.entries.set(idx, entry);
-    }
-
     public final AbstractDirectoryEntry getEntry(int idx) {
         return this.entries.get(idx);
     }
@@ -211,8 +207,8 @@ abstract class AbstractDirectory {
                 entries.add(new AbstractDirectoryEntry(this, src, index));
         }
     }
-
-    void addEntry(AbstractDirectoryEntry e) throws IOException {
+    
+    public void addEntry(AbstractDirectoryEntry e) throws IOException {
         assert (e != null);
         
         if (getSize() == getCapacity()) {
@@ -221,7 +217,7 @@ abstract class AbstractDirectory {
 
         entries.add(e);
     }
-
+    
     public void addEntries(AbstractDirectoryEntry[] entries)
             throws IOException {
         
@@ -231,11 +227,19 @@ abstract class AbstractDirectory {
 
         this.entries.addAll(Arrays.asList(entries));
     }
-
-    void removeEntry(AbstractDirectoryEntry entry) throws IOException {
+    
+    public void removeEntry(AbstractDirectoryEntry entry) throws IOException {
         assert (entry != null);
         
         this.entries.remove(entry);
         changeSize(getSize());
+    }
+    
+    public String getLabel() {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+    
+    public void setLabel(String label) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 }

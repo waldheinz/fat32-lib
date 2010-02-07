@@ -23,7 +23,6 @@ package com.meetwise.fs.fat;
 import com.meetwise.fs.AbstractFileSystem;
 import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
-import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FileSystemException;
 
 /**
@@ -38,6 +37,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     private final FsInfoSector fsiSector;
     private final BootSector bs;
     private final FatLfnDirectory rootDir;
+    private final AbstractDirectory rootDirStore;
     private final FatType fatType;
     private final long filesOffset;
 
@@ -84,8 +84,7 @@ public final class FatFileSystem extends AbstractFileSystem {
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
             ClusterChain rootDirFile = new ClusterChain(fat,
                     f32bs.getRootDirFirstCluster(), isReadOnly());
-            final ClusterChainDirectory fd =
-                    ClusterChainDirectory.readRoot(rootDirFile);
+            this.rootDirStore = ClusterChainDirectory.readRoot(rootDirFile);
             this.fsiSector = FsInfoSector.read(f32bs);
             
             if (fsiSector.getFreeClusterCount() != fat.getFreeClusterCount()) {
@@ -93,14 +92,13 @@ public final class FatFileSystem extends AbstractFileSystem {
                         fat.getFreeClusterCount() + " - fsinfo: " +
                         fsiSector.getFreeClusterCount());
             }
-            
-            rootDir = new FatLfnDirectory(fd, fat);
         } else {
-            final Fat16RootDirectory rd =
+            this.rootDirStore =
                     Fat16RootDirectory.read((Fat16BootSector) bs,readOnly);
-            rootDir = new FatLfnDirectory(rd, fat);
             this.fsiSector = null;
         }
+
+        this.rootDir = new FatLfnDirectory(rootDirStore, fat);
             
     }
 
@@ -118,7 +116,7 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @return the volume label
      */
     public String getVolumeLabel() {
-        return rootDir.getLabel();
+        return rootDirStore.getLabel();
     }
     
     /**
@@ -128,7 +126,7 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @throws IOException on write error
      */
     public void setVolumeLabel(String label) throws IOException {
-        rootDir.setLabel(label);
+        rootDirStore.setLabel(label);
     }
     
     /**

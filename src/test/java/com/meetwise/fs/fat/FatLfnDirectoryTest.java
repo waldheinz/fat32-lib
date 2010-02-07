@@ -142,22 +142,6 @@ public class FatLfnDirectoryTest {
     }
     
     @Test
-    @Ignore
-    public void testGetLabel() {
-        System.out.println("getLabel");
-        
-        fail("The test case is a prototype.");
-    }
-    
-    @Test
-    @Ignore
-    public void testSetLabel() throws Exception {
-        System.out.println("setLabel");
-        
-        dir.setLabel("a file system label");
-    }
-    
-    @Test
     public void testAddFile() throws Exception {
         System.out.println("addFile");
         
