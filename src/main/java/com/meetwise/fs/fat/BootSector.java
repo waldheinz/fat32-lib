@@ -74,14 +74,11 @@ public abstract class BootSector extends Sector {
                 "missing boot sector signature");
         
         final byte sectorsPerCluster = bb.get(SECTORS_PER_CLUSTER_OFFSET);
-        System.out.println("spc=" + sectorsPerCluster);
         
         final int rootDirEntries = bb.getShort(
                 Fat16BootSector.ROOT_DIR_ENTRIES_OFFSET);
         final int rootDirSectors = ((rootDirEntries * 32) +
                 (device.getSectorSize() - 1)) / device.getSectorSize();
-
-        System.out.println("rootDirSecs=" + rootDirSectors);
 
         final int total16 =
                 bb.getShort(TOTAL_SECTORS_16_OFFSET) & 0xffff;
@@ -90,25 +87,19 @@ public abstract class BootSector extends Sector {
         
         final long totalSectors = total16 == 0 ? total32 : total16;
         
-        System.out.println("totalSecs=" + totalSectors);
-        
         final int fatSz16 =
                 bb.getShort(Fat16BootSector.SECTORS_PER_FAT_OFFSET)  & 0xffff;
         final long fatSz32 =
                 bb.getInt(Fat32BootSector.SECTORS_PER_FAT_OFFSET) & 0xffffffffl;
                 
         final long fatSz = fatSz16 == 0 ? fatSz32 : fatSz16;
-        System.out.println("fatSz=" + fatSz);
         final int reservedSectors = bb.getShort(RESERVED_SECTORS_OFFSET);
         final int fatCount = bb.get(FAT_COUNT_OFFSET);
-        System.out.println("fatCnt=" + fatCount);
         final long dataSectors = totalSectors - (reservedSectors +
                 (fatCount * fatSz) + rootDirSectors);
 
         final long clusterCount = dataSectors / sectorsPerCluster;
-
-        System.out.println("clusters=" + clusterCount);
-
+        
         final BootSector result =
                 (clusterCount > Fat16BootSector.MAX_FAT16_CLUSTERS) ?
             new Fat32BootSector(device) : new Fat16BootSector(device);

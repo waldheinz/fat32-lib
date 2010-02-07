@@ -202,7 +202,7 @@ public final class SuperFloppyFormatter {
             tmp2 /= 2;
 
         final int result = (int) ((tmp1 + (tmp2 - 1)) / tmp2);
-        System.out.println("spf=" + result);
+        
         return result;
     }
     
@@ -326,7 +326,7 @@ public final class SuperFloppyFormatter {
             if (result * device.getSectorSize() > 4096) throw new
                     IllegalStateException("disk too large for FAT12");
         }
-        System.out.println("spc12=" + result);
+        
         return result;
     }
     

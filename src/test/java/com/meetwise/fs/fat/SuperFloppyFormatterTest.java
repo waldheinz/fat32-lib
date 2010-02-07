@@ -42,7 +42,7 @@ public class SuperFloppyFormatterTest {
         f.setFatType(FatType.FAT12);
         f.format();
     }
-
+    
     @Test
     public void testFat12FormatValid() throws IOException {
         System.out.println("fat12Format (valid)");
