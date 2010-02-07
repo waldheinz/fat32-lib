@@ -230,11 +230,21 @@ public final class SuperFloppyFormatter {
         return this.fatType;
     }
 
-    public SuperFloppyFormatter setFatType(FatType fatType) throws IOException {
+    /**
+     * Sets the type of FAT that will be created by this
+     * {@code SuperFloppyFormatter}.
+     *
+     * @param fatType the desired {@code FatType}
+     * @return this {@code SuperFloppyFormatter}
+     * @throws IOException on error setting the {@code fatType}
+     * @throws IllegalArgumentException if {@code fatType} does not support the
+     *      size of the device
+     */
+    public SuperFloppyFormatter setFatType(FatType fatType)
+            throws IOException, IllegalArgumentException {
+        
         if (fatType == null) throw new NullPointerException();
 
-        this.fatType = fatType;
-        
         switch (fatType) {
             case FAT12: case FAT16:
                 this.reservedSectors = 1;
@@ -243,9 +253,10 @@ public final class SuperFloppyFormatter {
             case FAT32:
                 this.reservedSectors = 32;
         }
-
-        this.sectorsPerCluster = defaultSectorsPerCluster();
-
+        
+        this.sectorsPerCluster = defaultSectorsPerCluster(fatType);
+        this.fatType = fatType;
+        
         return this;
     }
     
@@ -267,7 +278,7 @@ public final class SuperFloppyFormatter {
 
         final long sectors = device.getSize() / device.getSectorSize();
 
-        if (sectors <= 66600) throw new IllegalStateException(
+        if (sectors <= 66600) throw new IllegalArgumentException(
                 "disk too small for FAT32");
                 
         return
@@ -286,10 +297,10 @@ public final class SuperFloppyFormatter {
 
         final long sectors = device.getSize() / device.getSectorSize();
         
-        if (sectors <= 8400) throw new IllegalStateException(
+        if (sectors <= 8400) throw new IllegalArgumentException(
                 "disk too small for FAT16");
 
-        if (sectors > 4194304) throw new IllegalStateException(
+        if (sectors > 4194304) throw new IllegalArgumentException(
                 "disk too large for FAT16");
 
         return
@@ -299,9 +310,9 @@ public final class SuperFloppyFormatter {
                 sectors >  262144 ?  8 :
                 sectors >   32680 ?  4 : 2;
     }
-
-    private int defaultSectorsPerCluster() throws IOException {
-        switch (this.fatType) {
+    
+    private int defaultSectorsPerCluster(FatType fatType) throws IOException {
+        switch (fatType) {
             case FAT12:
                 return sectorsPerCluster12();
 
@@ -324,7 +335,7 @@ public final class SuperFloppyFormatter {
         while (sectors / result > Fat16BootSector.MAX_FAT12_CLUSTERS) {
             result *= 2;
             if (result * device.getSectorSize() > 4096) throw new
-                    IllegalStateException("disk too large for FAT12");
+                    IllegalArgumentException("disk too large for FAT12");
         }
         
         return result;

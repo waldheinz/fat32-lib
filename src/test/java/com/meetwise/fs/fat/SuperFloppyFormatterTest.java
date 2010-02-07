@@ -8,6 +8,7 @@ import com.meetwise.fs.util.FileDisk;
 import com.meetwise.fs.util.RamDisk;
 import java.io.File;
 import java.io.IOException;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -33,7 +34,7 @@ public class SuperFloppyFormatterTest {
         d.close();
     }
     
-    @Test(expected=IllegalStateException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void testFat12FormatInvalid() throws IOException {
         System.out.println("fat12Format (invalid)");
 
@@ -60,15 +61,55 @@ public class SuperFloppyFormatterTest {
                 bs.getNrTotalSectors() / bs.getSectorsPerCluster());
         assertEquals(FatType.FAT12, fs.getFatType());
     }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testFat16FormatTooSmall() throws IOException {
+        System.out.println("fat16Format (too small)");
+
+        BlockDevice dev = new RamDisk(4 * 1024 * 1024);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.setFatType(FatType.FAT16);
+    }
+
+    @Test
+    public void testFat16FormatValid() throws IOException {
+        System.out.println("fat16Format (valid)");
+        
+        BlockDevice dev = new RamDisk(16 * 1024 * 1024);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.setFatType(FatType.FAT16);
+    }
+
+    @Test(expected=IllegalArgumentException.class) @Ignore
+    public void testFat16FormatTooBig() throws IOException {
+        System.out.println("fat16Format (too big)");
+        final File file = File.createTempFile("fat32-test", ".img");
+        
+        try {
+            BlockDevice dev = FileDisk.create(file, 3 * 1024 * 1024 * 1024);
+            SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+            f.setFatType(FatType.FAT16);
+        } finally {
+            file.delete();
+        }
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testFat32FormatInvalid() throws IOException {
+        System.out.println("fat32Format (invalid)");
+
+        BlockDevice dev = new RamDisk(16 * 1024 * 1024);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.setFatType(FatType.FAT32);
+    }
     
     @Test
-    public void testFat32Format() throws IOException {
-        System.out.println("fat32Format");
+    public void testFat32FormatValid() throws IOException {
+        System.out.println("fat32Format (valid)");
 
         BlockDevice dev = new RamDisk(50 * 1024 * 1024);
         SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
         f.setFatType(FatType.FAT32);
-//        f.setVolumeLabel("test");
         f.format();
         
         FatFileSystem fs = new FatFileSystem(dev, false);
@@ -76,8 +117,6 @@ public class SuperFloppyFormatterTest {
         fs.getRoot().addFile("this is another looooong name");
         fs.getRoot().addDirectory("this is a sub-directory!!!");
         fs.close();
-        
-//        assertEquals("test", fs.getVolumeLabel());
     }
     
     @Test
