@@ -162,10 +162,8 @@ public final class FatFileSystem extends AbstractFileSystem {
             fat.writeCopy(FatUtils.getFatOffset(bs, i));
         }
         
-        if (rootDir.isDirty()) {
-            rootDir.flush();
-        }
-
+        rootDir.flush();
+        
         if (fsiSector != null) {
             fsiSector.setFreeClusterCount(fat.getFreeClusterCount());
             fsiSector.setLastAllocatedCluster(fat.getLastAllocatedCluster());

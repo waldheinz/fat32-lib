@@ -4,9 +4,11 @@ package com.meetwise.fs.fat;
 import com.meetwise.fs.BlockDevice;
 import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSDirectoryEntry;
+import com.meetwise.fs.FSFile;
 import com.meetwise.fs.fat.FatLfnDirectory.LfnEntry;
 import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +37,26 @@ public class FatLfnDirectoryTest {
                 (Fat16BootSector) bs, false);
         this.fat = Fat.read(bs, 0);
         this.dir = new FatLfnDirectory(rootDirStore, fat);
+    }
+
+    @Test
+    public void testWriteSubdirFile() throws IOException {
+        System.out.println("writeSubdirFile");
+
+        System.out.println("cluster size: " + bs.getBytesPerCluster());
+        final int freeBefore = fat.getFreeClusterCount();
+        System.out.println("free clusters before: " +
+                freeBefore);
+        
+        final LfnEntry subDir = dir.addDirectory("Directory");
+        final FSDirectoryEntry fe = subDir.getDirectory().addFile("A File");
+        final FSFile f = fe.getFile();
+        f.write(0, ByteBuffer.allocate(516));
+
+        System.out.println("free clusters after: " +
+                fat.getFreeClusterCount());
+        
+        assertEquals(freeBefore - 3, fat.getFreeClusterCount());
     }
     
     @Test

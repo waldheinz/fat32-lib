@@ -1,6 +1,8 @@
 
 package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BlockDevice;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
@@ -16,7 +18,66 @@ import static org.junit.Assert.*;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public class FatFileSystemTest {
+
+    @Test
+    public void testCreateFile() throws IOException {
+        System.out.println("createFile");
+
+        BlockDevice dev = new RamDisk(2 * 1024 * 1024);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.format();
+
+        FatFileSystem fs = new FatFileSystem(dev, false);
+        FSDirectoryEntry dirEntry =
+                fs.getRoot().addFile("This is a file");
+        final FSFile fsFile = dirEntry.getFile();
+        byte[] nullBytes = new byte[516];
+        ByteBuffer buff = ByteBuffer.wrap(nullBytes);
+        buff.rewind();
+        fsFile.write(0, buff);
+
+        fs.close();
+
+        fs = new FatFileSystem(dev, true);
+        
+        dirEntry = fs.getRoot().getEntry("This is a file");
+        assertNotNull("file is missing", dirEntry);
+        assertTrue(dirEntry.isFile());
+        final FSFile file = dirEntry.getFile();
+        assertNotNull(file);
+        assertEquals(516, file.getLength());
+    }
     
+    @Test
+    public void testCreateeSubDirFile() throws IOException {
+        System.out.println("createSubDirFile");
+
+        BlockDevice dev = new RamDisk(2 * 1024 * 1024);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.format();
+
+        FatFileSystem fs = new FatFileSystem(dev, false);
+        FSDirectoryEntry dirEntry =
+                fs.getRoot().addDirectory("Directory");
+        FSDirectoryEntry e = dirEntry.getDirectory().addFile(
+                    "This is a file");
+        final FSFile fsFile = e.getFile();
+        byte[] nullBytes = new byte[516];
+        ByteBuffer buff = ByteBuffer.wrap(nullBytes);
+        buff.rewind();
+        fsFile.write(0, buff);
+
+        fs.close();
+        
+        fs = new FatFileSystem(dev, true);
+
+        dirEntry = fs.getRoot().getEntry("Directory");
+        assertNotNull(dirEntry);
+
+        e = dirEntry.getDirectory().getEntry("This is a file");
+        assertNotNull("file is missing", e);
+    }
+
     @Test
     public void testFat12Read() throws Exception {
         System.out.println("testFat12Read");
@@ -219,10 +280,5 @@ public class FatFileSystemTest {
         for (int i=0; i < 1024; i++) {
             assertNotNull(rootDir.getEntry("f-" + i));
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        FatFileSystemTest test = new FatFileSystemTest();
-        test.testFat32Write();
     }
 }

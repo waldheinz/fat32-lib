@@ -172,5 +172,11 @@ final class FatDirEntry {
     void remove() throws IOException {
         entry.remove();
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() +
+                " [name=" + getName() + "]"; //NOI18N
+    }
     
 }

@@ -97,14 +97,17 @@ public class FatFileTest {
         final long origModified = entry.getLastModified();
         final long origAccessed = entry.getLastAccessed();
         final long origCreated = entry.getCreated();
-
-        final ByteBuffer data = ByteBuffer.allocate(100000);
+        final int len = 100000;
+        
+        final ByteBuffer data = ByteBuffer.allocate(len);
         ff.write(0, data);
         
         assertTrue(entry.getLastAccessed() > origAccessed);
         assertTrue(entry.getLastModified() > origModified);
         assertEquals(origCreated, entry.getCreated());
-
+        assertEquals(len, ff.getLength());
+        assertEquals(len / fat.getBootSector().getBytesPerCluster() + 1,
+                ff.getChain().getChainLength());
     }
     
 }

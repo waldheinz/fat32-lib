@@ -110,9 +110,12 @@ final class FatLfnDirectory implements FSDirectory {
         final LfnEntry entry = new LfnEntry(realEntry, name);
 
         dir.addEntries(entry.compactForm());
-
+        
         shortNameIndex.put(shortName, entry);
         longNameIndex.put(name, entry);
+
+        getFile(realEntry);
+        
         dir.setDirty();
         return entry;
     }
@@ -137,6 +140,9 @@ final class FatLfnDirectory implements FSDirectory {
         
         shortNameIndex.put(sn, entry);
         longNameIndex.put(name, entry);
+
+        getDirectory(realEntry);
+        
         flush();
         return entry;
     }
@@ -266,7 +272,8 @@ final class FatLfnDirectory implements FSDirectory {
     @Override
     public String toString() {
         return getClass().getSimpleName() +
-                " [size=" + shortNameIndex.size() + "]";
+                " [size=" + shortNameIndex.size() + //NOI18N
+                ", dir=" + dir + "]"; //NOI18N
     }
 
     @Override
