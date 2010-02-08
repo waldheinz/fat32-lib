@@ -120,6 +120,22 @@ final class AbstractDirectoryEntry extends FatObject {
         return ((getFlags() & F_SYSTEM) != 0);
     }
 
+    /**
+     * Decides if this entry is a "volume label" entry according to the FAT
+     * specification.
+     *
+     * @return if this is a volume label entry
+     */
+    public boolean isVolumeLabel() {
+        if (isLfnEntry()) return false;
+        else return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == F_VOLUME_ID);
+    }
+    
+    public boolean isLfnEntry() {
+        return isReadonlyFlag() && isSystem() &&
+                isHidden() && isLabel();
+    }
+    
     public void setSystem() {
         setFlags(getFlags() | F_SYSTEM);
     }
@@ -129,7 +145,7 @@ final class AbstractDirectoryEntry extends FatObject {
     }
 
     public boolean isDirectory() {
-        return ((getFlags() & F_DIRECTORY) != 0);
+        return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == F_DIRECTORY);
     }
 
     public void setDirectory() {
@@ -147,7 +163,7 @@ final class AbstractDirectoryEntry extends FatObject {
      * @see org.jnode.fs.FSDirectoryEntry#isFile()
      */
     public boolean isFile() {
-        return (!(isDirectory() || isLabel()));
+        return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == 0);
     }
     
     public boolean isArchive() {

@@ -31,10 +31,7 @@ final class FatLfnDirEntry {
 
     private FatLfnDirEntry() { /* no instances */ }
 
-    public static boolean isLfnEntry(AbstractDirectoryEntry entry) {
-        return entry.isReadonlyFlag() && entry.isSystem() &&
-                entry.isHidden() && entry.isLabel();
-    }
+    
     
     public static void set(AbstractDirectoryEntry entry, String subName,
             int ordinal, byte checkSum, boolean isLast) {

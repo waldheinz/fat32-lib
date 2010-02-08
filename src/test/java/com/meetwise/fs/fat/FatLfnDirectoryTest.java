@@ -9,7 +9,6 @@ import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
 import java.util.Date;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

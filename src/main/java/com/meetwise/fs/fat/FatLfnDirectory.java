@@ -170,7 +170,7 @@ final class FatLfnDirectory implements FSDirectory {
 
             int offset = i; // beginning of the entry
             // check when we reach a real entry
-            while (FatLfnDirEntry.isLfnEntry(dir.getEntry(i))) {
+            while (dir.getEntry(i).isLfnEntry()) {
                 i++;
                 if (i >= size) {
                     // This is a cutted entry, forgive it

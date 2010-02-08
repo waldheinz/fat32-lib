@@ -33,13 +33,22 @@ import java.util.List;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 abstract class AbstractDirectory {
+
+    /**
+     * The maximum length of the volume label.
+     *
+     * @see #setLabel(java.lang.String) 
+     */
+    public static final int MAX_LABEL_LENGTH = 11;
+    
     private final List<AbstractDirectoryEntry> entries;
     private final boolean readOnly;
     private final boolean isRoot;
     
     private boolean dirty;
     private int capacity;
-    
+    private String volumeLabel;
+
     protected AbstractDirectory(
             int capacity, boolean readOnly, boolean isRoot) {
         
@@ -136,12 +145,14 @@ abstract class AbstractDirectory {
     }
     
     /**
-     * Gets the number of directory entries in this directory
+     * Gets the number of directory entries in this directory. This is the
+     * number of "real" entries in this directory, possibly plus one if a
+     * volume label is set.
      * 
-     * @return int
+     * @return the number of entries in this directory
      */
     public int getSize() {
-        return entries.size();
+        return entries.size() + ((this.volumeLabel != null) ? 1 : 0);
     }
     
     /**
@@ -179,13 +190,31 @@ abstract class AbstractDirectory {
      */
     public void flush() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
-                capacity * AbstractDirectoryEntry.SIZE);
-                
+                getCapacity() * AbstractDirectoryEntry.SIZE);
+
+        final int volLabelOffset;
+
+        if (this.volumeLabel != null) {
+            volLabelOffset = 32;
+            final AbstractDirectoryEntry labelEntry =
+                    new AbstractDirectoryEntry(this);
+            labelEntry.setFlags(AbstractDirectoryEntry.F_VOLUME_ID);
+            
+            for (int i=0; i < volumeLabel.length(); i++) {
+                labelEntry.getData()[i] = volumeLabel.getBytes()[i];
+            }
+            
+            labelEntry.write(data.array(), 0);
+        } else {
+            volLabelOffset = 0;
+        }
+        
         for (int i=0; i < entries.size(); i++) {
             final AbstractDirectoryEntry entry = entries.get(i);
 
             if (entry != null) {
-                entry.write(data.array(), i * 32);
+                entry.write(data.array(),
+                        i * AbstractDirectoryEntry.SIZE + volLabelOffset);
             }
         }
         
@@ -202,9 +231,17 @@ abstract class AbstractDirectory {
         final byte[] src = data.array();
 
         for (int i = 0; i < getCapacity(); i++) {
-            int index = i * 32;
-            if (src[index] != 0)
-                entries.add(new AbstractDirectoryEntry(this, src, index));
+            final int offset = i * 32;
+            if (src[offset] != 0) {
+                final AbstractDirectoryEntry entry =
+                        new AbstractDirectoryEntry(this, src, offset);
+
+                if (entry.isVolumeLabel()) {
+                    parseVolumeLabel(entry);
+                } else {
+                    entries.add(entry);
+                }
+            }
         }
     }
     
@@ -236,10 +273,57 @@ abstract class AbstractDirectory {
     }
     
     public String getLabel() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (!isRoot()) throw new AssertionError("not root");
+        
+        return volumeLabel;
+    }
+
+    /**
+     *
+     * @param label
+     * @throws IllegalArgumentException if the label is too long
+     */
+    public void setLabel(String label)
+            throws IllegalArgumentException, IOException {
+
+        if (!isRoot()) throw new AssertionError("not root");
+        if (label.length() > MAX_LABEL_LENGTH) throw new
+                IllegalArgumentException("label too long");
+
+        if (this.volumeLabel != null) {
+            if (label == null) {
+                changeSize(getSize() - 1);
+                this.volumeLabel = null;
+            } else {
+                ShortName.checkValidChars(label.toCharArray());
+                this.volumeLabel = label;
+            }
+        } else {
+            if (label != null) {
+                changeSize(getSize() + 1);
+                ShortName.checkValidChars(label.toCharArray());
+                this.volumeLabel = label;
+            }
+        }
+
+        this.dirty = true;
     }
     
-    public void setLabel(String label) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void parseVolumeLabel(AbstractDirectoryEntry entry) {
+        if (!entry.isVolumeLabel()) throw new IllegalArgumentException();
+
+        final StringBuilder sb = new StringBuilder();
+
+        for (int i=0; i < 11; i++) {
+            final byte b = entry.getData()[i];
+            
+            if (b != 0) {
+                sb.append((char) b);
+            } else {
+                break;
+            }
+        }
+        
+        this.volumeLabel = sb.toString();
     }
 }

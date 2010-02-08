@@ -82,10 +82,11 @@ class ClusterChainDirectory extends AbstractDirectory {
         chain.writeData(0, data);
         final long trueSize = chain.getLengthOnDisk();
         
+        /* TODO: check if the code below is really needed */
         if (trueSize > toWrite) {
-            final int rest = (int) (trueSize - data.capacity());
+            final int rest = (int) (trueSize - toWrite);
             final ByteBuffer fill = ByteBuffer.allocate(rest);
-            chain.writeData(data.capacity(), fill);
+            chain.writeData(toWrite, fill);
         }
     }
 

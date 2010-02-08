@@ -23,9 +23,9 @@ public class DosFsckTest {
 
     @Before
     public void setUp() throws IOException {
-        this.file = File.createTempFile("fat32-lib-test", ".img");
+        this.file = File.createTempFile("fat32-lib-test-", ".img");
     }
-
+    
     @After
     public void tearDown() throws IOException {
         this.dev.close();
@@ -33,6 +33,19 @@ public class DosFsckTest {
         
         this.file.delete();
         this.file = null;
+    }
+
+    @Test @Ignore
+    public void testVolumeLabel() throws Exception {
+        System.out.println("volumeLabel");
+        
+        this.dev = FileDisk.create(file, 128 * 1024 * 1024);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.setFatType(FatType.FAT32);
+        f.setVolumeLabel("Cool Vol");
+        f.format();
+        
+        runFsck();
     }
 
     @Test @Ignore
@@ -45,7 +58,7 @@ public class DosFsckTest {
         f.format();
 
         FatFileSystem fs = new FatFileSystem(dev, false);
-        final FatLfnDirectory rootDir = fs.getRoot();
+        final FatLfnDirectory rootDir = (FatLfnDirectory) fs.getRoot();
 
         for (int i=0; i < 1024; i++) {
             rootDir.addFile("This is file number " + i);
@@ -94,8 +107,9 @@ public class DosFsckTest {
     }
 
     private void runFsck() throws Exception {
+        System.out.println("running fsck on " + file);
         final ProcessBuilder pb = new ProcessBuilder(
-                DOSFSCK_CMD, "-n", file.toString());
+                DOSFSCK_CMD, "-v", "-n", file.toString());
 
         pb.redirectErrorStream(true);
         final Process proc = pb.start();

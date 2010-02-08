@@ -182,7 +182,7 @@ public final class SuperFloppyFormatter {
         if (label != null) {
             FatFileSystem fs = new FatFileSystem(device, false);
             fs.setVolumeLabel(label);
-            fs.flush();
+            fs.close();
         }
         
         device.flush();

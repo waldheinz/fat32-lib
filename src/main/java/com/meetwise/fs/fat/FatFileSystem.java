@@ -22,8 +22,10 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.AbstractFileSystem;
 import com.meetwise.fs.BlockDevice;
+import com.meetwise.fs.FSDirectory;
 import java.io.IOException;
 import com.meetwise.fs.FileSystemException;
+import com.meetwise.fs.ReadOnlyFileSystemException;
 
 /**
  * 
@@ -116,7 +118,13 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @return the volume label
      */
     public String getVolumeLabel() {
-        return rootDirStore.getLabel();
+        final String fromDir = rootDirStore.getLabel();
+        
+        if (fromDir == null && fatType != FatType.FAT32) {
+            return ((Fat16BootSector)bs).getVolumeLabel();
+        } else {
+            return fromDir;
+        }
     }
     
     /**
@@ -126,7 +134,17 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @throws IOException on write error
      */
     public void setVolumeLabel(String label) throws IOException {
+        if (isReadOnly()) throw new ReadOnlyFileSystemException(this);
+        
         rootDirStore.setLabel(label);
+        
+        if (fatType != FatType.FAT32) {
+            ((Fat16BootSector)bs).setVolumeLabel(label);
+        }
+    }
+
+    AbstractDirectory getRootDirStore() {
+        return rootDirStore;
     }
     
     /**
@@ -140,10 +158,8 @@ public final class FatFileSystem extends AbstractFileSystem {
             bs.write();
         }
         
-        if (fat.isDirty()) {
-            for (int i = 0; i < bs.getNrFats(); i++) {
-                fat.writeCopy(FatUtils.getFatOffset(bs, i));
-            }
+        for (int i = 0; i < bs.getNrFats(); i++) {
+            fat.writeCopy(FatUtils.getFatOffset(bs, i));
         }
         
         if (rootDir.isDirty()) {
@@ -158,7 +174,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     }
     
     @Override
-    public FatLfnDirectory getRoot() {
+    public FSDirectory getRoot() {
         return rootDir;
     }
     

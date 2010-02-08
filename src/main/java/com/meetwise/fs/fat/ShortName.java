@@ -144,7 +144,7 @@ final class ShortName {
         for (int i = 0; i < 11; i++) {
             dest[i] = (byte) name[i];
         }
-
+        
         entry.markDirty();
     }
 
@@ -204,9 +204,9 @@ final class ShortName {
      * @param chars the char array to test
      * @throws IllegalArgumentException if invalid chars are contained
      */
-    private static void checkValidChars(char[] chars)
+    public static void checkValidChars(char[] chars)
             throws IllegalArgumentException {
-
+            
         if (chars[0] == 0x20) throw new IllegalArgumentException(
                 "0x20 can not be the first character");
 

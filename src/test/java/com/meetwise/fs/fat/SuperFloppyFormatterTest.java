@@ -34,6 +34,23 @@ public class SuperFloppyFormatterTest {
         d.close();
     }
     
+    @Test
+    public void testSetVolumeLabel() throws IOException {
+        System.out.println("setVolumeLabel");
+
+        final String label = "Vol Label";
+
+        BlockDevice dev = new RamDisk(50 * 1024 * 1024);
+        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
+        f.setFatType(FatType.FAT32);
+        f.setVolumeLabel(label);
+        f.format();
+
+        FatFileSystem fs = new FatFileSystem(dev, false);
+        assertEquals(label, fs.getVolumeLabel());
+        fs.close();
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public void testFat12FormatInvalid() throws IOException {
         System.out.println("fat12Format (invalid)");

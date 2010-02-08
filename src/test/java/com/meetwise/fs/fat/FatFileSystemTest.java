@@ -8,8 +8,6 @@ import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSDirectoryEntry;
 import com.meetwise.fs.FSFile;
 import com.meetwise.fs.util.RamDisk;
-import java.util.Date;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -200,6 +198,7 @@ public class FatFileSystemTest {
 
         final RamDisk rd = RamDisk.readGzipped(is);
         FatFileSystem fatFs = new FatFileSystem(rd, false);
+        assertEquals(FatType.FAT32, fatFs.getFatType());
         FSDirectory rootDir = fatFs.getRoot();
 
         for (int i=0; i < 1024; i++) {
@@ -214,6 +213,7 @@ public class FatFileSystemTest {
         fatFs.close();
 
         fatFs = new FatFileSystem(rd, false);
+        assertEquals(FatType.FAT32, fatFs.getFatType());
         rootDir = fatFs.getRoot();
         
         for (int i=0; i < 1024; i++) {

@@ -46,8 +46,7 @@ final class Fat {
     private final BootSector bs;
     private final long offset;
     private final int lastClusterIndex;
-
-    private boolean dirty;
+    
     private int lastAllocatedCluster;
 
     /**
@@ -122,7 +121,6 @@ final class Fat {
         this.sectorCount = (int) bs.getSectorsPerFat();
         this.sectorSize = bs.getBytesPerSector();
         this.device = bs.getDevice();
-        this.dirty = false;
         this.offset = offset;
         this.lastAllocatedCluster = FIRST_CLUSTER;
         if (bs.getDataClusterCount() > Integer.MAX_VALUE) throw
@@ -179,8 +177,6 @@ final class Fat {
 
         for (int i = 0; i < entries.length; i++)
             entries[i] = fatType.readEntry(data, i);
-
-        this.dirty = false;
     }
     
     public void write() throws IOException {
@@ -201,7 +197,6 @@ final class Fat {
         }
         
         device.write(offset, ByteBuffer.wrap(data));
-        this.dirty = false;
     }
     
     /**
@@ -307,7 +302,6 @@ final class Fat {
         if (lastAllocatedCluster < FIRST_CLUSTER)
             lastAllocatedCluster = FIRST_CLUSTER;
         
-        this.dirty = true;
         return entryIndex;
     }
     
@@ -456,16 +450,7 @@ final class Fat {
                     "invalid cluster value " + cluster);
         }
     }
-
-    /**
-     * Returns the dirty.
-     *
-     * @return boolean
-     */
-    public boolean isDirty() {
-        return dirty;
-    }
-
+    
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
