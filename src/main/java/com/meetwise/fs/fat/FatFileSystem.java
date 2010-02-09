@@ -51,18 +51,18 @@ public final class FatFileSystem extends AbstractFileSystem {
     /**
      * Constructor for FatFileSystem in specified readOnly mode
      * 
-     * @param api the BlockDevice holding the file system
+     * @param device the {@code BlockDevice} holding the file system
      * @param readOnly if this FS should be read-lonly
      * @param ignoreFatDifferences
      * @throws IOException on read error
      */
-    public FatFileSystem(BlockDevice api, boolean readOnly,
+    public FatFileSystem(BlockDevice device, boolean readOnly,
             boolean ignoreFatDifferences)
             throws IOException {
         
-        super(api, readOnly);
+        super(readOnly);
         
-        this.bs = BootSector.read(api);
+        this.bs = BootSector.read(device);
         
         if (bs.getNrFats() <= 0) throw new IOException(
                 "boot sector says there are no FATs");

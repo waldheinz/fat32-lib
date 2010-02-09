@@ -21,7 +21,6 @@
 package com.meetwise.fs;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * Abstract class with common things in different FileSystem implementations.
@@ -31,33 +30,17 @@ import java.util.HashMap;
  */
 public abstract class AbstractFileSystem implements FileSystem {
     private final boolean readOnly;
-    private final BlockDevice blockDevice;
     private boolean closed;
-
-    private final HashMap<FSDirectoryEntry, FSFile> files =
-            new HashMap<FSDirectoryEntry, FSFile>();
-            
-    private final HashMap<FSDirectoryEntry, FSDirectory> directories =
-            new HashMap<FSDirectoryEntry, FSDirectory>();
-
+    
     /**
      * Constructs an {@code AbstractFileSystem} in specified readOnly mode. If
      * the specified {@code device} is read-only, only a read-only file system
      * can be created on top of it.
      * 
-     * @param device the {@code BlockDevice} holding the file system
      * @param readOnly if the file system should be read-only.
-     * @throws IllegalArgumentException if the specified device is
-     *      {@link BlockDevice#isReadOnly() read-only}, but a the
-     *      {@code readOnly} parameter was {@code false}
      */
-    public AbstractFileSystem(BlockDevice device, boolean readOnly)
-            throws IllegalArgumentException {
+    public AbstractFileSystem(boolean readOnly) {
         
-        if (!readOnly && device.isReadOnly()) throw
-                new IllegalArgumentException("the device is read-only");
-        
-        this.blockDevice = device;
         this.closed = false;
         this.readOnly = readOnly;
     }
@@ -68,68 +51,31 @@ public abstract class AbstractFileSystem implements FileSystem {
             if (!isReadOnly()) {
                 flush();
             }
-
-            blockDevice.flush();
-            files.clear();
-            directories.clear();
             
             closed = true;
         }
     }
     
-    /**
-     * Save the content that have been altered but not saved in the Device
-     * 
-     * @throws IOException
-     */
-    @Override
-    public void flush() throws IOException {
-        flushFiles();
-        flushDirectories();
-    }
-    
-    /**
-     * @return Returns the FSApi.
-     */
-    public final BlockDevice getBlockDevice() {
-        return blockDevice;
-    }
-    
-    /**
-     * @return if filesystem is closed.
-     */
     @Override
     public final boolean isClosed() {
         return closed;
     }
-
-    /**
-     * @return if filesystem is readOnly.
-     */
+    
     @Override
     public final boolean isReadOnly() {
         return readOnly;
     }
-    
+
     /**
-     * Flush all unsaved FSFile in our cache
-     * 
-     * @throws IOException
+     * Checks if this {@code FileSystem} was already closed, and throws an
+     * exception if it was.
+     *
+     * @throws IllegalStateException if this {@code FileSystem} was
+     *      already closed
      */
-    private final void flushFiles() throws IOException {
-        for (FSFile f : files.values()) {
-            f.flush();
-        }
-    }
-    
-    /**
-     * Flush all unsaved FSDirectory in our cache
-     * 
-     * @throws IOException
-     */
-    private final void flushDirectories() throws IOException {
-        for (FSDirectory d : directories.values()) {
-            d.flush();
+    protected final void checkClosed() throws IllegalStateException {
+        if (isClosed()) {
+            throw new IllegalStateException("file system was already closed");
         }
     }
 }
