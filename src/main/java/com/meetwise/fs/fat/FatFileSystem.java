@@ -103,10 +103,14 @@ public final class FatFileSystem extends AbstractFileSystem {
     }
 
     public long getFilesOffset() {
+        checkClosed();
+        
         return filesOffset;
     }
     
     public FatType getFatType() {
+        checkClosed();
+
         return this.fatType;
     }
 
@@ -116,6 +120,8 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @return the volume label
      */
     public String getVolumeLabel() {
+        checkClosed();
+        
         final String fromDir = rootDirStore.getLabel();
         
         if (fromDir == null && fatType != FatType.FAT32) {
@@ -135,8 +141,9 @@ public final class FatFileSystem extends AbstractFileSystem {
     public void setVolumeLabel(String label)
             throws ReadOnlyException, IOException {
         
-        if (isReadOnly()) throw new ReadOnlyException();
-        
+        checkClosed();
+        checkReadOnly();
+
         rootDirStore.setLabel(label);
         
         if (fatType != FatType.FAT32) {
@@ -145,16 +152,20 @@ public final class FatFileSystem extends AbstractFileSystem {
     }
 
     AbstractDirectory getRootDirStore() {
+        checkClosed();
+        
         return rootDirStore;
     }
     
     /**
      * Flush all changed structures to the device.
      * 
-     * @throws IOException
+     * @throws IOException on write error
      */
     @Override
     public void flush() throws IOException {
+        checkClosed();
+        
         if (bs.isDirty()) {
             bs.write();
         }
@@ -174,13 +185,11 @@ public final class FatFileSystem extends AbstractFileSystem {
     
     @Override
     public FSDirectory getRoot() {
+        checkClosed();
+        
         return rootDir;
     }
     
-    public int getClusterSize() {
-        return bs.getBytesPerSector() * bs.getSectorsPerCluster();
-    }
-
     /**
      * Returns the fat.
      * 
@@ -196,6 +205,8 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @return BootSector
      */
     public BootSector getBootSector() {
+        checkClosed();
+        
         return bs;
     }
     

@@ -40,7 +40,6 @@ public abstract class AbstractFileSystem implements FileSystem {
      * @param readOnly if the file system should be read-only.
      */
     public AbstractFileSystem(boolean readOnly) {
-        
         this.closed = false;
         this.readOnly = readOnly;
     }
@@ -72,10 +71,25 @@ public abstract class AbstractFileSystem implements FileSystem {
      *
      * @throws IllegalStateException if this {@code FileSystem} was
      *      already closed
+     * @see #isClosed()
+     * @see #close() 
      */
     protected final void checkClosed() throws IllegalStateException {
         if (isClosed()) {
             throw new IllegalStateException("file system was already closed");
+        }
+    }
+
+    /**
+     * Checks if this {@code FileSystem} is read-only, and throws an
+     * exception if it is.
+     *
+     * @throws ReadOnlyException if this {@code FileSystem} is read-only
+     * @see #isReadOnly() 
+     */
+    protected final void checkReadOnly() throws ReadOnlyException {
+        if (isReadOnly()) {
+            throw new ReadOnlyException();
         }
     }
 }

@@ -87,9 +87,8 @@ public class FatFileSystemTest {
 
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fatFs = new FatFileSystem(rd, false);
-        assertEquals(2048, fatFs.getClusterSize());
-
         final BootSector bs = fatFs.getBootSector();
+        
         assertEquals("mkdosfs", bs.getOemName());
         assertEquals(512, bs.getBytesPerSector());
         assertEquals(FatType.FAT12, bs.getFatType());
@@ -132,9 +131,8 @@ public class FatFileSystemTest {
         
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fatFs = new FatFileSystem(rd, false);
-        assertEquals(2048, fatFs.getClusterSize());
-        
         final BootSector bs = fatFs.getBootSector();
+        
         assertEquals("mkdosfs", bs.getOemName());
         assertEquals(512, bs.getBytesPerSector());
         assertEquals(FatType.FAT16, bs.getFatType());
@@ -205,9 +203,8 @@ public class FatFileSystemTest {
 
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fatFs = new FatFileSystem(rd, false);
-        assertEquals(512, fatFs.getClusterSize());
-
         final BootSector bs = fatFs.getBootSector();
+        
         assertEquals(FatType.FAT32, bs.getFatType());
         assertEquals("mkdosfs", bs.getOemName());
         assertEquals(512, bs.getBytesPerSector());
