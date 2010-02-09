@@ -30,8 +30,6 @@ import com.meetwise.fs.util.LittleEndian;
 final class FatLfnDirEntry {
 
     private FatLfnDirEntry() { /* no instances */ }
-
-    
     
     public static void set(AbstractDirectoryEntry entry, String subName,
             int ordinal, byte checkSum, boolean isLast) {

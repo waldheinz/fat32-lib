@@ -74,6 +74,19 @@ final class ShortNameGenerator {
         return true;
     }
 
+    private String stripLeadingPeriods(String str) {
+        final StringBuilder sb = new StringBuilder(str.length());
+
+        for (int i=0; i < str.length(); i++) {
+            if (str.charAt(i) != '.') { //NOI18N
+                sb.append(str.substring(i));
+                break;
+            }
+        }
+        
+        return sb.toString();
+    }
+
     /**
      * Generates a new unique 8.3 file name that is not already contained in
      * the set specified to the constructor.
@@ -85,20 +98,22 @@ final class ShortNameGenerator {
     public ShortName generateShortName(String longFullName)
             throws IllegalStateException {
         
+        longFullName = stripLeadingPeriods(longFullName).toUpperCase();
+        
         final String longName;
         final String longExt;
         final int dotIdx = longFullName.lastIndexOf('.');
         final boolean forceSuffix;
-
+        
         if (dotIdx == -1) {
             /* no dot in the name */
-            forceSuffix = !cleanString(longFullName.toUpperCase());
+            forceSuffix = !cleanString(longFullName);
             longName = tidyString(longFullName);
             longExt = ""; /* so no extension */
         } else {
             /* split at the dot */
             forceSuffix = !cleanString(longFullName.substring(
-                    0, dotIdx).toUpperCase());
+                    0, dotIdx));
             longName = tidyString(longFullName.substring(0, dotIdx));
             longExt = tidyString(longFullName.substring(dotIdx + 1));
         }

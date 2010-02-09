@@ -39,6 +39,20 @@ public class FatLfnDirectoryTest {
         this.dir = new FatLfnDirectory(rootDirStore, fat);
     }
 
+    @Test(expected=IOException.class)
+    public void testOnlyDotsDirectory() throws IOException {
+        System.out.println("onlyDotsDirectory");
+
+        dir.addDirectory("....");
+    }
+    
+    @Test(expected=IOException.class)
+    public void testOnlyDotsFile() throws IOException {
+        System.out.println("onlyDotsFile");
+
+        dir.addFile("....");
+    }
+
     @Test
     public void testTrailingSpaces() throws IOException {
         System.out.println("trailingSpaces");

@@ -25,6 +25,15 @@ public class ShortNameGeneratorTest {
         assertFalse(ShortNameGenerator.validChar('ö'));
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void testOnlyDots() {
+        System.out.println("onlyDots");
+        
+        final ShortNameGenerator sng =
+                new ShortNameGenerator(new HashSet<ShortName>());
+        sng.generateShortName("....");
+    }
+
     @Test
     public void testGenerateShortName() {
         System.out.println("generateShortName");
@@ -44,6 +53,8 @@ public class ShortNameGeneratorTest {
                 sng.generateShortName("ver +1.2.text"));
         assertEquals(ShortName.get("MICROS~1.BAK"),
                 sng.generateShortName("microsoft.bak"));
+        assertEquals(ShortName.get("ANNOY"),
+                sng.generateShortName(".annoy"));
     }
     
     @Test

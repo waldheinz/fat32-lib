@@ -108,7 +108,7 @@ final class FatLfnDirectory implements FSDirectory {
         checkReadOnly();
         
         name = name.trim();
-        final ShortName shortName = sng.generateShortName(name);
+        final ShortName shortName = makeShortName(name);
         final AbstractDirectoryEntry entryData = new AbstractDirectoryEntry(dir);
         FatDirEntry realEntry = FatDirEntry.create(entryData);
         realEntry.setName(shortName);
@@ -123,6 +123,15 @@ final class FatLfnDirectory implements FSDirectory {
         
         dir.setDirty();
         return entry;
+    }
+
+    private ShortName makeShortName(String name) throws IOException {
+        try {
+            return sng.generateShortName(name);
+        } catch (IllegalArgumentException ex) {
+            throw new IOException(
+                    "could not generate short name for \"" + name + "\"", ex);
+        }
     }
     
     /**
@@ -142,7 +151,8 @@ final class FatLfnDirectory implements FSDirectory {
         checkReadOnly();
         
         name = name.trim();
-        final ShortName sn = sng.generateShortName(name);
+        
+        final ShortName sn = makeShortName(name);
         final FatDirectory newDir = FatDirectory.createSub(dir, fat);
         final FatDirEntry realEntry = newDir.getEntry();
         
