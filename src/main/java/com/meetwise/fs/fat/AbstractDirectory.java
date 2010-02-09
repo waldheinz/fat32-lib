@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 
+ * This is the abstract base class for all directory implementations.
  *
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
@@ -49,6 +49,14 @@ abstract class AbstractDirectory {
     private int capacity;
     private String volumeLabel;
 
+    /**
+     * Creates a new instance of {@code AbstractDirectory}.
+     *
+     * @param capacity the initial capacity of the new instance
+     * @param readOnly if the instance should be read-only
+     * @param isRoot if the new {@code AbstractDirectory} represents a root
+     *      directory
+     */
     protected AbstractDirectory(
             int capacity, boolean readOnly, boolean isRoot) {
         
@@ -57,16 +65,42 @@ abstract class AbstractDirectory {
         this.readOnly = readOnly;
         this.isRoot = isRoot;
     }
-    
+
+    /**
+     * Gets called when the {@code AbstractDirectory} must read it's content
+     * off the backing storage. This method must always fill the buffer's
+     * remaining space with the bytes making up this directory, beginning with
+     * the first byte.
+     *
+     * @param data the {@code ByteBuffer} to fill
+     * @throws IOException on read error
+     */
     protected abstract void read(ByteBuffer data) throws IOException;
-    
+
+    /**
+     * Gets called when the {@code AbstractDirectory} wants to write it's
+     * contents to the backing storage. This method is expected to write the
+     * buffer's remaining data to the storage, beginning with the first byte.
+     *
+     * @param data the {@code ByteBuffer} to write
+     * @throws IOException on write error
+     */
     protected abstract void write(ByteBuffer data) throws IOException;
 
+    /**
+     * Returns the number of the cluster where this directory is stored. This
+     * is important when creating the ".." entry in a sub-directory, as this
+     * entry must poing to the storage cluster of it's parent.
+     *
+     * @return this directory's storage cluster
+     */
     protected abstract long getStorageCluster();
 
     /**
+     * Gets called by the {@code AbstractDirectory} when it has determined that
+     * it should resize because the number of entries has changed.
      *
-     * @param entryCount
+     * @param entryCount the new number of entries this directory needs to store
      * @throws IOException on write error
      * @throws DirectoryFullException if the FAT12/16 root directory is full
      * @see #sizeChanged(long)
@@ -90,6 +124,11 @@ abstract class AbstractDirectory {
                 "invalid entry count of " + entryCount);
     }
 
+    /**
+     * Replaces all entries in this directory.
+     *
+     * @param newEntries the new directory entries
+     */
     public void setEntries(List<AbstractDirectoryEntry> newEntries) {
         if (newEntries.size() > capacity)
             throw new IllegalArgumentException("too many entries");
@@ -100,6 +139,7 @@ abstract class AbstractDirectory {
     
     /**
      * 
+     *
      * @param newSize the new storage space for the directory in bytes
      * @see #changeSize(int) 
      */
@@ -156,28 +196,25 @@ abstract class AbstractDirectory {
     }
     
     /**
-     * Returns the dirty.
-     * 
-     * @return boolean
-     */
-    public boolean isDirty() {
-        if (dirty)  return true;
-        
-        for (int i = 0; i < entries.size(); i++) {
-            final AbstractDirectoryEntry entry = entries.get(i);
-            if (entry != null && entry.isDirty()) return true;
-        }
-        
-        return false;
-    }
-
-    /**
      * Mark this directory as dirty.
      */
     protected final void setDirty() {
         this.dirty = true;
     }
 
+    /**
+     * Checks if this {@code AbstractDirectory} is a root directory.
+     *
+     * @throws UnsupportedOperationException if this is not a root directory
+     * @see #isRoot() 
+     */
+    private void checkRoot() throws UnsupportedOperationException {
+        if (!isRoot()) {
+            throw new UnsupportedOperationException(
+                    "only supported on root directories");
+        }
+    }
+    
     /**
      * Mark this directory as not dirty.
      */
@@ -249,7 +286,7 @@ abstract class AbstractDirectory {
         assert (e != null);
         
         if (getSize() == getCapacity()) {
-            changeSize(capacity + 1);
+            changeSize(getCapacity() + 1);
         }
 
         entries.add(e);
@@ -271,22 +308,35 @@ abstract class AbstractDirectory {
         this.entries.remove(entry);
         changeSize(getSize());
     }
-    
-    public String getLabel() {
-        if (!isRoot()) throw new AssertionError("not root");
+
+    /**
+     * Returns the volume label that is stored in this directory. Reading the
+     * volume label is only supported for the root directory.
+     *
+     * @return the volume label stored in this directory, or {@code null}
+     * @throws UnsupportedOperationException if this is not a root directory
+     * @see #isRoot() 
+     */
+    public String getLabel() throws UnsupportedOperationException {
+        checkRoot();
         
         return volumeLabel;
     }
 
     /**
+     * Sets the volume label that is stored in this directory. Setting the
+     * volume label is supported on the root directory only.
      *
-     * @param label
+     * @param label the new volume label
      * @throws IllegalArgumentException if the label is too long
+     * @throws UnsupportedOperationException if this is not a root directory
+     * @see #isRoot() 
      */
-    public void setLabel(String label)
-            throws IllegalArgumentException, IOException {
+    public void setLabel(String label) throws IllegalArgumentException,
+            UnsupportedOperationException, IOException {
 
-        if (!isRoot()) throw new AssertionError("not root");
+        checkRoot();
+
         if (label.length() > MAX_LABEL_LENGTH) throw new
                 IllegalArgumentException("label too long");
 
@@ -314,7 +364,7 @@ abstract class AbstractDirectory {
 
         final StringBuilder sb = new StringBuilder();
 
-        for (int i=0; i < 11; i++) {
+        for (int i=0; i < MAX_LABEL_LENGTH; i++) {
             final byte b = entry.getData()[i];
             
             if (b != 0) {

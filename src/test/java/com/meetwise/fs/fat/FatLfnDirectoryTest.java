@@ -154,15 +154,6 @@ public class FatLfnDirectoryTest {
     }
     
     @Test
-    public void testIsDirty() throws IOException {
-        System.out.println("isDirty");
-        
-        assertFalse(dir.isDirty());
-        dir.addFile("a file");
-        assertTrue(dir.isDirty());
-    }
-    
-    @Test
     public void testAddFile() throws Exception {
         System.out.println("addFile");
         
@@ -194,10 +185,8 @@ public class FatLfnDirectoryTest {
         System.out.println("flush");
         
         dir.addFile("The perfect File");
-        assertTrue(dir.isDirty());
 
         dir.flush();
-        assertFalse(dir.isDirty());
     }
     
 }

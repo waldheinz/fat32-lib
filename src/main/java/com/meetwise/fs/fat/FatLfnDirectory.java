@@ -95,10 +95,6 @@ final class FatLfnDirectory implements FSDirectory {
     public AbstractDirectory getStorageDirectory() {
         return this.dir;
     }
-
-    public boolean isDirty() {
-        return dir.isDirty();
-    }
     
     @Override
     public LfnEntry addFile(String name) throws IOException {
