@@ -25,12 +25,10 @@ public class FileSystemFactory {
      * @return a new {@code FileSystem} instance for the specified device
      * @throws UnknownFileSystemException if the file system type could
      *      not be determined
-     * @throws FileSystemException if the file system type could be determined,
-     *      but the attempt to create the file system failed
      * @throws IOException on read error
      */
     public static FileSystem create(BlockDevice device, boolean readOnly)
-            throws UnknownFileSystemException, FileSystemException, IOException {
+            throws UnknownFileSystemException, IOException {
             
         return new FatFileSystem(device, readOnly);
     }

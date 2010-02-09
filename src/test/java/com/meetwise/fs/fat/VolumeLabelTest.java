@@ -2,7 +2,7 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
-import com.meetwise.fs.ReadOnlyFileSystemException;
+import com.meetwise.fs.ReadOnlyException;
 import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
 import org.junit.Before;
@@ -44,8 +44,8 @@ public class VolumeLabelTest {
 
         fs.setVolumeLabel("this is too long for sure");
     }
-
-    @Test(expected=ReadOnlyFileSystemException.class)
+    
+    @Test(expected=ReadOnlyException.class)
     public void testSetLabelReadOnly() throws IOException {
         System.out.println("setLabel (read only)");
 

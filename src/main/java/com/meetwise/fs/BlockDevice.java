@@ -54,14 +54,14 @@ public interface BlockDevice {
      *
      * @param devOffset the byte offset where to store the data
      * @param src the source {@code ByteBuffer} to write to the device
-     * @throws ReadOnlyDeviceException if this {@code BlockDevice} is read-only
+     * @throws ReadOnlyException if this {@code BlockDevice} is read-only
      * @throws IOException on write error
      * @throws IllegalArgumentException if the {@code devOffset} is negative
      *      or the write would go beyond the end of the device
      * @see #isReadOnly()
      */
     public abstract void write(long devOffset, ByteBuffer src)
-            throws ReadOnlyDeviceException, IOException,
+            throws ReadOnlyException, IOException,
             IllegalArgumentException;
             
     /**

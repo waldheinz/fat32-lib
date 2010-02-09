@@ -2,7 +2,6 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
-import com.meetwise.fs.FileSystemException;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -84,9 +83,7 @@ final class ClusterChain extends FatObject {
      * @return long
      * @throws FileSystemException
      */
-    private long getDevOffset(long cluster, int clusterOffset)
-            throws FileSystemException {
-        
+    private long getDevOffset(long cluster, int clusterOffset) {
         return dataOffset + clusterOffset +
                 ((cluster - Fat.FIRST_CLUSTER) * clusterSize);
     }

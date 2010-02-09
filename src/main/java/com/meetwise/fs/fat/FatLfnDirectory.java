@@ -21,8 +21,7 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.FSDirectory;
 import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.ReadOnlyFileSystemException;
+import com.meetwise.fs.ReadOnlyException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,12 +42,7 @@ final class FatLfnDirectory implements FSDirectory {
     private final ShortNameGenerator sng;
     private final AbstractDirectory dir;
     private final Fat fat;
-
-    /**
-     * @param fs
-     * @param chain
-     * @throws FileSystemException
-     */
+    
     public FatLfnDirectory(AbstractDirectory dir, Fat fat) {
         if ((dir == null) || (fat == null)) throw new NullPointerException();
 
@@ -61,6 +55,12 @@ final class FatLfnDirectory implements FSDirectory {
         this.directories = new HashMap<FatDirEntry, FatLfnDirectory>();
 
         parseLfn();
+    }
+
+    private void checkReadOnly() throws ReadOnlyException {
+        if (dir.isReadOnly()) {
+            throw new ReadOnlyException();
+        }
     }
 
     /**
@@ -98,6 +98,8 @@ final class FatLfnDirectory implements FSDirectory {
     
     @Override
     public LfnEntry addFile(String name) throws IOException {
+        checkReadOnly();
+        
         name = name.trim();
         final ShortName shortName = sng.generateShortName(name);
         final AbstractDirectoryEntry entryData = new AbstractDirectoryEntry(dir);
@@ -118,6 +120,8 @@ final class FatLfnDirectory implements FSDirectory {
     
     @Override
     public LfnEntry addDirectory(String name) throws IOException {
+        checkReadOnly();
+        
         name = name.trim();
         final ShortName sn = sng.generateShortName(name);
         final FatDirectory newDir = FatDirectory.createSub(dir, fat);
@@ -212,7 +216,7 @@ final class FatLfnDirectory implements FSDirectory {
     }
 
     @Override
-    public void flush() throws FileSystemException, IOException {
+    public void flush() throws IOException {
         for (FatFile f : files.values()) {
             f.flush();
         }
@@ -259,7 +263,8 @@ final class FatLfnDirectory implements FSDirectory {
      */
     @Override
     public void remove(String name) throws IOException {
-        if (dir.isReadOnly()) throw new ReadOnlyFileSystemException(null);
+        checkReadOnly();
+        
         final LfnEntry entry = getEntryImpl(name);
         if (entry == null) return;
         entry.remove();
@@ -375,20 +380,28 @@ final class FatLfnDirectory implements FSDirectory {
         
         @Override
         public void setName(String newName) {
+            checkReadOnly();
+            
             fileName = newName;
             realEntry.setName(sng.generateShortName(newName));
         }
         
         public void setCreated(long created) {
+            checkReadOnly();
+
             realEntry.setCreated(created);
         }
 
         @Override
         public void setLastModified(long lastModified) {
+            checkReadOnly();
+
             realEntry.setLastModified(lastModified);
         }
 
         public void setLastAccessed(long lastAccessed) {
+            checkReadOnly();
+            
             realEntry.setLastAccessed(lastAccessed);
         }
 
@@ -432,8 +445,10 @@ final class FatLfnDirectory implements FSDirectory {
         public boolean isDirty() {
             return true;
         }
-
+        
         private void remove() throws IOException {
+            checkReadOnly();
+            
             final ClusterChain cc = new ClusterChain(
                     fat, realEntry.getStartCluster(), false);
             

@@ -1,10 +1,10 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FileSystemException;
 import java.io.IOException;
 import com.meetwise.fs.FSFile;
-import com.meetwise.fs.ReadOnlyFileSystemException;
+import com.meetwise.fs.ReadOnlyException;
+import java.io.EOFException;
 import java.nio.ByteBuffer;
 
 /**
@@ -56,20 +56,16 @@ final class FatFile extends FatObject implements FSFile {
     }
 
     @Override
-    public void setLength(long length) throws FileSystemException {
+    public void setLength(long length) throws ReadOnlyException, IOException {
         if (getLength() == length) return;
 
         if (!chain.isReadOnly()) {
             updateTimeStamps(true);
         } else {
-            throw new ReadOnlyFileSystemException(null);
+            throw new ReadOnlyException();
         }
-
-        try {
-            chain.setSize(length);
-        } catch (IOException ex) {
-            throw new FileSystemException(null, ex);
-        }
+        
+        chain.setSize(length);
         
         this.entry.setStartCluster(chain.getStartCluster());
         this.entry.setLength(length);
@@ -90,24 +86,20 @@ final class FatFile extends FatObject implements FSFile {
      * @see FatDirEntry#setLastAccessed(long) 
      */
     @Override
-    public void read(long offset, ByteBuffer dest) throws FileSystemException {
+    public void read(long offset, ByteBuffer dest) throws IOException {
         final int len = dest.remaining();
         
         if (len == 0) return;
         
-        if (offset + len > getLength())
-            throw new FileSystemException(null,
-                    "can not read beyond EOF"); //NOI18N
+        if (offset + len > getLength()) {
+            throw new EOFException();
+        }
 
         if (!chain.isReadOnly()) {
             updateTimeStamps(false);
         }
-
-        try {
-            chain.readData(offset, dest);
-        } catch (IOException ex) {
-            throw new FileSystemException(null, ex);
-        }
+        
+        chain.readData(offset, dest);
     }
 
     /**
@@ -125,12 +117,12 @@ final class FatFile extends FatObject implements FSFile {
      */
     @Override
     public void write(long offset, ByteBuffer srcBuf)
-            throws FileSystemException {
+            throws ReadOnlyException, IOException {
         
         if (!chain.isReadOnly()) {
             updateTimeStamps(true);
         } else {
-            throw new ReadOnlyFileSystemException(null);
+            throw new ReadOnlyException();
         }
         
         final long lastByte = offset + srcBuf.remaining();
@@ -139,11 +131,7 @@ final class FatFile extends FatObject implements FSFile {
             setLength(lastByte);
         }
         
-        try {
-            chain.writeData(offset, srcBuf);
-        } catch (IOException ex) {
-            throw new FileSystemException(null, ex);
-        }
+        chain.writeData(offset, srcBuf);
     }
     
     private void updateTimeStamps(boolean write) {

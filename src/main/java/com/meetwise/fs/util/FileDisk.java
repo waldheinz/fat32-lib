@@ -2,7 +2,7 @@
 package com.meetwise.fs.util;
 
 import com.meetwise.fs.BlockDevice;
-import com.meetwise.fs.ReadOnlyDeviceException;
+import com.meetwise.fs.ReadOnlyException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -102,7 +102,7 @@ public final class FileDisk implements BlockDevice {
     public void write(long devOffset, ByteBuffer src) throws IOException {
         checkClosed();
 
-        if (this.readOnly) throw new ReadOnlyDeviceException(this);
+        if (this.readOnly) throw new ReadOnlyException();
         
         int toWrite = src.remaining();
 

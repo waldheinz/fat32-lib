@@ -1,7 +1,6 @@
 
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FileSystemException;
 import com.meetwise.fs.fat.FatLfnDirectory.LfnEntry;
 import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
@@ -82,7 +81,7 @@ public class FatFileTest {
         assertEquals(origCreated, entry.getCreated());
     }
 
-    @Test(expected=FileSystemException.class)
+    @Test(expected=IOException.class)
     public void testReadTooLong() throws Exception {
         System.out.println("read (too long)");
         

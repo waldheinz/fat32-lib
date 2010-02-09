@@ -24,8 +24,7 @@ import com.meetwise.fs.AbstractFileSystem;
 import com.meetwise.fs.BlockDevice;
 import com.meetwise.fs.FSDirectory;
 import java.io.IOException;
-import com.meetwise.fs.FileSystemException;
-import com.meetwise.fs.ReadOnlyFileSystemException;
+import com.meetwise.fs.ReadOnlyException;
 
 /**
  * 
@@ -76,8 +75,7 @@ public final class FatFileSystem extends AbstractFileSystem {
             for (int i=1; i < bs.getNrFats(); i++) {
                 final Fat tmpFat = Fat.read(bs, i);
                 if (!fat.equals(tmpFat)) {
-                    throw new FileSystemException(this,
-                            "FAT " + i + " differs from FAT 0");
+                    throw new IOException("FAT " + i + " differs from FAT 0");
                 }
             }
         }
@@ -131,10 +129,13 @@ public final class FatFileSystem extends AbstractFileSystem {
      * Sets the volume label for this file system.
      *
      * @param label the new volume label, may be {@code null}
+     * @throws ReadOnlyException if the file system is read-only
      * @throws IOException on write error
      */
-    public void setVolumeLabel(String label) throws IOException {
-        if (isReadOnly()) throw new ReadOnlyFileSystemException(this);
+    public void setVolumeLabel(String label)
+            throws ReadOnlyException, IOException {
+        
+        if (isReadOnly()) throw new ReadOnlyException();
         
         rootDirStore.setLabel(label);
         
