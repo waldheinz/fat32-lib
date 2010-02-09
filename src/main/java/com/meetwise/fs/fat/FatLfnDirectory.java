@@ -29,7 +29,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * 
+ * This class implements the "long file name" logic atop an
+ * {@link AbstractDirectory} instance.
  *
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
@@ -62,13 +63,7 @@ final class FatLfnDirectory implements FSDirectory {
             throw new ReadOnlyException();
         }
     }
-
-    /**
-     * Gets the file for the given entry.
-     *
-     * @param entry
-     * @return
-     */
+    
     private FatFile getFile(FatDirEntry entry) throws IOException {
         FatFile file = files.get(entry);
 
@@ -95,7 +90,19 @@ final class FatLfnDirectory implements FSDirectory {
     public AbstractDirectory getStorageDirectory() {
         return this.dir;
     }
-    
+
+    /**
+     * <p>
+     * {@inheritDoc}
+     * </p><p>
+     * According to the FAT file system specification, leading and trailing
+     * spaces in the {@code name} are ignored by this method.
+     * </p>
+     * 
+     * @param name {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws IOException {@inheritDoc}
+     */
     @Override
     public LfnEntry addFile(String name) throws IOException {
         checkReadOnly();
@@ -118,6 +125,18 @@ final class FatLfnDirectory implements FSDirectory {
         return entry;
     }
     
+    /**
+     * <p>
+     * {@inheritDoc}
+     * </p><p>
+     * According to the FAT file system specification, leading and trailing
+     * spaces in the {@code name} are ignored by this method.
+     * </p>
+     *
+     * @param name {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws IOException {@inheritDoc}
+     */
     @Override
     public LfnEntry addDirectory(String name) throws IOException {
         checkReadOnly();
@@ -276,12 +295,24 @@ final class FatLfnDirectory implements FSDirectory {
                 " [size=" + shortNameIndex.size() + //NOI18N
                 ", dir=" + dir + "]"; //NOI18N
     }
-
+    
+    /**
+     * <p>
+     * {@inheritDoc}
+     * </p><p>
+     * According to the FAT file system specification, leading and trailing
+     * spaces in the {@code name} are ignored by this method.
+     * </p>
+     * 
+     * @param name {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws IOException {@inheritDoc}
+     */
     @Override
     public FSDirectoryEntry getEntry(String name) throws IOException {
         return getEntryImpl(name);
     }
-
+    
     class LfnEntry implements FSDirectoryEntry {
         private String fileName;
         private final FatDirEntry realEntry;

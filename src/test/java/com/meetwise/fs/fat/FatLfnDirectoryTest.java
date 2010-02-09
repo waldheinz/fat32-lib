@@ -40,6 +40,40 @@ public class FatLfnDirectoryTest {
     }
 
     @Test
+    public void testTrailingSpaces() throws IOException {
+        System.out.println("trailingSpaces");
+        
+        dir.addDirectory("testDirectory ");
+        assertNotNull(dir.getEntry("testDirectory"));
+
+        dir.addDirectory("anotherDirectory");
+        assertNotNull(dir.getEntry("anotherDirectory "));
+
+        dir.addFile("testFile ");
+        assertNotNull(dir.getEntry("testFile"));
+
+        dir.addFile("anotherFile");
+        assertNotNull(dir.getEntry("anotherFile "));
+    }
+    
+    @Test
+    public void testLeadingSpaces() throws IOException {
+        System.out.println("leadingSpaces");
+
+        dir.addDirectory(" testDirectory");
+        assertNotNull(dir.getEntry("testDirectory"));
+
+        dir.addDirectory("anotherDirectory");
+        assertNotNull(dir.getEntry(" anotherDirectory"));
+
+        dir.addFile(" testFile");
+        assertNotNull(dir.getEntry("testFile"));
+
+        dir.addFile("anotherFile");
+        assertNotNull(dir.getEntry(" anotherFile"));
+    }
+    
+    @Test
     public void testWriteSubdirFile() throws IOException {
         System.out.println("writeSubdirFile");
 
