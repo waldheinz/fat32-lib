@@ -174,7 +174,7 @@ final class ShortName {
                     " is null");
         if (str.length() < minLength)
             throw new IllegalArgumentException(strType +
-                    " must have at least " + maxLength +
+                    " must have at least " + minLength +
                     " characters: " + str);
         if (str.length() > maxLength)
             throw new IllegalArgumentException(strType +
