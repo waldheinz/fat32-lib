@@ -21,8 +21,8 @@ public final class DirectoryFullException extends IOException {
     DirectoryFullException(int currentCapacity, int requestedCapacity) {
         this("directory is full", currentCapacity, requestedCapacity);
     }
-
-    public DirectoryFullException(String message,
+    
+    DirectoryFullException(String message,
             int currentCapacity, int requestedCapacity) {
 
         super(message);
