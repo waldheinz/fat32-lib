@@ -88,21 +88,29 @@ public final class SuperFloppyFormatter {
     /**
      * Sets the OEM name of the boot sector.
      *
+     * TODO: throw an exception early if name is invalid (too long, ...)
+     *
      * @param oemName the new OEM name
-     * @see BootSector#setOemName(java.lang.String) 
+     * @return this {@code SuperFloppyFormatter}
+     * @see BootSector#setOemName(java.lang.String)
      */
-    public void setOemName(String oemName) {
+    public SuperFloppyFormatter setOemName(String oemName) {
         this.oemName = oemName;
+        return this;
     }
-
+    
     /**
      * Sets the volume label of the file system to create.
-     *
+     * 
+     * TODO: throw an exception early if label is invalid (too long, ...)
+     * 
      * @param label the new file system label, may be {@code null}
-     * @see FatFileSystem#setVolumeLabel(java.lang.String) 
+     * @return this {@code SuperFloppyFormatter}
+     * @see FatFileSystem#setVolumeLabel(java.lang.String)
      */
-    public void setVolumeLabel(String label) {
+    public SuperFloppyFormatter setVolumeLabel(String label) {
         this.label = label;
+        return this;
     }
 
     /**
@@ -116,11 +124,13 @@ public final class SuperFloppyFormatter {
     }
     
     /**
-     * Writes the boot sector and file system to the device.
+     * Initializes the boot sector and files system for the device. The file
+     * system created by this method will always be in read-write mode.
      *
+     * @return the file system that was created
      * @throws IOException on write error
      */
-    public void format() throws IOException {
+    public FatFileSystem format() throws IOException {
         final int sectorSize = device.getSectorSize();
         final int totalSectors = (int)(device.getSize() / sectorSize);
         
@@ -193,14 +203,15 @@ public final class SuperFloppyFormatter {
         for (int i = 0; i < bs.getNrFats(); i++) {
             fat.writeCopy(FatUtils.getFatOffset(bs, i));
         }
-        
+
+        FatFileSystem fs = new FatFileSystem(device, false);
+
         if (label != null) {
-            FatFileSystem fs = new FatFileSystem(device, false);
             fs.setVolumeLabel(label);
-            fs.close();
         }
-        
-        device.flush();
+
+        fs.flush();
+        return fs;
     }
 
     private int sectorsPerFat(int rootDirEntries, int totalSectors)
