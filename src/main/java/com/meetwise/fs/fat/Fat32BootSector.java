@@ -21,7 +21,10 @@ public final class Fat32BootSector extends BootSector {
      * The offset to the 4 bytes specifying the sectors per FAT value.
      */
     public static final int SECTORS_PER_FAT_OFFSET = 36;
-    
+
+    /*
+     * TODO: make this constructor private
+     */
     public Fat32BootSector(BlockDevice device) throws IOException {
         super(device);
     }
