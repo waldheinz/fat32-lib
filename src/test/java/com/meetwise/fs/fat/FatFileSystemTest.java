@@ -19,15 +19,34 @@ import static org.junit.Assert.*;
  */
 public class FatFileSystemTest {
 
+    @Test(expected=IllegalStateException.class)
+    public void testGetRootClosed() throws IOException {
+        System.out.println("getRoot (closed)");
+        
+        BlockDevice dev = new RamDisk(128 * 1024);
+        FatFileSystem fs = SuperFloppyFormatter.get(dev).format();
+        fs.close();
+        fs.getRoot();
+    }
+    
+    @Test(expected=IllegalStateException.class)
+    public void testFlushClosed() throws IOException {
+        System.out.println("flush (closed)");
+        
+        BlockDevice dev = new RamDisk(128 * 1024);
+        FatFileSystem fs = SuperFloppyFormatter.get(dev).format();
+        fs.close();
+        fs.flush();
+    }
+    
     @Test
     public void testCreateFile() throws IOException {
         System.out.println("createFile");
 
         BlockDevice dev = new RamDisk(2 * 1024 * 1024);
-        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
-        f.format();
+        
 
-        FatFileSystem fs = new FatFileSystem(dev, false);
+        FatFileSystem fs = SuperFloppyFormatter.get(dev).format();
         FSDirectoryEntry dirEntry =
                 fs.getRoot().addFile("This is a file");
         final FSFile fsFile = dirEntry.getFile();
@@ -53,10 +72,7 @@ public class FatFileSystemTest {
         System.out.println("createSubDirFile");
 
         BlockDevice dev = new RamDisk(2 * 1024 * 1024);
-        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
-        f.format();
-
-        FatFileSystem fs = new FatFileSystem(dev, false);
+        FatFileSystem fs = SuperFloppyFormatter.get(dev).format();
         FSDirectoryEntry dirEntry =
                 fs.getRoot().addDirectory("Directory");
         FSDirectoryEntry e = dirEntry.getDirectory().addFile(

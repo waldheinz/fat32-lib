@@ -47,14 +47,14 @@ public interface FileSystem {
     public boolean isReadOnly();
 
     /**
-     * Close this file system. After a close, all invocations of method of this
-     * file system. or objects created by this file system. will throw an
-     * IOException.
+     * Close this file system. After a close, all invocations of methods of
+     * this file system or objects created by this file system will throw an
+     * {@link IllegalStateException}.
      * 
      * @throws IOException on error closing the file system
      */
     public void close() throws IOException;
-
+    
     /**
      * Returns {@code true} if this file system is closed. If the file system
      * is closed, no more operations may be performed on it.

@@ -33,11 +33,9 @@ public abstract class AbstractFileSystem implements FileSystem {
     private boolean closed;
     
     /**
-     * Constructs an {@code AbstractFileSystem} in specified readOnly mode. If
-     * the specified {@code device} is read-only, only a read-only file system
-     * can be created on top of it.
+     * Creates a new {@code AbstractFileSystem}.
      * 
-     * @param readOnly if the file system should be read-only.
+     * @param readOnly if the file system should be read-only
      */
     public AbstractFileSystem(boolean readOnly) {
         this.closed = false;
@@ -79,7 +77,7 @@ public abstract class AbstractFileSystem implements FileSystem {
             throw new IllegalStateException("file system was already closed");
         }
     }
-
+    
     /**
      * Checks if this {@code FileSystem} is read-only, and throws an
      * exception if it is.
