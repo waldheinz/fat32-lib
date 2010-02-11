@@ -22,8 +22,7 @@ public class ClusterChainTest {
     @Before
     public void setUp() throws IOException {
         final RamDisk rd = new RamDisk(512 * 2048);
-        SuperFloppyFormatter sf = new SuperFloppyFormatter(rd);
-        sf.format();
+        SuperFloppyFormatter.get(rd).format();
         
         bs = BootSector.read(rd);
         fat = Fat.read(bs, 0);

@@ -23,10 +23,8 @@ public class VolumeLabelTest {
     @Before
     public void setUp() throws IOException {
         this.dev = new RamDisk(8 * 1024 * 1024);
-
-        SuperFloppyFormatter sff = new SuperFloppyFormatter(dev);
-        sff.format();
-        this.fs = new FatFileSystem(dev, false);
+        
+        this.fs = SuperFloppyFormatter.get(dev).format();
         this.dirStore = fs.getRootDirStore();
         this.bs = (Fat16BootSector) fs.getBootSector();
     }
