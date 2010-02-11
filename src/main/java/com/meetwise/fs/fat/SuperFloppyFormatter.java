@@ -53,7 +53,10 @@ public final class SuperFloppyFormatter {
      *
      * @param device
      * @throws IOException on error accessing the specified {@code device}
+     * @deprecated use the {@link #get(com.meetwise.fs.BlockDevice)
+     *      method instead
      */
+    @Deprecated
     public SuperFloppyFormatter(BlockDevice device) throws IOException {
         this.device = device;
         this.oemName = DEFAULT_OEM_NAME;
@@ -61,6 +64,18 @@ public final class SuperFloppyFormatter {
         setFatType(fatTypeFromDevice());
     }
 
+    /**
+     * Retruns a {@code SuperFloppyFormatter} instance suitable for formatting
+     * the specified device.
+     *
+     * @param dev the device that should be formatted
+     * @return the formatter for the device
+     * @throws IOException on error creating the formatter
+     */
+    public static SuperFloppyFormatter get(BlockDevice dev) throws IOException {
+        return new SuperFloppyFormatter(dev);
+    }
+    
     /**
      * Returns the OEM name that will be written to the {@link BootSector}.
      *
