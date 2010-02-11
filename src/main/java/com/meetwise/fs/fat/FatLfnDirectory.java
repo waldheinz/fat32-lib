@@ -19,8 +19,8 @@
  */
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSDirectoryEntry;
+import com.meetwise.fs.FsDirectory;
+import com.meetwise.fs.FsDirectoryEntry;
 import com.meetwise.fs.ReadOnlyException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Map;
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-final class FatLfnDirectory implements FSDirectory {
+final class FatLfnDirectory implements FsDirectory {
     private final Map<ShortName, LfnEntry> shortNameIndex;
     private final Map<String, LfnEntry> longNameIndex;
     private final Map<FatDirEntry, FatFile> files;
@@ -75,7 +75,7 @@ final class FatLfnDirectory implements FSDirectory {
         return file;
     }
 
-    private FSDirectory getDirectory(FatDirEntry entry) throws IOException {
+    private FsDirectory getDirectory(FatDirEntry entry) throws IOException {
         FatLfnDirectory result = directories.get(entry);
 
         if (result == null) {
@@ -259,8 +259,8 @@ final class FatLfnDirectory implements FSDirectory {
     }
 
     @Override
-    public Iterator<FSDirectoryEntry> iterator() {
-        return new Iterator<FSDirectoryEntry>() {
+    public Iterator<FsDirectoryEntry> iterator() {
+        return new Iterator<FsDirectoryEntry>() {
 
             Iterator<LfnEntry> it = shortNameIndex.values().iterator();
 
@@ -270,7 +270,7 @@ final class FatLfnDirectory implements FSDirectory {
             }
 
             @Override
-            public FSDirectoryEntry next() {
+            public FsDirectoryEntry next() {
                 return it.next();
             }
 
@@ -319,11 +319,11 @@ final class FatLfnDirectory implements FSDirectory {
      * @throws IOException {@inheritDoc}
      */
     @Override
-    public FSDirectoryEntry getEntry(String name) throws IOException {
+    public FsDirectoryEntry getEntry(String name) throws IOException {
         return getEntryImpl(name);
     }
     
-    class LfnEntry implements FSDirectoryEntry {
+    class LfnEntry implements FsDirectoryEntry {
         private String fileName;
         private final FatDirEntry realEntry;
 
@@ -390,7 +390,7 @@ final class FatLfnDirectory implements FSDirectory {
         }
 
         @Override
-        public FSDirectory getParent() {
+        public FsDirectory getParent() {
             return FatLfnDirectory.this;
         }
 
@@ -452,7 +452,7 @@ final class FatLfnDirectory implements FSDirectory {
         }
         
         @Override
-        public FSDirectory getDirectory() throws IOException {
+        public FsDirectory getDirectory() throws IOException {
             return FatLfnDirectory.this.getDirectory(realEntry);
         }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: FSFile.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: FsFile.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -24,16 +24,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * A FSFile is a representation of a single block of bytes on a filesystem. It
+ * A FsFile is a representation of a single block of bytes on a filesystem. It
  * is comparable to an inode in Unix.
  * 
- * An FSFile does not have any knowledge of who is using this file. It is also
- * possible that the system uses a single FSFile instance to create two
+ * An FsFile does not have any knowledge of who is using this file. It is also
+ * possible that the system uses a single FsFile instance to create two
  * inputstream's for two different principals.
  * 
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  */
-public interface FSFile extends FSObject {
+public interface FsFile extends FsObject {
 
     /**
      * Gets the length (in bytes) of this file.

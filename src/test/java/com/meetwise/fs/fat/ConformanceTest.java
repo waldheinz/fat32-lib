@@ -1,8 +1,8 @@
 
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSDirectoryEntry;
+import com.meetwise.fs.FsDirectory;
+import com.meetwise.fs.FsDirectoryEntry;
 import com.meetwise.fs.util.RamDisk;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
  */
 public class ConformanceTest {
     
-    private FSDirectory root;
+    private FsDirectory root;
     private FatFileSystem fs;
 
     public static void main(String[] args) throws Exception {
@@ -26,9 +26,7 @@ public class ConformanceTest {
     @Before
     public void setUp() throws Exception {
         RamDisk d = new RamDisk(512 * 1024);
-        final SuperFloppyFormatter ff = new SuperFloppyFormatter(d);
-        ff.format();
-        fs = new FatFileSystem(d, false);
+        fs = SuperFloppyFormatter.get(d).format();
         root = fs.getRoot();
     }
     
@@ -37,7 +35,7 @@ public class ConformanceTest {
         System.out.println("acceptedFileNames");
         
         root.addFile("jdom-1.0.jar");
-        final FSDirectoryEntry dir = root.addDirectory("testDir.test");
+        final FsDirectoryEntry dir = root.addDirectory("testDir.test");
         dir.getDirectory().addFile("this.should.work.toooo");
         fs.flush();
     }

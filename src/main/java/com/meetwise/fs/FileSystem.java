@@ -37,7 +37,7 @@ public interface FileSystem {
      * @return the file system's root entry
      * @throws IOException on read error
      */
-    public FSDirectory getRoot() throws IOException;
+    public FsDirectory getRoot() throws IOException;
 
     /**
      * Returns if this {@code FileSystem} is in read-only mode.

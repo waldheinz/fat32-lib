@@ -1,15 +1,14 @@
 
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FSFile;
+import com.meetwise.fs.FsDirectory;
+import com.meetwise.fs.FsDirectoryEntry;
+import com.meetwise.fs.FsFile;
 import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -31,12 +30,12 @@ public class ListAllTest {
         listDirectories(fs.getRoot(), "");
     }
     
-    private void listDirectories(FSDirectory dir, String ident) throws IOException {
+    private void listDirectories(FsDirectory dir, String ident) throws IOException {
 
-        final Iterator<FSDirectoryEntry> i = dir.iterator();
+        final Iterator<FsDirectoryEntry> i = dir.iterator();
         
         while (i.hasNext()) {
-            final FSDirectoryEntry e = i.next();
+            final FsDirectoryEntry e = i.next();
             
             if (e.isDirectory()) {
                 if (e.getName().equals(".") || e.getName().equals(".."))
@@ -50,9 +49,9 @@ public class ListAllTest {
         }
     }
     
-    private void checkFile(FSDirectoryEntry fe, String ident) throws IOException {
+    private void checkFile(FsDirectoryEntry fe, String ident) throws IOException {
         System.out.print(ident + " + " + fe.getName());
-        final FSFile f = fe.getFile();
+        final FsFile f = fe.getFile();
         
         System.out.println(" [size=" + f.getLength() + "]");
 

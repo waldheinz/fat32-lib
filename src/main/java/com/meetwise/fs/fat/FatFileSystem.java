@@ -22,7 +22,7 @@ package com.meetwise.fs.fat;
 
 import com.meetwise.fs.AbstractFileSystem;
 import com.meetwise.fs.BlockDevice;
-import com.meetwise.fs.FSDirectory;
+import com.meetwise.fs.FsDirectory;
 import java.io.IOException;
 import com.meetwise.fs.ReadOnlyException;
 
@@ -184,7 +184,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     }
     
     @Override
-    public FSDirectory getRoot() {
+    public FsDirectory getRoot() {
         checkClosed();
         
         return rootDir;

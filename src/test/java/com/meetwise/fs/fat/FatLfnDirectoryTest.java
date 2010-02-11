@@ -2,9 +2,9 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FSFile;
+import com.meetwise.fs.FsDirectory;
+import com.meetwise.fs.FsDirectoryEntry;
+import com.meetwise.fs.FsFile;
 import com.meetwise.fs.fat.FatLfnDirectory.LfnEntry;
 import com.meetwise.fs.util.RamDisk;
 import java.io.IOException;
@@ -29,8 +29,7 @@ public class FatLfnDirectoryTest {
     @Before
     public void setUp() throws IOException {
         this.dev = new RamDisk(1024 * 1024);
-        SuperFloppyFormatter sff = new SuperFloppyFormatter(dev);
-        sff.format();
+        SuperFloppyFormatter.get(dev).format().close();
         
         this.bs = BootSector.read(dev);
         this.rootDirStore = Fat16RootDirectory.read(
@@ -97,8 +96,8 @@ public class FatLfnDirectoryTest {
                 freeBefore);
         
         final LfnEntry subDir = dir.addDirectory("Directory");
-        final FSDirectoryEntry fe = subDir.getDirectory().addFile("A File");
-        final FSFile f = fe.getFile();
+        final FsDirectoryEntry fe = subDir.getDirectory().addFile("A File");
+        final FsFile f = fe.getFile();
         f.write(0, ByteBuffer.allocate(516));
 
         System.out.println("free clusters after: " +
@@ -153,8 +152,8 @@ public class FatLfnDirectoryTest {
         final LfnEntry subDirEntry = dir.addDirectory("testDir");
         assertTrue(subDirEntry.isDirectory());
         
-        final FSDirectory subDir = subDirEntry.getDirectory();
-        final FSDirectoryEntry dot = subDir.getEntry(".");
+        final FsDirectory subDir = subDirEntry.getDirectory();
+        final FsDirectoryEntry dot = subDir.getEntry(".");
         
         assertNotNull(dot);
         assertEquals(

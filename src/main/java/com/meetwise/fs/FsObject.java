@@ -1,5 +1,5 @@
 /*
- * $Id: FSObject.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: FsObject.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -25,7 +25,7 @@ package com.meetwise.fs;
  * 
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  */
-public interface FSObject {
+public interface FsObject {
 
     /**
      * Is this object still valid.
@@ -34,7 +34,7 @@ public interface FSObject {
      * filesystem. All invocations on methods (exception this method) of invalid
      * objects must throw an IOException.
      * 
-     * @return if this {@code FSObject} is still valid
+     * @return if this {@code FsObject} is still valid
      */
     public boolean isValid();
 }

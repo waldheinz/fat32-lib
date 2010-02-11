@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import com.meetwise.fs.FSDirectory;
-import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FSFile;
+import com.meetwise.fs.FsDirectory;
+import com.meetwise.fs.FsDirectoryEntry;
+import com.meetwise.fs.FsFile;
 import com.meetwise.fs.util.RamDisk;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -47,9 +47,9 @@ public class FatFileSystemTest {
         
 
         FatFileSystem fs = SuperFloppyFormatter.get(dev).format();
-        FSDirectoryEntry dirEntry =
+        FsDirectoryEntry dirEntry =
                 fs.getRoot().addFile("This is a file");
-        final FSFile fsFile = dirEntry.getFile();
+        final FsFile fsFile = dirEntry.getFile();
         byte[] nullBytes = new byte[516];
         ByteBuffer buff = ByteBuffer.wrap(nullBytes);
         buff.rewind();
@@ -62,7 +62,7 @@ public class FatFileSystemTest {
         dirEntry = fs.getRoot().getEntry("This is a file");
         assertNotNull("file is missing", dirEntry);
         assertTrue(dirEntry.isFile());
-        final FSFile file = dirEntry.getFile();
+        final FsFile file = dirEntry.getFile();
         assertNotNull(file);
         assertEquals(516, file.getLength());
     }
@@ -73,11 +73,11 @@ public class FatFileSystemTest {
 
         BlockDevice dev = new RamDisk(2 * 1024 * 1024);
         FatFileSystem fs = SuperFloppyFormatter.get(dev).format();
-        FSDirectoryEntry dirEntry =
+        FsDirectoryEntry dirEntry =
                 fs.getRoot().addDirectory("Directory");
-        FSDirectoryEntry e = dirEntry.getDirectory().addFile(
+        FsDirectoryEntry e = dirEntry.getDirectory().addFile(
                     "This is a file");
-        final FSFile fsFile = e.getFile();
+        final FsFile fsFile = e.getFile();
         byte[] nullBytes = new byte[516];
         ByteBuffer buff = ByteBuffer.wrap(nullBytes);
         buff.rewind();
@@ -122,13 +122,13 @@ public class FatFileSystemTest {
         assertEquals(1536, FatUtils.getFatOffset(bs, 1));
         assertEquals(2560, FatUtils.getRootDirOffset(bs));
 
-        final FSDirectory fatRootDir = fatFs.getRoot();
+        final FsDirectory fatRootDir = fatFs.getRoot();
 
-        Iterator<FSDirectoryEntry> i = fatRootDir.iterator();
+        Iterator<FsDirectoryEntry> i = fatRootDir.iterator();
         assertTrue (i.hasNext());
 
         while (i.hasNext()) {
-            final FSDirectoryEntry e = i.next();
+            final FsDirectoryEntry e = i.next();
             System.out.println("     - " + e);
         }
     }
@@ -166,9 +166,9 @@ public class FatFileSystemTest {
         assertEquals(0x2a00, FatUtils.getFatOffset(bs, 1));
         assertEquals(0x5200, FatUtils.getRootDirOffset(bs));
         
-        final FSDirectory fatRootDir = fatFs.getRoot();
+        final FsDirectory fatRootDir = fatFs.getRoot();
         
-        FSDirectoryEntry entry = fatRootDir.getEntry("testFile");
+        FsDirectoryEntry entry = fatRootDir.getEntry("testFile");
         assertTrue(entry.isFile());
         assertFalse(entry.isDirectory());
 
@@ -179,17 +179,17 @@ public class FatFileSystemTest {
 //        assertEquals(1250906972000l, entry.getLastModified());
 //        assertEquals(1250899200000l, entry.getLastAccessed());
         
-        FSFile file = entry.getFile();
+        FsFile file = entry.getFile();
         assertEquals(8, file.getLength());
         
-        final FSDirectory rootDir = fatFs.getRoot();
+        final FsDirectory rootDir = fatFs.getRoot();
         System.out.println("   rootDir = " + rootDir);
 
-        Iterator<FSDirectoryEntry> i = rootDir.iterator();
+        Iterator<FsDirectoryEntry> i = rootDir.iterator();
         assertTrue (i.hasNext());
         
         while (i.hasNext()) {
-            final FSDirectoryEntry e = i.next();
+            final FsDirectoryEntry e = i.next();
             System.out.println("     - " + e);
         }
 
@@ -198,13 +198,13 @@ public class FatFileSystemTest {
         assertTrue(entry.isDirectory());
         assertFalse(entry.isFile());
 
-        final FSDirectory testDir = entry.getDirectory();
+        final FsDirectory testDir = entry.getDirectory();
         System.out.println("   testDir = " + testDir);
         
         i = testDir.iterator();
         
         while (i.hasNext()) {
-            final FSDirectoryEntry e = i.next();
+            final FsDirectoryEntry e = i.next();
             System.out.println("     - " + e);
         }
         
@@ -238,22 +238,22 @@ public class FatFileSystemTest {
         assertEquals(16384 + bs.getSectorsPerFat() * bs.getBytesPerSector(),
                 FatUtils.getFatOffset(bs, 1));
         
-        final FSDirectory rootDir = fatFs.getRoot();
+        final FsDirectory rootDir = fatFs.getRoot();
         System.out.println("   rootDir = " + rootDir);
         
-        Iterator<FSDirectoryEntry> i = rootDir.iterator();
+        Iterator<FsDirectoryEntry> i = rootDir.iterator();
         assertTrue(i.hasNext());
         
         while (i.hasNext()) {
-            final FSDirectoryEntry e = i.next();
+            final FsDirectoryEntry e = i.next();
             System.out.println("     - " + e);
         }
 
-        FSDirectoryEntry e = rootDir.getEntry("Langer Verzeichnisname");
+        FsDirectoryEntry e = rootDir.getEntry("Langer Verzeichnisname");
         assertTrue(e.isDirectory());
         assertFalse(e.isFile());
 
-        final FSDirectory dir = e.getDirectory();
+        final FsDirectory dir = e.getDirectory();
         i = dir.iterator();
         assertTrue(i.hasNext());
         
@@ -273,13 +273,13 @@ public class FatFileSystemTest {
         final RamDisk rd = RamDisk.readGzipped(is);
         FatFileSystem fatFs = new FatFileSystem(rd, false);
         assertEquals(FatType.FAT32, fatFs.getFatType());
-        FSDirectory rootDir = fatFs.getRoot();
+        FsDirectory rootDir = fatFs.getRoot();
 
         for (int i=0; i < 1024; i++) {
-            final FSDirectoryEntry e = rootDir.addFile("f-" + i);
+            final FsDirectoryEntry e = rootDir.addFile("f-" + i);
             assertTrue(e.isFile());
             assertFalse(e.isDirectory());
-            final FSFile f = e.getFile();
+            final FsFile f = e.getFile();
             
             f.write(0, ByteBuffer.wrap(("this is file # " + i).getBytes()));
         }

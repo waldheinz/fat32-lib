@@ -1,5 +1,5 @@
 /*
- * $Id: FSDirectoryEntry.java 4975 2009-02-02 08:30:52Z lsantha $
+ * $Id: FsDirectoryEntry.java 4975 2009-02-02 08:30:52Z lsantha $
  *
  * Copyright (C) 2003-2009 JNode.org
  *
@@ -29,17 +29,17 @@ import java.util.Comparator;
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public interface FSDirectoryEntry extends FSObject {
+public interface FsDirectoryEntry extends FsObject {
 
     /**
      * Compares directory entries alphabetically, with all directories coming
      * before all files.
      */
-    public final static Comparator<FSDirectoryEntry> DIRECTORY_ENTRY_COMPARATOR =
-            new Comparator<FSDirectoryEntry>() {
+    public final static Comparator<FsDirectoryEntry> DIRECTORY_ENTRY_COMPARATOR =
+            new Comparator<FsDirectoryEntry>() {
 
         @Override
-        public int compare(FSDirectoryEntry e1, FSDirectoryEntry e2) {
+        public int compare(FsDirectoryEntry e1, FsDirectoryEntry e2) {
             if (e2.isDirectory() == e1.isDirectory()) {
                 /* compare names */
                 return e1.getName().compareTo(e2.getName());
@@ -62,7 +62,7 @@ public interface FSDirectoryEntry extends FSObject {
      * 
      * @return the parent directory of this entry, or {@code null}
      */
-    public FSDirectory getParent();
+    public FsDirectory getParent();
 
     /**
      * Gets the last modification time of this entry.
@@ -127,7 +127,7 @@ public interface FSDirectoryEntry extends FSObject {
      * @return the file described by this entry
      * @throws IOException on error accessing the file
      */
-    public FSFile getFile() throws IOException;
+    public FsFile getFile() throws IOException;
 
     /**
      * Gets the directory this entry refers to. This method can only be called
@@ -136,7 +136,7 @@ public interface FSDirectoryEntry extends FSObject {
      * @return The directory described by this entry
      * @throws IOException on read error
      */
-    public FSDirectory getDirectory() throws IOException;
+    public FsDirectory getDirectory() throws IOException;
     
     /**
      * Indicate if the entry has been modified in memory (ie need to be saved)

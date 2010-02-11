@@ -29,7 +29,7 @@ import java.util.Iterator;
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte
  */
-public interface FSDirectory extends Iterable<FSDirectoryEntry> {
+public interface FsDirectory extends Iterable<FsDirectoryEntry> {
 
     /**
      * Gets an iterator to iterate over the entries of this directory.
@@ -37,7 +37,7 @@ public interface FSDirectory extends Iterable<FSDirectoryEntry> {
      * @return the directory iterator
      */
     @Override
-    public Iterator<FSDirectoryEntry> iterator();
+    public Iterator<FsDirectoryEntry> iterator();
 
     /**
      * Gets the entry with the given name.
@@ -46,7 +46,7 @@ public interface FSDirectory extends Iterable<FSDirectoryEntry> {
      * @return the entry, if it existed
      * @throws IOException on error retrieving the entry
      */
-    public FSDirectoryEntry getEntry(String name) throws IOException;
+    public FsDirectoryEntry getEntry(String name) throws IOException;
 
     /**
      * Add a new file with a given name to this directory.
@@ -55,7 +55,7 @@ public interface FSDirectory extends Iterable<FSDirectoryEntry> {
      * @return the entry pointing to the new file
      * @throws IOException on error creating the file
      */
-    public FSDirectoryEntry addFile(String name) throws IOException;
+    public FsDirectoryEntry addFile(String name) throws IOException;
 
     /**
      * Add a new (sub-)directory with a given name to this directory.
@@ -64,7 +64,7 @@ public interface FSDirectory extends Iterable<FSDirectoryEntry> {
      * @return the entry pointing to the new directory
      * @throws IOException on error creating the directory
      */
-    public FSDirectoryEntry addDirectory(String name) throws IOException;
+    public FsDirectoryEntry addDirectory(String name) throws IOException;
 
     /**
      * Remove the entry with the given name from this directory.

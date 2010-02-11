@@ -2,7 +2,7 @@
 package com.meetwise.fs.fat;
 
 import java.io.IOException;
-import com.meetwise.fs.FSFile;
+import com.meetwise.fs.FsFile;
 import com.meetwise.fs.ReadOnlyException;
 import java.io.EOFException;
 import java.nio.ByteBuffer;
@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
  * 
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-final class FatFile extends FatObject implements FSFile {
+final class FatFile extends FatObject implements FsFile {
     private final FatDirEntry entry;
     private final ClusterChain chain;
     

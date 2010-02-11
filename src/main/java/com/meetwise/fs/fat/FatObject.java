@@ -20,12 +20,12 @@
  
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FSObject;
+import com.meetwise.fs.FsObject;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public abstract class FatObject implements FSObject {
+public abstract class FatObject implements FsObject {
     
     /** 
      * Is this object still valid?

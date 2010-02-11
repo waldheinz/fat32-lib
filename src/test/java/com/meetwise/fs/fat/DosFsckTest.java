@@ -1,7 +1,7 @@
 package com.meetwise.fs.fat;
 
-import com.meetwise.fs.FSDirectoryEntry;
-import com.meetwise.fs.FSFile;
+import com.meetwise.fs.FsDirectoryEntry;
+import com.meetwise.fs.FsFile;
 import com.meetwise.fs.util.FileDisk;
 import java.io.File;
 import java.io.IOException;
@@ -42,10 +42,8 @@ public class DosFsckTest {
         System.out.println("volumeLabel");
 
         this.dev = FileDisk.create(file, 128 * 1024 * 1024);
-        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
-        f.setFatType(FatType.FAT32);
-        f.setVolumeLabel("Cool Vol");
-        f.format();
+        SuperFloppyFormatter.get(dev).setFatType(FatType.FAT32).
+                setVolumeLabel("Cool Vol").format();
 
         runFsck();
     }
@@ -56,9 +54,7 @@ public class DosFsckTest {
         System.out.println("fat32Write");
 
         this.dev = FileDisk.create(file, 128 * 1024 * 1024);
-        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
-        f.setFatType(FatType.FAT32);
-        f.format();
+        SuperFloppyFormatter.get(dev).setFatType(FatType.FAT32).format();
         
         FatFileSystem fs = new FatFileSystem(dev, false);
         final FatLfnDirectory rootDir = (FatLfnDirectory) fs.getRoot();
@@ -66,9 +62,9 @@ public class DosFsckTest {
         FatLfnDirectory.LfnEntry entry = rootDir.addDirectory("Directory");
         
         for (int i = 0; i < 1; i++) {
-            final FSDirectoryEntry e = entry.getDirectory().addFile(
+            final FsDirectoryEntry e = entry.getDirectory().addFile(
                     "This is file number " + i);
-            final FSFile fsFile = e.getFile();
+            final FsFile fsFile = e.getFile();
             
             byte[] nullBytes = new byte[516];
             ByteBuffer buff = ByteBuffer.wrap(nullBytes);
@@ -87,11 +83,7 @@ public class DosFsckTest {
         System.out.println("createFat32");
 
         this.dev = FileDisk.create(file, 128 * 1024 * 1024);
-
-        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
-        f.setFatType(FatType.FAT32);
-        f.format();
-
+        SuperFloppyFormatter.get(dev).setFatType(FatType.FAT32).format();
         runFsck();
     }
 
@@ -101,11 +93,7 @@ public class DosFsckTest {
         System.out.println("createFat16");
 
         this.dev = FileDisk.create(file, 16 * 1024 * 1024);
-
-        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
-        f.setFatType(FatType.FAT16);
-        f.format();
-
+        SuperFloppyFormatter.get(dev).setFatType(FatType.FAT16).format();
         runFsck();
     }
 
@@ -115,11 +103,7 @@ public class DosFsckTest {
         System.out.println("createFat12");
 
         this.dev = FileDisk.create(file, 2 * 1024 * 1024);
-
-        SuperFloppyFormatter f = new SuperFloppyFormatter(dev);
-        f.setFatType(FatType.FAT12);
-        f.format();
-
+        SuperFloppyFormatter.get(dev).setFatType(FatType.FAT12).format();
         runFsck();
     }
     
