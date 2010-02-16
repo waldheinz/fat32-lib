@@ -102,13 +102,13 @@ public final class FatFileSystem extends AbstractFileSystem {
             
     }
 
-    public long getFilesOffset() {
+    long getFilesOffset() {
         checkClosed();
         
         return filesOffset;
     }
     
-    public FatType getFatType() {
+    FatType getFatType() {
         checkClosed();
 
         return this.fatType;
@@ -204,7 +204,7 @@ public final class FatFileSystem extends AbstractFileSystem {
      * 
      * @return BootSector
      */
-    public BootSector getBootSector() {
+    BootSector getBootSector() {
         checkClosed();
         
         return bs;

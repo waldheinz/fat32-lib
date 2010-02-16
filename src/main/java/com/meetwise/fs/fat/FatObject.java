@@ -25,7 +25,7 @@ import com.meetwise.fs.FsObject;
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public abstract class FatObject implements FsObject {
+abstract class FatObject implements FsObject {
     
     /** 
      * Is this object still valid?

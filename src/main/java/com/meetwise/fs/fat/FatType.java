@@ -27,7 +27,7 @@ package com.meetwise.fs.fat;
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public enum FatType {
+enum FatType {
 
     /**
      * For a 12-bit file allocation table.

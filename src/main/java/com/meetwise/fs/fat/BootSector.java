@@ -32,7 +32,7 @@ import java.nio.ByteOrder;
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public abstract class BootSector extends Sector {
+abstract class BootSector extends Sector {
 
     /**
      * Offset to the byte specifying the number of FATs.

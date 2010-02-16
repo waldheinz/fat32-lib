@@ -9,7 +9,7 @@ import java.io.IOException;
  *
  * @author Matthias Treydte &lt;matthias.treydte at meetwise.com&gt;
  */
-public final class Fat32BootSector extends BootSector {
+final class Fat32BootSector extends BootSector {
 
     /**
      * The offset to the entry specifying the first cluster of the FAT32
