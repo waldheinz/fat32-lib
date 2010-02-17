@@ -91,13 +91,13 @@
         <snapshotRepository>
             <uniqueVersion>true</uniqueVersion>
             <id>waldheinz.de</id>
-            <url>ftp://waldheinz.de/snapshots/fat32-lib</url>
+            <url>ftp://waldheinz.de/maven/snapshots/fat32-lib</url>
             <layout>default</layout>
         </snapshotRepository>
 
         <site>
             <id>waldheinz.de</id>
-            <url>ftp://waldheinz.de/site/fat32-lib</url>
+            <url>ftp://waldheinz.de/maven/site/fat32-lib</url>
         </site>
     </distributionManagement>
 
