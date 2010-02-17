@@ -21,7 +21,6 @@
 package com.meetwise.fs.fat;
 
 import com.meetwise.fs.BlockDevice;
-import com.meetwise.fs.Sector;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

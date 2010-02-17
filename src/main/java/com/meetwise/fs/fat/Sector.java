@@ -1,6 +1,7 @@
 
-package com.meetwise.fs;
+package com.meetwise.fs.fat;
 
+import com.meetwise.fs.BlockDevice;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -9,7 +10,7 @@ import java.nio.ByteOrder;
  * 
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-public class Sector {
+class Sector {
     private final BlockDevice device;
     private final long offset;
 
