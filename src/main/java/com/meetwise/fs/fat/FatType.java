@@ -27,7 +27,7 @@ package com.meetwise.fs.fat;
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-enum FatType {
+public enum FatType {
 
     /**
      * For a 12-bit file allocation table.
@@ -35,7 +35,7 @@ enum FatType {
     FAT12((1 << 12) - 16, 0xFFFL, 1.5f, "FAT12   ") {
 
         @Override
-        public long readEntry(byte[] data, int index) {
+        long readEntry(byte[] data, int index) {
             final int idx = (int) (index * 1.5);
             final int b1 = data[idx] & 0xFF;
             final int b2 = data[idx + 1] & 0xFF;
@@ -49,7 +49,7 @@ enum FatType {
         }
 
         @Override
-        public void writeEntry(byte[] data, int index, long entry) {
+        void writeEntry(byte[] data, int index, long entry) {
             final int idx = (int) (index * 1.5);
             
             if ((index % 2) == 0) {
@@ -68,7 +68,7 @@ enum FatType {
     FAT16((1 << 16) - 16, 0xFFFFL, 2.0f, "FAT16   ") {
         
         @Override
-        public long readEntry(byte[] data, int index) {
+        long readEntry(byte[] data, int index) {
             final int idx = index << 1;
             final int b1 = data[idx] & 0xFF;
             final int b2 = data[idx + 1] & 0xFF;
@@ -76,7 +76,7 @@ enum FatType {
         }
 
         @Override
-        public void writeEntry(byte[] data, int index, long entry) {
+        void writeEntry(byte[] data, int index, long entry) {
             final int idx = index << 1;
             data[idx] = (byte) (entry & 0xFF);
             data[idx + 1] = (byte) ((entry >> 8) & 0xFF);
@@ -89,7 +89,7 @@ enum FatType {
     FAT32((1 << 28) - 16, 0xFFFFFFFFL, 4.0f, "FAT32   ") {
 
         @Override
-        public long readEntry(byte[] data, int index) {
+        long readEntry(byte[] data, int index) {
             final int idx = index * 4;
             final long l1 = data[idx] & 0xFF;
             final long l2 = data[idx + 1] & 0xFF;
@@ -99,7 +99,7 @@ enum FatType {
         }
 
         @Override
-        public void writeEntry(byte[] data, int index, long entry) {
+        void writeEntry(byte[] data, int index, long entry) {
             final int idx = index << 2;
             data[idx] = (byte) (entry & 0xFF);
             data[idx + 1] = (byte) ((entry >> 8) & 0xFF);
@@ -139,7 +139,7 @@ enum FatType {
      *
      * @return the maximum cluster count supported
      */
-    public long maxClusters() {
+    long maxClusters() {
         return this.maxClusters;
     }
     
@@ -149,7 +149,7 @@ enum FatType {
      *
      * @return the boot sector label for this FAT type.
      */
-    public String getLabel() {
+    String getLabel() {
         return this.label;
     }
 
