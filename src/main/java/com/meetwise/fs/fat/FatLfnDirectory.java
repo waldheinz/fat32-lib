@@ -24,6 +24,7 @@ import com.meetwise.fs.FsDirectoryEntry;
 import com.meetwise.fs.ReadOnlyException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -233,9 +234,7 @@ final class FatLfnDirectory implements FsDirectory {
 
         for (LfnEntry currentEntry : shortNameIndex.values()) {
             AbstractDirectoryEntry[] encoded = currentEntry.compactForm();
-            for (int i = 0; i < encoded.length; i++) {
-                destination.add(encoded[i]);
-            }
+            destination.addAll(Arrays.asList(encoded));
         }
 
         final int size = destination.size();
