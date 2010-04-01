@@ -130,10 +130,10 @@ final class Fat {
 
         entries = new long[(int) ((sectorCount * sectorSize) /
                 fatType.getEntrySize())];
-
-        assert (lastClusterIndex <= entries.length) :
-            "last cluster idx=" + lastClusterIndex +
-            ", entries=" + entries.length;
+                
+        if (lastClusterIndex > entries.length) throw new IOException(
+            "file system has " + lastClusterIndex +
+            "clusters but only " + entries.length + " FAT entries");
     }
     
     public FatType getFatType() {
