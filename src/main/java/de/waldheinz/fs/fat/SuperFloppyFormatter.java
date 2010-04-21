@@ -6,6 +6,22 @@ import java.io.IOException;
 import java.util.Random;
 
 /**
+ * <p>
+ * Allows to create FAT file systems on {@link BlockDevice}s which follow the
+ * "super floppy" standard. This means that the device will be formatted so
+ * that it does not contain a partition table. Instead, the entire device holds
+ * a single FAT file system.
+ * </p><p>
+ * This class follows the "builder" pattern, which means it's methods always
+ * returns the {@code SuperFloppyFormatter} instance they're called on. This
+ * allows to chain the method calls like this:
+ * <pre>
+ *  BlockDevice dev = new RamDisk(16700000);
+ *  FatFileSystem fs = SuperFloppyFormatter.get(dev).
+ *          setFatType(FatType.FAT12).format();
+ * </pre>
+ * 
+ * </p>
  *
  * @author Matthias Treydte &lt;matthias.treydte at meetwise.com&gt;
  */
@@ -121,7 +137,7 @@ public final class SuperFloppyFormatter {
     }
     
     /**
-     * Initializes the boot sector and files system for the device. The file
+     * Initializes the boot sector and file system for the device. The file
      * system created by this method will always be in read-write mode.
      *
      * @return the file system that was created
@@ -201,7 +217,7 @@ public final class SuperFloppyFormatter {
             fat.writeCopy(FatUtils.getFatOffset(bs, i));
         }
 
-        FatFileSystem fs = new FatFileSystem(device, false);
+        FatFileSystem fs = FatFileSystem.read(device, false);
 
         if (label != null) {
             fs.setVolumeLabel(label);

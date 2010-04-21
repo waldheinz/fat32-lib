@@ -31,6 +31,6 @@ public class FileSystemFactory {
     public static FileSystem create(BlockDevice device, boolean readOnly)
             throws UnknownFileSystemException, IOException {
             
-        return new FatFileSystem(device, readOnly);
+        return FatFileSystem.read(device, readOnly);
     }
 }

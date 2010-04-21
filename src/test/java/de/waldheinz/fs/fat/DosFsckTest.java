@@ -1,9 +1,5 @@
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.FatFileSystem;
-import de.waldheinz.fs.fat.FatType;
-import de.waldheinz.fs.fat.SuperFloppyFormatter;
-import de.waldheinz.fs.fat.FatLfnDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
 import de.waldheinz.fs.FsFile;
 import de.waldheinz.fs.util.FileDisk;

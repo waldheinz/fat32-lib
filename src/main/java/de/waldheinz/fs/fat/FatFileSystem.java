@@ -27,7 +27,14 @@ import java.io.IOException;
 import de.waldheinz.fs.ReadOnlyException;
 
 /**
- * 
+ * <p>
+ * Implements the {@code FileSystem} interface for the FAT family of file
+ * systems. This class always uses the "long file name" specification when
+ * writing directory entries.
+ * </p><p>
+ * For creating (aka "formatting") FAT file systems please refer to the
+ * {@link SuperFloppyFormatter} class.
+ * </p>
  *
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
@@ -42,8 +49,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     private final FatType fatType;
     private final long filesOffset;
 
-    public FatFileSystem(BlockDevice api, boolean readOnly)
-            throws IOException {
+    FatFileSystem(BlockDevice api, boolean readOnly) throws IOException {
 
         this(api, readOnly, false);
     }
@@ -56,7 +62,7 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @param ignoreFatDifferences
      * @throws IOException on read error
      */
-    public FatFileSystem(BlockDevice device, boolean readOnly,
+    private FatFileSystem(BlockDevice device, boolean readOnly,
             boolean ignoreFatDifferences)
             throws IOException {
         
@@ -100,6 +106,23 @@ public final class FatFileSystem extends AbstractFileSystem {
 
         this.rootDir = new FatLfnDirectory(rootDirStore, fat);
             
+    }
+
+    /**
+     * Reads the file system structure from the specified {@code BlockDevice}
+     * and returns a fresh {@code FatFileSystem} instance to read or modify
+     * it.
+     *
+     * @param device the {@code BlockDevice} holding the file system
+     * @param readOnly if the {@code FatFileSystem} should be in read-only mode
+     * @return the {@code FatFileSystem} instance for the device
+     * @throws IOException on read error or if the file system structure could
+     *      not be parsed
+     */
+    public static FatFileSystem read (BlockDevice device, boolean readOnly)
+            throws IOException {
+        
+        return new FatFileSystem(device, readOnly);
     }
 
     long getFilesOffset() {

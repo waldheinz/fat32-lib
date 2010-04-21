@@ -21,8 +21,8 @@
 package de.waldheinz.fs.fat;
 
 /**
- * The different entry sizes of 12, 16 and 32 bits per entry for the different
- * FAT implementations.
+ * Enumerates the different entry sizes of 12, 16 and 32 bits for the different
+ * FAT flavours.
  *
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
@@ -30,7 +30,7 @@ package de.waldheinz.fs.fat;
 public enum FatType {
 
     /**
-     * For a 12-bit file allocation table.
+     * Represents a 12-bit file allocation table.
      */
     FAT12((1 << 12) - 16, 0xFFFL, 1.5f, "FAT12   ") {
 
@@ -63,7 +63,7 @@ public enum FatType {
     },
 
     /**
-     * For a 16-bit file allocation table.
+     * Represents a 16-bit file allocation table.
      */
     FAT16((1 << 16) - 16, 0xFFFFL, 2.0f, "FAT16   ") {
         
@@ -84,7 +84,7 @@ public enum FatType {
     },
     
     /**
-     * For a 32-bit file allocation table.
+     * Represents a 32-bit file allocation table.
      */
     FAT32((1 << 28) - 16, 0xFFFFFFFFL, 4.0f, "FAT32   ") {
 
@@ -169,7 +169,7 @@ public enum FatType {
         return entrySize;
     }
     
-    public long getBitMask() {
+    long getBitMask() {
         return bitMask;
     }
 }

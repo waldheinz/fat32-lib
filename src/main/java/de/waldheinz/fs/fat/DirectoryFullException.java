@@ -6,11 +6,11 @@ import java.io.IOException;
 /**
  * Gets thrown when either
  * <ul>
- * <li>a {@link Fat16RootDirectory} becomes full</li>
- * <li>or an {@link ClusterChainDirectory} grows beyond it's
+ * <li>a {@link Fat16RootDirectory} becomes full or</li>
+ * <li>a {@link ClusterChainDirectory} grows beyond it's
  *      {@link ClusterChainDirectory#MAX_SIZE maximum size}
  * </ul>
- *
+ * 
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public final class DirectoryFullException extends IOException {
