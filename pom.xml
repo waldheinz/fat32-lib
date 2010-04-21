@@ -1,24 +1,41 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.meetwise.fs</groupId>
+    <groupId>de.waldheinz</groupId>
     <artifactId>fat32-lib</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
-
-    <name>fat32-lib</name>
-
-    <description>
-        A Java library for manipulating FAT file systems.
-    </description>
-
+    <version>0.5</version>
+    <name>FAT32 Library</name>
+    <description>A library for manipulating FAT file systems.</description>
     <url>http://code.google.com/p/fat32-lib/</url>
-
+    
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License, version 2.1</name>
+            <url>http://www.gnu.org/licenses/lgpl-2.1.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    
+    <scm>
+        <url>
+            http://code.google.com/p/fat32-lib/source/browse/
+        </url>
+        
+        <connection>
+            scm:hg:https://fat32-lib.googlecode.com/hg/
+        </connection>
+        
+        <developerConnection>
+            scm:hg:https://fat32-lib.googlecode.com/hg/
+        </developerConnection>
+    </scm>
+    
     <issueManagement>
-        <system>Google Code</system>
+        <system>Google Code issue tracker</system>
         <url>http://code.google.com/p/fat32-lib/issues/list</url>
     </issueManagement>
-
+    
     <build>
         <plugins>
             <plugin>
@@ -52,14 +69,6 @@
                 <artifactId>emma-maven-plugin</artifactId>
             </plugin>
         </plugins>
-        <!--
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ftp</artifactId>
-            </extension>
-        </extensions>
-        -->
     </build>
 
     <reporting>
@@ -69,7 +78,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
             </plugin>
-
+            
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
@@ -84,22 +93,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <distributionManagement>
-        <downloadUrl>http://waldheinz.de/maven/snapshots/fat32-lib</downloadUrl>
-
-        <snapshotRepository>
-            <uniqueVersion>true</uniqueVersion>
-            <id>waldheinz.de</id>
-            <url>ftp://waldheinz.de/maven/snapshots/fat32-lib</url>
-            <layout>default</layout>
-        </snapshotRepository>
-
-        <site>
-            <id>waldheinz.de</id>
-            <url>ftp://waldheinz.de/maven/site/fat32-lib</url>
-        </site>
-    </distributionManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
