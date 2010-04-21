@@ -179,7 +179,7 @@ final class AbstractDirectoryEntry extends FatObject {
         this.dir.setDirty();
     }
 
-    public final boolean isDirty() {
+    public boolean isDirty() {
         return this.dirty;
     }
 

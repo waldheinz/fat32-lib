@@ -125,7 +125,7 @@ final class ClusterChain extends FatObject {
      *
      * @return the length of this chain
      */
-    public final int getChainLength() {
+    public int getChainLength() {
         if (getStartCluster() == 0) return 0;
         
         final long[] chain = getFat().getChain(getStartCluster());
@@ -140,7 +140,7 @@ final class ClusterChain extends FatObject {
      * @throws IOException on error updating the chain length
      * @see #setSize(long) 
      */
-    public final void setChainLength(int nrClusters) throws IOException {
+    public void setChainLength(int nrClusters) throws IOException {
         if (nrClusters < 0) throw new IllegalArgumentException(
                 "negative cluster count"); //NOI18N
                 

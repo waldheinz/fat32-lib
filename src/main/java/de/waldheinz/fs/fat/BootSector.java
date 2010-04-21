@@ -151,7 +151,7 @@ abstract class BootSector extends Sector {
      *
      * @return the number of bytes usable for storing user data
      */
-    private final long getDataSize() {
+    private long getDataSize() {
         return (getSectorCount() * getBytesPerSector()) -
                 FatUtils.getFilesOffset(this);
     }

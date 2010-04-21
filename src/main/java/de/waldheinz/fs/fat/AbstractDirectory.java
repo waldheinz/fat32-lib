@@ -218,7 +218,7 @@ abstract class AbstractDirectory {
     /**
      * Mark this directory as not dirty.
      */
-    private final void resetDirty() {
+    private void resetDirty() {
         this.dirty = false;
     }
     
@@ -237,10 +237,11 @@ abstract class AbstractDirectory {
                     new AbstractDirectoryEntry(this);
             labelEntry.setFlags(AbstractDirectoryEntry.F_VOLUME_ID);
             
-            for (int i=0; i < volumeLabel.length(); i++) {
-                labelEntry.getData()[i] = volumeLabel.getBytes()[i];
-            }
-            
+            System.arraycopy(
+                    volumeLabel.getBytes(), 0,
+                    labelEntry.getData(), 0,
+                    volumeLabel.length());
+
             labelEntry.write(data.array(), 0);
         } else {
             volLabelOffset = 0;
