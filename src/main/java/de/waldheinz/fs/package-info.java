@@ -1,7 +1,7 @@
 
 /**
  * Contains the file-system independent classes and interfaces, as well as
- * the {@link com.meetwise.fs.FileSystemFactory} for creating
- * {@link com.meetwise.fs.FileSystem} instances.
+ * the {@link de.waldheinz.fs.FileSystemFactory} for creating
+ * {@link de.waldheinz.fs.FileSystem} instances.
  */
 package de.waldheinz.fs;

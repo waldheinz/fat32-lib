@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Comparator;
 
 /**
- * Represents one entry in a {@link FSDirectory}.
+ * Represents one entry in a {@link FsDirectory}.
  * 
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
