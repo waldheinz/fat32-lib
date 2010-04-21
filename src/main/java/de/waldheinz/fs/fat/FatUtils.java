@@ -21,7 +21,6 @@
 package de.waldheinz.fs.fat;
 
 import java.io.IOException;
-import de.waldheinz.fs.util.LittleEndian;
 
 /**
  * <description>

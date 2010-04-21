@@ -20,8 +20,6 @@
  
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.util.DosUtils;
-import de.waldheinz.fs.util.LittleEndian;
 import java.io.IOException;
 
 /**

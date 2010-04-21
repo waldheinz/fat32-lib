@@ -20,8 +20,6 @@
  
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.util.LittleEndian;
-
 /**
  *
  * @author gbin

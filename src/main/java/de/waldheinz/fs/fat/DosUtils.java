@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package de.waldheinz.fs.util;
+package de.waldheinz.fs.fat;
 
 import java.util.Calendar;
 
@@ -28,7 +28,7 @@ import java.util.Calendar;
  * 
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  */
-public class DosUtils {
+final class DosUtils {
 
     private DosUtils() { /* no instances */ }
 

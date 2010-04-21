@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package de.waldheinz.fs.util;
+package de.waldheinz.fs.fat;
 
 
 /**
@@ -26,7 +26,7 @@ package de.waldheinz.fs.util;
  *
  * @author Ewout Prangsma &lt;epr at users.sourceforge.net&gt;
  */
-public class LittleEndian {
+final class LittleEndian {
 
     private LittleEndian() { /* no instances */ }
     
