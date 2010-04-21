@@ -16,8 +16,9 @@ public class FileSystemFactory {
     /**
      * <p>
      * Creates a new {@link FileSystem} for the specified {@code device}. When
-     * using this method, care must be taken that there are no two file systems
-     * existing on the same {@link BlockDevice}.
+     * using this method, care must be taken that there is only one
+     * {@code FileSystems} accessing the specified {@link BlockDevice}.
+     * Otherwise severe file system corruption may occur.
      * </p>
      *
      * @param device the device to create the file system for

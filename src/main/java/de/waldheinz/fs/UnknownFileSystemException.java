@@ -4,8 +4,8 @@ package de.waldheinz.fs;
 import java.io.IOException;
 
 /**
- * Indicates that it was not possible to determine the file system being
- * used on a block device.
+ * Indicates that it was not possible to determine the type of the file
+ * system being used on a block device.
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
