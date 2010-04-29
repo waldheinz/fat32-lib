@@ -32,7 +32,7 @@ public enum FatType {
     /**
      * Represents a 12-bit file allocation table.
      */
-    FAT12((1 << 12) - 16, 0xFFFL, 1.5f, "FAT12   ") {
+    FAT12((1 << 12) - 16, 0xFFFL, 1.5f, "FAT12   ") { //NOI18N
 
         @Override
         long readEntry(byte[] data, int index) {
@@ -65,7 +65,7 @@ public enum FatType {
     /**
      * Represents a 16-bit file allocation table.
      */
-    FAT16((1 << 16) - 16, 0xFFFFL, 2.0f, "FAT16   ") {
+    FAT16((1 << 16) - 16, 0xFFFFL, 2.0f, "FAT16   ") { //NOI18N
         
         @Override
         long readEntry(byte[] data, int index) {
@@ -86,7 +86,7 @@ public enum FatType {
     /**
      * Represents a 32-bit file allocation table.
      */
-    FAT32((1 << 28) - 16, 0xFFFFFFFFL, 4.0f, "FAT32   ") {
+    FAT32((1 << 28) - 16, 0xFFFFFFFFL, 4.0f, "FAT32   ") { //NOI18N
 
         @Override
         long readEntry(byte[] data, int index) {
@@ -147,7 +147,7 @@ public enum FatType {
      * Returns the human-readable FAT name string as written to the
      * {@link com.meetwise.fs.BootSector}.
      *
-     * @return the boot sector label for this FAT type.
+     * @return the boot sector label for this FAT type
      */
     String getLabel() {
         return this.label;
