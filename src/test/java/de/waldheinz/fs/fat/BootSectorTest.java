@@ -1,9 +1,6 @@
 
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.Fat16BootSector;
-import de.waldheinz.fs.fat.BootSector;
-import de.waldheinz.fs.fat.Fat32BootSector;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
 import org.junit.Test;
@@ -16,12 +13,28 @@ import static org.junit.Assert.*;
 public class BootSectorTest {
 
     @Test
+    public void testSectorsPerCluster() throws IOException {
+        System.out.println("sectorsPerCluster");
+
+        RamDisk rd = new RamDisk(1024 * 1024);
+        BootSector bs = new Fat16BootSector(rd);
+        bs.init();
+        bs.setSectorsPerCluster(1);
+        bs.write();
+
+        bs = BootSector.read(rd);
+        assertEquals(1, bs.getSectorsPerCluster());
+    }
+
+    @Test
     public void testGetDataClusterCount() throws IOException {
         System.out.println("getDataClusterCount");
 
         RamDisk rd = new RamDisk(1024 * 1024);
         BootSector bs = new Fat16BootSector(rd);
         bs.init();
+        bs.setSectorsPerCluster(2);
+        bs.setSectorCount(2048);
 
         assertTrue(bs.getDataClusterCount() > 0);
     }
@@ -33,6 +46,7 @@ public class BootSectorTest {
         RamDisk rd = new RamDisk(512);
         BootSector bs = new Fat32BootSector(rd);
         bs.init();
+        bs.setSectorsPerCluster(2);
         bs.setNrFats(2);
         bs.write();
 

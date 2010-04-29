@@ -135,7 +135,21 @@ public final class SuperFloppyFormatter {
     public String getVolumeLabel() {
         return label;
     }
-    
+
+    private void initBootSector(BootSector bs)
+            throws IOException {
+        
+        bs.init();
+        bs.setFileSystemTypeLabel(fatType.getLabel());
+        bs.setNrReservedSectors(reservedSectors);
+        bs.setNrFats(fatCount);
+        bs.setSectorsPerCluster(sectorsPerCluster);
+        bs.setMediumDescriptor(MEDIUM_DESCRIPTOR_HD);
+        bs.setSectorsPerTrack(DEFAULT_SECTORS_PER_TRACK);
+        bs.setNrHeads(DEFULT_HEADS);
+        bs.setOemName(oemName);
+    }
+
     /**
      * Initializes the boot sector and file system for the device. The file
      * system created by this method will always be in read-write mode.
@@ -149,44 +163,41 @@ public final class SuperFloppyFormatter {
         
         final FsInfoSector fsi;
         final BootSector bs;
+        if (sectorsPerCluster == 0) throw new AssertionError();
+        
         if (fatType == FatType.FAT32) {
             bs = new Fat32BootSector(device);
+            initBootSector(bs);
+            
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
             
-            f32bs.init();
             f32bs.setFsInfoSectorNr(1);
+            
             f32bs.setSectorsPerFat(sectorsPerFat(0, totalSectors));
             final Random rnd = new Random(System.currentTimeMillis());
             f32bs.setFileSystemId(rnd.nextInt());
-            f32bs.setNrFats(fatCount);
+            
             f32bs.setVolumeLabel(label);
             
             /* create FS info sector */
             fsi = FsInfoSector.create(f32bs);
         } else {
             bs = new Fat16BootSector(device);
+            initBootSector(bs);
+            
             final Fat16BootSector f16bs = (Fat16BootSector) bs;
-            f16bs.init();
             
             final int rootDirEntries = rootDirectorySize(
                     device.getSectorSize(), totalSectors);
-
-            f16bs.setNrFats(fatCount);
+                    
             f16bs.setRootDirEntryCount(rootDirEntries);
             f16bs.setSectorsPerFat(sectorsPerFat(rootDirEntries, totalSectors));
             if (label != null) f16bs.setVolumeLabel(label);
             fsi = null;
         }
+
         
-        bs.setNrReservedSectors(reservedSectors);
-        bs.setMediumDescriptor(MEDIUM_DESCRIPTOR_HD);
-        bs.setSectorsPerTrack(DEFAULT_SECTORS_PER_TRACK);
-        bs.setNrHeads(DEFULT_HEADS);
-        bs.setOemName(oemName);
-        bs.setSectorsPerCluster(sectorsPerCluster);
-        bs.setBytesPerSector(device.getSectorSize());
-        bs.setSectorCount(totalSectors);
-        bs.write();
+//        bs.write();
         
         if (fatType == FatType.FAT32) {
             Fat32BootSector f32bs = (Fat32BootSector) bs;
@@ -216,6 +227,8 @@ public final class SuperFloppyFormatter {
         for (int i = 0; i < bs.getNrFats(); i++) {
             fat.writeCopy(FatUtils.getFatOffset(bs, i));
         }
+        
+        bs.write();
 
         FatFileSystem fs = FatFileSystem.read(device, false);
 

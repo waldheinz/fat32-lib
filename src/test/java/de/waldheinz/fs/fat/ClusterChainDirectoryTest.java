@@ -1,13 +1,6 @@
 
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.ClusterChainDirectory;
-import de.waldheinz.fs.fat.Fat;
-import de.waldheinz.fs.fat.AbstractDirectoryEntry;
-import de.waldheinz.fs.fat.FatDirEntry;
-import de.waldheinz.fs.fat.DirectoryFullException;
-import de.waldheinz.fs.fat.Fat32BootSector;
-import de.waldheinz.fs.fat.ClusterChain;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
 import org.junit.Before;
@@ -31,6 +24,10 @@ public class ClusterChainDirectoryTest {
         this.rd = new RamDisk(2048 * 2048);
         this.bs = new Fat32BootSector(rd);
         this.bs.init();
+        
+        this.bs.setSectorsPerCluster(2);
+        this.bs.setSectorsPerFat(4096);
+        
         this.fat = Fat.create(bs, 0);
         this.chain = new ClusterChain(fat, false);
         this.dir = ClusterChainDirectory.createRoot(chain);

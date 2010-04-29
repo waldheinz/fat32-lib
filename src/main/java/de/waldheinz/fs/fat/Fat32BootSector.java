@@ -20,13 +20,20 @@ final class Fat32BootSector extends BootSector {
     /**
      * The offset to the 4 bytes specifying the sectors per FAT value.
      */
-    public static final int SECTORS_PER_FAT_OFFSET = 36;
+    public static final int SECTORS_PER_FAT_OFFSET = 0x24;
 
     /**
      * Offset to the file system type label.
      */
     public static final int FILE_SYSTEM_TYPE_OFFSET = 0x52;
+    
+    public static final int VERSION_OFFSET = 0x2a;
+    public static final int VERSION = 0;
 
+    public static final int FS_INFO_SECTOR_OFFSET = 0x30;
+    public static final int BOOT_SECTOR_COPY_OFFSET = 0x32;
+    public static final int EXTENDED_BOOT_SIGNATURE_OFFSET = 0x42;
+    
     /*
      * TODO: make this constructor private
      */
@@ -35,9 +42,11 @@ final class Fat32BootSector extends BootSector {
     }
     
     @Override
-    public void init() {
+    public void init() throws IOException {
         super.init();
-        
+
+        set16(VERSION_OFFSET, VERSION);
+
         setBootSectorCopySector(6); /* as suggested by M$ */
     }
 
@@ -71,7 +80,7 @@ final class Fat32BootSector extends BootSector {
         if (sectNr < 0) throw new IllegalArgumentException(
                 "boot sector copy sector must be >= 0");
         
-        set16(0x32, sectNr);
+        set16(BOOT_SECTOR_COPY_OFFSET, sectNr);
     }
     
     /**
@@ -81,7 +90,7 @@ final class Fat32BootSector extends BootSector {
      * @return the sector number of the boot sector copy
      */
     public int getBootSectorCopySector() {
-        return get16(0x32);
+        return get16(BOOT_SECTOR_COPY_OFFSET);
     }
 
     /**
@@ -100,13 +109,13 @@ final class Fat32BootSector extends BootSector {
     }
 
     public int getFsInfoSectorNr() {
-        return get16(0x30);
+        return get16(FS_INFO_SECTOR_OFFSET);
     }
 
     public void setFsInfoSectorNr(int offset) {
         if (getFsInfoSectorNr() == offset) return;
 
-        set16(0x30, offset);
+        set16(FS_INFO_SECTOR_OFFSET, offset);
     }
     
     @Override
@@ -174,5 +183,10 @@ final class Fat32BootSector extends BootSector {
     @Override
     public int getFileSystemTypeLabelOffset() {
         return FILE_SYSTEM_TYPE_OFFSET;
+    }
+
+    @Override
+    public int getExtendedBootSignatureOffset() {
+        return EXTENDED_BOOT_SIGNATURE_OFFSET;
     }
 }

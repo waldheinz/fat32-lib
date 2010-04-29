@@ -1,9 +1,9 @@
 
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.Fat16BootSector;
 import de.waldheinz.fs.BlockDevice;
 import de.waldheinz.fs.util.RamDisk;
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -24,7 +24,7 @@ public class Fat16BootSectorTest {
     }
     
     @Test
-    public void testGetVolumeLabel() {
+    public void testGetVolumeLabel() throws IOException {
         System.out.println("getVolumeLabel");
 
         bs.init();
@@ -48,7 +48,7 @@ public class Fat16BootSectorTest {
     }
     
     @Test
-    public void testInit() {
+    public void testInit() throws IOException {
         System.out.println("init");
 
         bs.init();

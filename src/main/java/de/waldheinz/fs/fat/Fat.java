@@ -123,8 +123,12 @@ final class Fat {
         this.device = bs.getDevice();
         this.offset = offset;
         this.lastAllocatedCluster = FIRST_CLUSTER;
+        
         if (bs.getDataClusterCount() > Integer.MAX_VALUE) throw
                 new IOException("too many data clusters");
+        
+        if (bs.getDataClusterCount() == 0) throw
+                new IOException("no data clusters");
         
         this.lastClusterIndex = (int) bs.getDataClusterCount() + FIRST_CLUSTER;
 

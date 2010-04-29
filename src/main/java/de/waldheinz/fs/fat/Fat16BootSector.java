@@ -2,6 +2,7 @@
 package de.waldheinz.fs.fat;
 
 import de.waldheinz.fs.BlockDevice;
+import java.io.IOException;
 
 /**
  * The boot sector layout as used by the FAT12 / FAT16 variants.
@@ -65,6 +66,8 @@ final class Fat16BootSector extends BootSector {
      */
     public static final int MAX_VOLUME_LABEL_LENGTH = 11;
     
+    public static final int EXTENDED_BOOT_SIGNATURE_OFFSET = 0x26;
+
     /**
      * Creates a new {@code Fat16BootSector} for the specified device.
      *
@@ -193,7 +196,7 @@ final class Fat16BootSector extends BootSector {
     }
     
     @Override
-    public void init() {
+    public void init() throws IOException {
         super.init();
         
         setRootDirEntryCount(DEFAULT_ROOT_DIR_ENTRY_COUNT);
@@ -203,6 +206,11 @@ final class Fat16BootSector extends BootSector {
     @Override
     public int getFileSystemTypeLabelOffset() {
         return FILE_SYSTEM_TYPE_OFFSET;
+    }
+
+    @Override
+    public int getExtendedBootSignatureOffset() {
+        return EXTENDED_BOOT_SIGNATURE_OFFSET;
     }
     
 }
