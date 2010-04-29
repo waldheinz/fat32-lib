@@ -63,7 +63,7 @@ class Sector {
     public final void write() throws IOException {
         if (!isDirty()) return;
         
-        buffer.rewind();
+        buffer.position(0);
         buffer.limit(buffer.capacity());
         device.write(offset, buffer);
         this.dirty = false;
@@ -101,4 +101,12 @@ class Sector {
         dirty = true;
     }
     
+    /**
+     * Returns the device offset to this {@code Sector}.
+     *
+     * @return the {@code Sector}'s device offset
+     */
+    protected long getOffset() {
+        return this.offset;
+    }
 }
