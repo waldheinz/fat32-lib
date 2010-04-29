@@ -24,7 +24,15 @@ public class FsInfoSectorTest {
         this.bs.init();
         this.bs.setFsInfoSectorNr(1);
     }
-    
+
+    @Test(expected=IOException.class)
+    public void testCreateFail() throws Exception {
+        System.out.println("create (fail)");
+
+        bs.setFsInfoSectorNr(0);
+        FsInfoSector.create(bs);
+    }
+
     @Test(expected=IOException.class)
     public void testReadFail() throws Exception {
         System.out.println("read (fail)");
