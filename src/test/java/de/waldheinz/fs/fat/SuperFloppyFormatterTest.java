@@ -1,10 +1,6 @@
 
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.FatFileSystem;
-import de.waldheinz.fs.fat.FatType;
-import de.waldheinz.fs.fat.BootSector;
-import de.waldheinz.fs.fat.SuperFloppyFormatter;
 import de.waldheinz.fs.BlockDevice;
 import de.waldheinz.fs.util.FileDisk;
 import de.waldheinz.fs.util.RamDisk;
