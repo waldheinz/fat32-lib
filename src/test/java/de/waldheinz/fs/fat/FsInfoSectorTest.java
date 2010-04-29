@@ -1,8 +1,6 @@
 
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.FsInfoSector;
-import de.waldheinz.fs.fat.Fat32BootSector;
 import de.waldheinz.fs.BlockDevice;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
@@ -24,7 +22,7 @@ public class FsInfoSectorTest {
         this.dev = new RamDisk(1024);
         this.bs = new Fat32BootSector(dev);
         this.bs.init();
-        
+        this.bs.setFsInfoSectorNr(1);
     }
     
     @Test(expected=IOException.class)
