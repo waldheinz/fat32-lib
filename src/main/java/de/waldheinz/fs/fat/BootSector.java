@@ -46,6 +46,13 @@ abstract class BootSector extends Sector {
     public static final int TOTAL_SECTORS_32_OFFSET = 32;
 
     /**
+     * The length of the file system type string.
+     *
+     * @see #getFileSystemType()
+     */
+    public static final int FILE_SYSTEM_TYPE_LENGTH = 8;
+
+    /**
      * The offset to the sectors per cluster value stored in a boot sector.
      * 
      * @see #getSectorsPerCluster()
@@ -96,8 +103,9 @@ abstract class BootSector extends Sector {
         final int fatCount = bb.get(FAT_COUNT_OFFSET);
         final long dataSectors = totalSectors - (reservedSectors +
                 (fatCount * fatSz) + rootDirSectors);
-
-        final long clusterCount = dataSectors / sectorsPerCluster;
+                
+        final long clusterCount = (sectorsPerCluster > 0) ?
+            dataSectors / sectorsPerCluster : 0;
         
         final BootSector result =
                 (clusterCount > Fat16BootSector.MAX_FAT16_CLUSTERS) ?
@@ -129,10 +137,58 @@ abstract class BootSector extends Sector {
     
     public abstract long getSectorCount();
 
+    /**
+     * Returns the offset to the file system type label, as this differs
+     * between FAT12/16 and FAT32.
+     *
+     * @return the offset to the file system type label
+     */
+    public abstract int getFileSystemTypeLabelOffset();
+    
     public void init() {
         final ByteBuffer bb = ByteBuffer.wrap(SF_BS);
         buffer.position(0);
         buffer.put(bb);
+
+        set8(0x1fe, 0x55);
+        set8(0x1ff, 0xaa);
+    }
+    
+    /**
+     * Returns the file system type label string.
+     *
+     * @return the file system type string
+     * @see #setFileSystemTypeLabel(java.lang.String)
+     * @see #getFileSystemTypeLabelOffset() 
+     * @see #FILE_SYSTEM_TYPE_LENGTH
+     */
+    public String getFileSystemTypeLabel() {
+        final StringBuilder sb = new StringBuilder(FILE_SYSTEM_TYPE_LENGTH);
+
+        for (int i=0; i < FILE_SYSTEM_TYPE_LENGTH; i++) {
+            sb.append ((char) get8(getFileSystemTypeLabelOffset() + i));
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 
+     *
+     * @param fsType the
+     * @throws IllegalArgumentException if the length of the specified string
+     *      does not equal {@link #FILE_SYSTEM_TYPE_LENGTH}
+     */
+    public void setFileSystemTypeLabel(String fsType)
+            throws IllegalArgumentException {
+
+        if (fsType.length() != FILE_SYSTEM_TYPE_LENGTH) {
+            throw new IllegalArgumentException();
+        }
+
+        for (int i=0; i < FILE_SYSTEM_TYPE_LENGTH; i++) {
+            set8(getFileSystemTypeLabelOffset() + i, fsType.charAt(i));
+        }
     }
 
     /**
@@ -194,27 +250,7 @@ abstract class BootSector extends Sector {
             set8(0x3 + i, ch);
         }
     }
-
-    /**
-     * Sets the FAT type for this boot sector. This method updates the string
-     * found at offset 0x36 in the boot sector.
-     *
-     * @param type the new FAT type
-     */
-    public void setFatType(FatType type) {
-        
-        for (int i = 0; i < 8; i++) {
-            char ch;
-            if (i < type.getLabel().length()) {
-                ch = type.getLabel().charAt(i);
-            } else {
-                ch = (char) 0;
-            }
-            
-            set8(0x36 + i, ch);
-        }
-    }
-
+    
     /**
      * Gets the number of bytes/sector
      * 

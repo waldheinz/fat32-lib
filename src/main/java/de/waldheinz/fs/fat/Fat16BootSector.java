@@ -52,12 +52,19 @@ final class Fat16BootSector extends BootSector {
      * The offset to the first byte of the volume label.
      */
     public static final int VOLUME_LABEL_OFFSET = 0x2b;
-
+    
+    /**
+     * Offset to the FAT file system type string.
+     *
+     * @see #getFileSystemType() 
+     */
+    public static final int FILE_SYSTEM_TYPE_OFFSET = 0x36;
+    
     /**
      * The maximum length of the volume label.
      */
     public static final int MAX_VOLUME_LABEL_LENGTH = 11;
-
+    
     /**
      * Creates a new {@code Fat16BootSector} for the specified device.
      *
@@ -191,6 +198,11 @@ final class Fat16BootSector extends BootSector {
         
         setRootDirEntryCount(DEFAULT_ROOT_DIR_ENTRY_COUNT);
         setVolumeLabel(DEFAULT_VOLUME_LABEL);
+    }
+
+    @Override
+    public int getFileSystemTypeLabelOffset() {
+        return FILE_SYSTEM_TYPE_OFFSET;
     }
     
 }

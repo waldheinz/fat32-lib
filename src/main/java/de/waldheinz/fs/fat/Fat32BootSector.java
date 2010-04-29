@@ -22,6 +22,11 @@ final class Fat32BootSector extends BootSector {
      */
     public static final int SECTORS_PER_FAT_OFFSET = 36;
 
+    /**
+     * Offset to the file system type label.
+     */
+    public static final int FILE_SYSTEM_TYPE_OFFSET = 0x52;
+
     /*
      * TODO: make this constructor private
      */
@@ -34,17 +39,6 @@ final class Fat32BootSector extends BootSector {
         super.init();
         
         setBootSectorCopySector(6); /* as suggested by M$ */
-
-        /* FAT version */
-        
-        set8(0x52, 0x46); /* 'F' */
-        set8(0x53, 0x41); /* 'A' */
-        set8(0x54, 0x54); /* 'T' */
-        set8(0x55, 0x33); /* '3' */
-        set8(0x56, 0x32); /* '2' */
-        set8(0x57, 0x20); /* ' ' */
-        set8(0x58, 0x20); /* ' ' */
-        set8(0x59, 0x20); /* ' ' */
     }
 
     /**
@@ -175,5 +169,10 @@ final class Fat32BootSector extends BootSector {
             buffer.limit(buffer.capacity());
             device.write(offset, buffer);
         }
+    }
+
+    @Override
+    public int getFileSystemTypeLabelOffset() {
+        return FILE_SYSTEM_TYPE_OFFSET;
     }
 }
