@@ -60,6 +60,11 @@ final class FsInfoSector extends Sector {
      * @see Fat32BootSector#getFsInfoSectorNr() 
      */
     public static FsInfoSector create(Fat32BootSector bs) throws IOException {
+        final int offset = offset(bs);
+
+        if (offset == 0) throw new IOException(
+                "creating a FS info sector at offset 0 is strange");
+        
         final FsInfoSector result =
                 new FsInfoSector(bs.getDevice(), offset(bs));
         
@@ -150,6 +155,16 @@ final class FsInfoSector extends Sector {
 
             throw new IOException("invalid FS info sector signature");
         }
+    }
+
+    @Override
+    public String toString() {
+        return FsInfoSector.class.getSimpleName() +
+                " [freeClusterCount=" + getFreeClusterCount() + //NOI18N
+                ", lastAllocatedCluster=" + getLastAllocatedCluster() + //NOI18N
+                ", offset=" + getOffset() + //NOI18N
+                ", dirty=" + isDirty() + //NOI18N
+                "]"; //NOI18N
     }
     
 }
