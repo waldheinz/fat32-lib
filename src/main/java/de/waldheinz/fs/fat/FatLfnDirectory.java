@@ -360,7 +360,7 @@ final class FatLfnDirectory implements FsDirectory {
             if (realEntry.getName().equals(ShortName.DOT) ||
                     realEntry.getName().equals(ShortName.DOT_DOT)) {
 
-                /* the dot entries must not have an LFN */
+                /* the dot entries must not have a LFN */
                 return new AbstractDirectoryEntry[] { realEntry.getEntry() };
             }
 

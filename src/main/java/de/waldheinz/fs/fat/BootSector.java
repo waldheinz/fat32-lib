@@ -150,11 +150,21 @@ abstract class BootSector extends Sector {
     public abstract int getFileSystemTypeLabelOffset();
     
     public abstract int getExtendedBootSignatureOffset();
-
+    
     public void init() throws IOException {
         setBytesPerSector(getDevice().getSectorSize());
         setSectorCount(getDevice().getSize() / getDevice().getSectorSize());
         set8(getExtendedBootSignatureOffset(), EXTENDED_BOOT_SIGNATURE);
+
+        /* magic bytes needed by some windows versions to recognize a boot
+         * sector. these are x86 jump instructions which lead into
+         * nirvana when executed, but we're currently unable to produce really
+         * bootable images anyway. So... */
+        set8(0x00, 0xeb);
+        set8(0x01, 0x3c);
+        set8(0x02, 0x90);
+        
+        /* the boot sector signature */
         set8(0x1fe, 0x55);
         set8(0x1ff, 0xaa);
     }
