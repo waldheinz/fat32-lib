@@ -127,7 +127,7 @@ public final class RamDisk implements BlockDevice {
      * Returns a slice of the {@code ByteBuffer} that is used by this
      * {@code RamDisk} as it's backing store. The returned buffer will be
      * live (reflecting any changes made through the
-     * {@link #write(long, java.nio.ByteBuffer) method), but read-only.
+     * {@link #write(long, java.nio.ByteBuffer) method}, but read-only.
      *
      * @return a buffer holding the contents of this {@code RamDisk}
      */
