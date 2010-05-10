@@ -1,12 +1,6 @@
 
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.Fat16BootSector;
-import de.waldheinz.fs.fat.Fat;
-import de.waldheinz.fs.fat.BootSector;
-import de.waldheinz.fs.fat.Fat16RootDirectory;
-import de.waldheinz.fs.fat.SuperFloppyFormatter;
-import de.waldheinz.fs.fat.DirectoryFullException;
 import de.waldheinz.fs.BlockDevice;
 import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
