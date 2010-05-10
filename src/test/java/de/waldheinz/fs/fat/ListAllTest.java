@@ -1,7 +1,6 @@
 
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.FatFileSystem;
 import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
 import de.waldheinz.fs.FsFile;
