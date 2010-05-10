@@ -25,7 +25,7 @@ import de.waldheinz.fs.ReadOnlyException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -47,15 +47,15 @@ final class FatLfnDirectory implements FsDirectory {
     
     public FatLfnDirectory(AbstractDirectory dir, Fat fat) {
         if ((dir == null) || (fat == null)) throw new NullPointerException();
-
+        
         this.fat = fat;
         this.dir = dir;
-        this.shortNameIndex = new HashMap<ShortName, LfnEntry>();
-        this.longNameIndex = new HashMap<String, LfnEntry>();
+        this.shortNameIndex = new LinkedHashMap<ShortName, LfnEntry>();
+        this.longNameIndex = new LinkedHashMap<String, LfnEntry>();
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
-        this.files = new HashMap<FatDirEntry, FatFile>();
-        this.directories = new HashMap<FatDirEntry, FatLfnDirectory>();
-
+        this.files = new LinkedHashMap<FatDirEntry, FatFile>();
+        this.directories = new LinkedHashMap<FatDirEntry, FatLfnDirectory>();
+        
         parseLfn();
     }
 
