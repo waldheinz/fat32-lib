@@ -357,6 +357,13 @@ final class FatLfnDirectory implements FsDirectory {
         }
 
         public AbstractDirectoryEntry[] compactForm() {
+            if (realEntry.getName().equals(ShortName.DOT) ||
+                    realEntry.getName().equals(ShortName.DOT_DOT)) {
+
+                /* the dot entries must not have an LFN */
+                return new AbstractDirectoryEntry[] { realEntry.getEntry() };
+            }
+
             int totalEntrySize = totalEntrySize();
             
             final AbstractDirectoryEntry[] entries =
