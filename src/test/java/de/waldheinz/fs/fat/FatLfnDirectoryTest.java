@@ -38,6 +38,26 @@ public class FatLfnDirectoryTest {
         this.dir = new FatLfnDirectory(rootDirStore, fat);
     }
 
+    @Test
+    public void testDotEntriesLfn() throws IOException {
+        System.out.println("dotEntriesLfn");
+
+        final LfnEntry subEntry = dir.addDirectory("test");
+        final FatLfnDirectory subDir =
+                (FatLfnDirectory) subEntry.getDirectory();
+        
+        LfnEntry entry = (LfnEntry) subDir.getEntry(".");
+        System.out.println(entry);
+        /* dot entries should not have a LFN */
+        assertEquals(1, entry.compactForm().length);
+
+        entry = (LfnEntry) subDir.getEntry("..");
+        System.out.println(entry);
+        /* dot entries should not have a LFN */
+        assertEquals(1, entry.compactForm().length);
+
+    }
+
     @Test(expected=IOException.class)
     public void testOnlyDotsDirectory() throws IOException {
         System.out.println("onlyDotsDirectory");
