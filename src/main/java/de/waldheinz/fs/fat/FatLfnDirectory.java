@@ -288,9 +288,12 @@ final class FatLfnDirectory implements FsDirectory {
      * 
      * @param name the name of the entry to remove
      * @throws IOException on error removing the entry
+     * @throws IllegalArgumentException on an attempt to remove the dot entries
      */
     @Override
-    public void remove(String name) throws IOException {
+    public void remove(String name)
+            throws IOException, IllegalArgumentException {
+        
         checkReadOnly();
         
         final LfnEntry entry = getEntryImpl(name);
@@ -495,7 +498,14 @@ final class FatLfnDirectory implements FsDirectory {
         
         private void remove() throws IOException {
             checkReadOnly();
-            
+
+            if (realEntry.getName().equals(ShortName.DOT) ||
+                    realEntry.getName().equals(ShortName.DOT_DOT)) {
+
+                throw new IllegalArgumentException(
+                        "the dot entries can not be removed");
+            }
+
             final ClusterChain cc = new ClusterChain(
                     fat, realEntry.getStartCluster(), false);
             

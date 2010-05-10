@@ -39,6 +39,23 @@ public class FatLfnDirectoryTest {
     }
 
     @Test
+    public void testRemoveDotEntries() throws IOException {
+        System.out.println("removeDotEntries");
+
+        final LfnEntry subEntry = dir.addDirectory("test");
+        final FatLfnDirectory subDir =
+                (FatLfnDirectory) subEntry.getDirectory();
+
+
+        try {
+            subDir.remove(".");
+            fail("we just removed the \".\" entry");
+        } catch (IllegalArgumentException ex) {
+            /* fine */
+        }
+    }
+
+    @Test
     public void testDotEntriesLfn() throws IOException {
         System.out.println("dotEntriesLfn");
 
