@@ -1,3 +1,4 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -9,7 +10,13 @@
     <name>FAT32 Library</name>
     <description>A library for manipulating FAT file systems.</description>
     <url>http://code.google.com/p/fat32-lib/</url>
-    
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>3</version>
+    </parent>
+
     <licenses>
         <license>
             <name>GNU Lesser General Public License, version 2.1</name>
