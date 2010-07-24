@@ -1,7 +1,6 @@
 /*
- * $Id: AbstractFileSystem.java 4975 2009-02-02 08:30:52Z lsantha $
- *
  * Copyright (C) 2003-2009 JNode.org
+ *               2009,2010 Matthias Treydte <mt@waldheinz.de>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
