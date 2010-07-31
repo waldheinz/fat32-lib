@@ -64,7 +64,7 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
         }
     }
     
-    public int totalEntrySize() {
+    private int totalEntrySize() {
         int result = (fileName.length() / 13) + 1;
         if ((fileName.length() % 13) != 0) {
             result++;
@@ -78,17 +78,17 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
             /* the dot entries must not have a LFN */
             return new AbstractDirectoryEntry[]{realEntry.getEntry()};
         }
-        
+    
         int totalEntrySize = totalEntrySize();
         final AbstractDirectoryEntry[] entries =
                 new AbstractDirectoryEntry[totalEntrySize];
-        
+
         final byte checkSum = realEntry.getName().checkSum();
         int j = 0;
         for (int i = totalEntrySize - 2; i > 0; i--) {
             entries[i] = new AbstractDirectoryEntry(
                     lfnDir.getStorageDirectory());
-            
+
             set(entries[i], fileName.substring(
                     j * 13, j * 13 + 13), j + 1, checkSum, false);
             j++;
