@@ -23,6 +23,7 @@ import de.waldheinz.fs.FsObject;
 
 /**
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @since 0.6
  */
 abstract class FatObject implements FsObject {
     
@@ -50,7 +51,7 @@ abstract class FatObject implements FsObject {
     /**
      * Mark this object as invalid.
      */
-    protected void invalidate() {
+    void invalidate() {
         valid = false;
     }
 }

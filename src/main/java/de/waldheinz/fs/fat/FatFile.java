@@ -29,8 +29,9 @@ import java.nio.ByteBuffer;
  * clusters).
  * 
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
+ * @since 0.6
  */
-final class FatFile extends FatObject implements FsFile {
+public final class FatFile extends FatObject implements FsFile {
     private final FatDirEntry entry;
     private final ClusterChain chain;
     
@@ -39,7 +40,7 @@ final class FatFile extends FatObject implements FsFile {
         this.chain = chain;
     }
     
-    public static FatFile get(Fat fat, FatDirEntry entry)
+    static FatFile get(Fat fat, FatDirEntry entry)
             throws IOException {
         
         if (entry.getEntry().isDirectory())
@@ -59,7 +60,6 @@ final class FatFile extends FatObject implements FsFile {
      * is stored in the {@link FatDirEntry} that is associated with this file.
      * 
      * @return long the length that is recorded for this file
-     * @see #getChainLength() 
      */
     @Override
     public long getLength() {
@@ -171,7 +171,7 @@ final class FatFile extends FatObject implements FsFile {
      *
      * @return the file's {@code ClusterChain}
      */
-    public ClusterChain getChain() {
+    ClusterChain getChain() {
         return chain;
     }
     

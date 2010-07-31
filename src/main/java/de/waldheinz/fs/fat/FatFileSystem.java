@@ -21,7 +21,6 @@ package de.waldheinz.fs.fat;
 
 import de.waldheinz.fs.AbstractFileSystem;
 import de.waldheinz.fs.BlockDevice;
-import de.waldheinz.fs.FsDirectory;
 import java.io.IOException;
 import de.waldheinz.fs.ReadOnlyException;
 
@@ -206,7 +205,7 @@ public final class FatFileSystem extends AbstractFileSystem {
     }
     
     @Override
-    public FsDirectory getRoot() {
+    public FatLfnDirectory getRoot() {
         checkClosed();
         
         return rootDir;

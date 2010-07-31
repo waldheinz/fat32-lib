@@ -35,8 +35,9 @@ import java.util.Map;
  *
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
+ * @since 0.6
  */
-final class FatLfnDirectory implements FsDirectory {
+public final class FatLfnDirectory implements FsDirectory {
     final Map<ShortName, FatLfnDirectoryEntry> shortNameIndex;
     final Map<String, FatLfnDirectoryEntry> longNameIndex;
     final Map<FatDirEntry, FatFile> files;
@@ -45,7 +46,7 @@ final class FatLfnDirectory implements FsDirectory {
     final AbstractDirectory dir;
     final Fat fat;
     
-    public FatLfnDirectory(AbstractDirectory dir, Fat fat) {
+    FatLfnDirectory(AbstractDirectory dir, Fat fat) {
         if ((dir == null) || (fat == null)) throw new NullPointerException();
         
         this.fat = fat;
@@ -89,7 +90,7 @@ final class FatLfnDirectory implements FsDirectory {
         return result;
     }
     
-    public AbstractDirectory getStorageDirectory() {
+    AbstractDirectory getStorageDirectory() {
         return this.dir;
     }
 

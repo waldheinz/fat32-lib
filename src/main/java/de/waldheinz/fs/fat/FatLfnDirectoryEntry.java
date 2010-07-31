@@ -23,13 +23,18 @@ import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
 import java.io.IOException;
 
-class FatLfnDirectoryEntry implements FsDirectoryEntry {
+/**
+ *
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
+ * @since 0.6
+ */
+public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
     private final FatDirEntry realEntry;
     private final FatLfnDirectory lfnDir;
 
     private String fileName;
 
-    public FatLfnDirectoryEntry(FatDirEntry realEntry, String name,
+    FatLfnDirectoryEntry(FatDirEntry realEntry, String name,
             FatLfnDirectory lfnDir) {
         
         this.lfnDir = lfnDir;
@@ -37,7 +42,7 @@ class FatLfnDirectoryEntry implements FsDirectoryEntry {
         this.fileName = name;
     }
 
-    public FatLfnDirectoryEntry(
+    FatLfnDirectoryEntry(
             int offset, int length, FatLfnDirectory lfnDir) {
         
         this.lfnDir = lfnDir;
@@ -67,7 +72,7 @@ class FatLfnDirectoryEntry implements FsDirectoryEntry {
         return result;
     }
 
-    public AbstractDirectoryEntry[] compactForm() {
+    AbstractDirectoryEntry[] compactForm() {
         if (realEntry.getName().equals(ShortName.DOT) ||
                 realEntry.getName().equals(ShortName.DOT_DOT)) {
             /* the dot entries must not have a LFN */
@@ -181,7 +186,7 @@ class FatLfnDirectoryEntry implements FsDirectoryEntry {
     /**
      * @return Returns the realEntry.
      */
-    public FatDirEntry getRealEntry() {
+    FatDirEntry getRealEntry() {
         return realEntry;
     }
 
@@ -220,7 +225,7 @@ class FatLfnDirectoryEntry implements FsDirectoryEntry {
     }
 
 
-    public static void set(AbstractDirectoryEntry entry, String subName,
+    static void set(AbstractDirectoryEntry entry, String subName,
             int ordinal, byte checkSum, boolean isLast) {
 
         final char[] unicodechar = new char[13];
@@ -264,7 +269,7 @@ class FatLfnDirectoryEntry implements FsDirectoryEntry {
 
     }
 
-    public static String getSubstring(AbstractDirectoryEntry entry) {
+    static String getSubstring(AbstractDirectoryEntry entry) {
         final byte[] rawData = entry.getData();
 
         final char[] unicodechar = new char[13];
