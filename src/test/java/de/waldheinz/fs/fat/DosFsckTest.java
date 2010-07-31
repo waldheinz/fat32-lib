@@ -77,7 +77,7 @@ public class DosFsckTest {
         FatFileSystem fs = new FatFileSystem(dev, false);
         final FatLfnDirectory rootDir = (FatLfnDirectory) fs.getRoot();
 
-        FatLfnDirectory.LfnEntry entry = rootDir.addDirectory("Directory");
+        FatLfnDirectoryEntry entry = rootDir.addDirectory("Directory");
         
         for (int i = 0; i < 1; i++) {
             final FsDirectoryEntry e = entry.getDirectory().addFile(

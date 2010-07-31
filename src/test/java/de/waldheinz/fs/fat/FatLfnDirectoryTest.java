@@ -22,7 +22,7 @@ import de.waldheinz.fs.BlockDevice;
 import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
 import de.waldheinz.fs.FsFile;
-import de.waldheinz.fs.fat.FatLfnDirectory.LfnEntry;
+import de.waldheinz.fs.fat.FatLfnDirectoryEntry;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -59,7 +59,7 @@ public class FatLfnDirectoryTest {
     public void testRemoveDotEntries() throws IOException {
         System.out.println("removeDotEntries");
 
-        final LfnEntry subEntry = dir.addDirectory("test");
+        final FatLfnDirectoryEntry subEntry = dir.addDirectory("test");
         final FatLfnDirectory subDir =
                 (FatLfnDirectory) subEntry.getDirectory();
 
@@ -76,16 +76,16 @@ public class FatLfnDirectoryTest {
     public void testDotEntriesLfn() throws IOException {
         System.out.println("dotEntriesLfn");
 
-        final LfnEntry subEntry = dir.addDirectory("test");
+        final FatLfnDirectoryEntry subEntry = dir.addDirectory("test");
         final FatLfnDirectory subDir =
                 (FatLfnDirectory) subEntry.getDirectory();
         
-        LfnEntry entry = (LfnEntry) subDir.getEntry(".");
+        FatLfnDirectoryEntry entry = (FatLfnDirectoryEntry) subDir.getEntry(".");
         System.out.println(entry);
         /* dot entries should not have a LFN */
         assertEquals(1, entry.compactForm().length);
 
-        entry = (LfnEntry) subDir.getEntry("..");
+        entry = (FatLfnDirectoryEntry) subDir.getEntry("..");
         System.out.println(entry);
         /* dot entries should not have a LFN */
         assertEquals(1, entry.compactForm().length);
@@ -149,7 +149,7 @@ public class FatLfnDirectoryTest {
         System.out.println("free clusters before: " +
                 freeBefore);
         
-        final LfnEntry subDir = dir.addDirectory("Directory");
+        final FatLfnDirectoryEntry subDir = dir.addDirectory("Directory");
         final FsDirectoryEntry fe = subDir.getDirectory().addFile("A File");
         final FsFile f = fe.getFile();
         f.write(0, ByteBuffer.allocate(516));
@@ -168,7 +168,7 @@ public class FatLfnDirectoryTest {
         final int entriesBefore = rootDirStore.getEntryCount();
 
         final String dirName = "testDirectory";
-        final LfnEntry fileEntry = dir.addFile(dirName);
+        final FatLfnDirectoryEntry fileEntry = dir.addFile(dirName);
         fileEntry.getFile().setLength(100000);
         assertTrue(fat.getFreeClusterCount() < freeBefore);
         assertEquals(entriesBefore + 2, rootDirStore.getEntryCount());
@@ -203,7 +203,7 @@ public class FatLfnDirectoryTest {
     public void testSubDirectoryTimeStamps() throws IOException {
         System.out.println("subDirectoryTimeStamps");
         
-        final LfnEntry subDirEntry = dir.addDirectory("testDir");
+        final FatLfnDirectoryEntry subDirEntry = dir.addDirectory("testDir");
         assertTrue(subDirEntry.isDirectory());
         
         final FsDirectory subDir = subDirEntry.getDirectory();
@@ -266,7 +266,7 @@ public class FatLfnDirectoryTest {
         System.out.println("addDirectory");
         
         final String name = "A nice directory";
-        final LfnEntry newDir = dir.addDirectory(name);
+        final FatLfnDirectoryEntry newDir = dir.addDirectory(name);
         assertNotNull(newDir);
         assertTrue(newDir == dir.getEntry(name));
         assertTrue(newDir.getDirectory() == dir.getEntry(name).getDirectory());
@@ -277,7 +277,7 @@ public class FatLfnDirectoryTest {
         System.out.println("getEntry");
         
         final String NAME = "A fine File";
-        final LfnEntry file = dir.addFile(NAME);
+        final FatLfnDirectoryEntry file = dir.addFile(NAME);
         assertEquals(file, dir.getEntry(NAME));
     }
     

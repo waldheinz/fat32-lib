@@ -18,7 +18,7 @@
 
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.FatLfnDirectory.LfnEntry;
+import de.waldheinz.fs.fat.FatLfnDirectoryEntry;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 public class FatFileTest {
 
     private Fat fat;
-    private LfnEntry entry;
+    private FatLfnDirectoryEntry entry;
     private FatDirEntry fatEntry;
     private FatFile ff;
 
@@ -46,7 +46,7 @@ public class FatFileTest {
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fatFs = new FatFileSystem(rd, false);
 
-        this.entry = (LfnEntry) fatFs.getRoot().getEntry("Readme.txt");
+        this.entry = (FatLfnDirectoryEntry) fatFs.getRoot().getEntry("Readme.txt");
         this.fatEntry = entry.getRealEntry();
         this.fat = fatFs.getFat();
         this.ff = FatFile.get(fat, fatEntry);
