@@ -22,7 +22,6 @@ import de.waldheinz.fs.BlockDevice;
 import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
 import de.waldheinz.fs.FsFile;
-import de.waldheinz.fs.fat.FatLfnDirectoryEntry;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -224,7 +223,8 @@ public class FatLfnDirectoryTest {
         int count = 0;
         
         do {
-            int freeBeforeAdd = fat.getFreeClusterCount();
+            final int freeBeforeAdd = fat.getFreeClusterCount();
+            
             try {
                 dir.addDirectory("this is test directory with index " + count);
             } catch (DirectoryFullException ex) {

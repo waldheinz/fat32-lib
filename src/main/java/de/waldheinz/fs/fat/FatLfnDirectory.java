@@ -82,7 +82,7 @@ public final class FatLfnDirectory implements FsDirectory {
         FatLfnDirectory result = directories.get(entry);
 
         if (result == null) {
-            final FatDirectory storage = FatDirectory.read(entry, fat);
+            final ClusterChainDirectory storage = read(entry, fat);
             result = new FatLfnDirectory(storage, fat);
             directories.put(entry, result);
         }
@@ -159,8 +159,7 @@ public final class FatLfnDirectory implements FsDirectory {
         name = name.trim();
         
         final ShortName sn = makeShortName(name);
-        final FatDirectory newDir = FatDirectory.createSub(dir, fat);
-        final FatDirectoryEntry realEntry = newDir.getEntry();
+        final FatDirectoryEntry realEntry = createSub(dir, fat);
         
         realEntry.setName(sn);
         
@@ -170,7 +169,10 @@ public final class FatLfnDirectory implements FsDirectory {
         try {
             dir.addEntries(entry.compactForm());
         } catch (IOException ex) {
-            newDir.delete();
+            new ClusterChain(
+                    fat, realEntry.getStartCluster(), false).setChainLength(0);
+//            realEntry.getEntry().remove();
+            realEntry.remove();
             throw ex;
         }
         
@@ -331,5 +333,72 @@ public final class FatLfnDirectory implements FsDirectory {
     @Override
     public FsDirectoryEntry getEntry(String name) throws IOException {
         return getEntryImpl(name);
+    }
+
+    private static ClusterChainDirectory read(FatDirectoryEntry entry, Fat fat)
+            throws IOException {
+
+        if (!entry.getEntry().isDirectory()) throw
+                new IllegalArgumentException(entry + " is no directory");
+
+        final ClusterChain chain = new ClusterChain(
+                fat, entry.getStartCluster(),
+                entry.getEntry().isReadOnly());
+
+        final ClusterChainDirectory result =
+                new ClusterChainDirectory(chain, false);
+
+        result.read();
+        return result;
+    }
+    
+    private static FatDirectoryEntry createSub(
+            AbstractDirectory parent, Fat fat) throws IOException {
+
+        final ClusterChain chain = new ClusterChain(fat, false);
+        chain.setChainLength(1);
+
+        final AbstractDirectoryEntry entryData =
+                new AbstractDirectoryEntry(parent);
+
+        final FatDirectoryEntry realEntry = FatDirectoryEntry.create(entryData);
+        realEntry.getEntry().setFlags(AbstractDirectoryEntry.F_DIRECTORY);
+        realEntry.setStartCluster(chain.getStartCluster());
+
+        final ClusterChainDirectory dir =
+                new ClusterChainDirectory(chain, false);
+
+        /* add "." entry */
+
+        final AbstractDirectoryEntry dot = new AbstractDirectoryEntry(dir);
+        dot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
+        final FatDirectoryEntry dotEntry = FatDirectoryEntry.create(dot);
+        dotEntry.setName(ShortName.DOT);
+        dotEntry.setStartCluster((int) dir.getStorageCluster());
+        copyDateTimeFields(realEntry, dotEntry);
+        dir.addEntry(dot);
+
+        /* add ".." entry */
+
+        final AbstractDirectoryEntry dotDot =
+                new AbstractDirectoryEntry(dir);
+        dotDot.setFlags(AbstractDirectoryEntry.F_DIRECTORY);
+        final FatDirectoryEntry dotDotEntry = FatDirectoryEntry.create(dotDot);
+        dotDotEntry.setName(ShortName.DOT_DOT);
+        dotDotEntry.setStartCluster((int) parent.getStorageCluster());
+        copyDateTimeFields(realEntry, dotDotEntry);
+        dir.addEntry(dotDot);
+
+        dir.flush();
+
+        return realEntry;
+    }
+
+    private static void copyDateTimeFields(
+            FatDirectoryEntry src, FatDirectoryEntry dst) {
+        
+        dst.setCreated(src.getCreated());
+        dst.setLastAccessed(src.getLastAccessed());
+        dst.setLastModified(src.getLastModified());
     }
 }
