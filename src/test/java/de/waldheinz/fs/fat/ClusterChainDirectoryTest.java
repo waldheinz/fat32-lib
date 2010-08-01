@@ -55,7 +55,7 @@ public class ClusterChainDirectoryTest {
         System.out.println("maximumSize");
         
         while (true) {
-            AbstractDirectoryEntry e = new AbstractDirectoryEntry(dir);
+            AbstractDirectoryEntry e = new AbstractDirectoryEntry();
             FatDirectoryEntry fe = FatDirectoryEntry.create(e);
             dir.addEntry(e);
             

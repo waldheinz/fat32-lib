@@ -233,7 +233,7 @@ abstract class AbstractDirectory {
         if (this.volumeLabel != null) {
             volLabelOffset = 32;
             final AbstractDirectoryEntry labelEntry =
-                    new AbstractDirectoryEntry(this);
+                    new AbstractDirectoryEntry();
             labelEntry.setFlags(AbstractDirectoryEntry.F_VOLUME_ID);
             
             System.arraycopy(
@@ -271,7 +271,7 @@ abstract class AbstractDirectory {
             final int offset = i * 32;
             if (src[offset] != 0) {
                 final AbstractDirectoryEntry entry =
-                        new AbstractDirectoryEntry(this, src, offset);
+                        new AbstractDirectoryEntry(src, offset);
 
                 if (entry.isVolumeLabel()) {
                     parseVolumeLabel(entry);

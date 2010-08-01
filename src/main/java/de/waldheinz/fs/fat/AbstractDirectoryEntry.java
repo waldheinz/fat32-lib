@@ -19,8 +19,6 @@
  
 package de.waldheinz.fs.fat;
 
-import java.io.IOException;
-
 /**
  * 
  * @author gbin
@@ -45,20 +43,16 @@ final class AbstractDirectoryEntry extends FatObject {
     public final static int SIZE = 32;
     
     private final byte[] rawData = new byte[SIZE];
-    private final AbstractDirectory dir;
     
     private boolean dirty;
 
-    public AbstractDirectoryEntry(AbstractDirectory dir) {
-        this.dir = dir;
+    public AbstractDirectoryEntry() {
+        
     }
 
-    protected AbstractDirectoryEntry(AbstractDirectory dir,
-            byte[] src, int offset) {
-        
+    protected AbstractDirectoryEntry(byte[] src, int offset) {
         System.arraycopy(src, offset, rawData, 0, SIZE);
         
-        this.dir = dir;
         this.dirty = false;
     }
     
@@ -91,7 +85,7 @@ final class AbstractDirectoryEntry extends FatObject {
     }
 
     public boolean isReadOnly() {
-        return dir.isReadOnly() || isReadonlyFlag();
+        return isReadonlyFlag();
     }
 
     public boolean isReadonlyFlag() {
@@ -170,7 +164,6 @@ final class AbstractDirectoryEntry extends FatObject {
 
     protected void markDirty() {
         this.dirty = true;
-        this.dir.setDirty();
     }
 
     public boolean isDirty() {
@@ -194,10 +187,6 @@ final class AbstractDirectoryEntry extends FatObject {
         sb.append("]"); //NOI18N
         
         return sb.toString();
-    }
-
-    void remove() throws IOException {
-        dir.removeEntry(this);
     }
     
 }

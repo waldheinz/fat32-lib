@@ -66,9 +66,11 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
     
     private int totalEntrySize() {
         int result = (fileName.length() / 13) + 1;
+
         if ((fileName.length() % 13) != 0) {
             result++;
         }
+        
         return result;
     }
 
@@ -86,15 +88,14 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
         final byte checkSum = realEntry.getName().checkSum();
         int j = 0;
         for (int i = totalEntrySize - 2; i > 0; i--) {
-            entries[i] = new AbstractDirectoryEntry(
-                    parent.getStorageDirectory());
+            entries[i] = new AbstractDirectoryEntry();
 
             set(entries[i], fileName.substring(
                     j * 13, j * 13 + 13), j + 1, checkSum, false);
             j++;
         }
 
-        entries[0] = new AbstractDirectoryEntry(parent.getStorageDirectory());
+        entries[0] = new AbstractDirectoryEntry();
         set(entries[0],
                 fileName.substring(j * 13), j + 1, checkSum, true);
         entries[totalEntrySize - 1] = realEntry.getEntry();
@@ -199,32 +200,7 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
     public boolean isDirty() {
         return true;
     }
-
-    void remove() throws IOException {
-        parent.checkReadOnly();
-
-        if (realEntry.getName().equals(ShortName.DOT) ||
-                realEntry.getName().equals(ShortName.DOT_DOT)) {
-            throw new IllegalArgumentException(
-                    "the dot entries can not be removed");
-        }
-
-        final ClusterChain cc = new ClusterChain(
-                parent.fat, realEntry.getStartCluster(), false);
-        
-        cc.setChainLength(0);
-        parent.longNameIndex.remove(this.getName());
-        parent.shortNameIndex.remove(realEntry.getName());
-        if (isFile()) {
-            parent.files.remove(this.realEntry);
-        } else {
-            parent.files.remove(this.realEntry);
-        }
-        realEntry.remove();
-        parent.updateLFN();
-    }
-
-
+    
     static void set(AbstractDirectoryEntry entry, String subName,
             int ordinal, byte checkSum, boolean isLast) {
 
