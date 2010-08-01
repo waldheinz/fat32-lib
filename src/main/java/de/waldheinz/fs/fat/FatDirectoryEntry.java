@@ -19,15 +19,36 @@
  
 package de.waldheinz.fs.fat;
 
+import java.nio.ByteBuffer;
+
 /**
  * 
  *
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-final class FatDirectoryEntry {
+class FatDirectoryEntry extends FatObject {
     
-    private final AbstractDirectoryEntry entry;
+    /**
+     * The size in bytes of an FAT directory entry.
+     */
+    public final static int SIZE = 32;
+
+    /**
+     * The offset to the flags byte in a directory entry.
+     */
+    public static final int FLAGS_OFFSET = 0x0b;
+
+    public static final int F_READONLY = 0x01;
+    public static final int F_HIDDEN = 0x02;
+    public static final int F_SYSTEM = 0x04;
+    public static final int F_VOLUME_ID = 0x08;
+    public static final int F_DIRECTORY = 0x10;
+    public static final int F_ARCHIVE = 0x20;
+    
+    protected final byte[] data;
+
+    private boolean dirty;
     
     /**
      * Create a new entry from a FAT directory image.
@@ -36,16 +57,70 @@ final class FatDirectoryEntry {
      * @param src
      * @param offset
      */
-    private FatDirectoryEntry(AbstractDirectoryEntry entry) {
-        this.entry = entry;
+    FatDirectoryEntry(byte[] data) {
+        this.data = data;
     }
 
-    public static FatDirectoryEntry read(AbstractDirectoryEntry e) {
-        return new FatDirectoryEntry(e);
+    public FatDirectoryEntry() {
+        this.data = new byte[SIZE];
+    }
+    
+    public static FatDirectoryEntry read(ByteBuffer buff, int offset) {
+        throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * Decides if this entry is a "volume label" entry according to the FAT
+     * specification.
+     *
+     * @return if this is a volume label entry
+     */
+    public boolean isVolumeLabel() {
+        if (isLfnEntry()) return false;
+        else return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == F_VOLUME_ID);
+    }
+    
+    public boolean isSystem() {
+        return ((getFlags() & F_SYSTEM) != 0);
     }
 
-    public static FatDirectoryEntry create(AbstractDirectoryEntry e) {
-        final FatDirectoryEntry result = new FatDirectoryEntry(e);
+    public boolean isHidden() {
+        return ((getFlags() & F_HIDDEN) != 0);
+    }
+    
+    public boolean isLabel() {
+        return ((getFlags() & F_VOLUME_ID) != 0);
+    }
+    
+    public boolean isLfnEntry() {
+        return isReadonlyFlag() && isSystem() &&
+                isHidden() && isLabel();
+    }
+
+    /**
+     * Returns the attribute.
+     *
+     * @return int
+     */
+    public int getFlags() {
+        return LittleEndian.getUInt8(data, FLAGS_OFFSET);
+    }
+    
+    /**
+     * Sets the flags.
+     *
+     * @param flags
+     */
+    public void setFlags(int flags) {
+        LittleEndian.setInt8(data, FLAGS_OFFSET, flags);
+    }
+    
+    public boolean isDirectory() {
+        return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == F_DIRECTORY);
+    }
+    
+    public static FatDirectoryEntry create() {
+        final FatDirectoryEntry result = new FatDirectoryEntry();
 
         final long now = System.currentTimeMillis();
 
@@ -55,51 +130,80 @@ final class FatDirectoryEntry {
 
         return result;
     }
+    
+    public static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
+        final byte[] data = new byte[SIZE];
+        
+        System.arraycopy(
+                    volumeLabel.getBytes(), 0,
+                    data, 0,
+                    volumeLabel.length());
 
-    public AbstractDirectoryEntry getEntry() {
-        return entry;
+        final FatDirectoryEntry result = new FatDirectoryEntry(data);
+        result.setFlags(FatDirectoryEntry.F_VOLUME_ID);
+        return result;
     }
     
+    public String getVolumeLabel() {
+        if (!isVolumeLabel())
+            throw new IllegalStateException("not a volume label");
+            
+        final StringBuilder sb = new StringBuilder();
+        
+        for (int i=0; i < AbstractDirectory.MAX_LABEL_LENGTH; i++) {
+            final byte b = this.data[i];
+            
+            if (b != 0) {
+                sb.append((char) b);
+            } else {
+                break;
+            }
+        }
+        
+        return sb.toString();
+    }
+
     public long getCreated() {
         return DosUtils.decodeDateTime(
-                LittleEndian.getUInt16(entry.getData(), 0x10),
-                LittleEndian.getUInt16(entry.getData(), 0x0e));
+                LittleEndian.getUInt16(data, 0x10),
+                LittleEndian.getUInt16(data, 0x0e));
     }
     
     public void setCreated(long created) {
-        LittleEndian.setInt16(entry.getData(), 0x0e,
+        LittleEndian.setInt16(data, 0x0e,
                 DosUtils.encodeTime(created));
-        LittleEndian.setInt16(entry.getData(), 0x10,
+        LittleEndian.setInt16(data, 0x10,
                 DosUtils.encodeDate(created));
 
-        entry.markDirty();
+        this.dirty = true;
     }
 
     public long getLastModified() {
         return DosUtils.decodeDateTime(
-                LittleEndian.getUInt16(entry.getData(), 0x18),
-                LittleEndian.getUInt16(entry.getData(), 0x16));
+                LittleEndian.getUInt16(data, 0x18),
+                LittleEndian.getUInt16(data, 0x16));
     }
 
     public void setLastModified(long lastModified) {
-        LittleEndian.setInt16(entry.getData(), 0x16,
+        LittleEndian.setInt16(data, 0x16,
                 DosUtils.encodeTime(lastModified));
-        LittleEndian.setInt16(entry.getData(), 0x18,
+        LittleEndian.setInt16(data, 0x18,
                 DosUtils.encodeDate(lastModified));
 
-        entry.markDirty();
+        this.dirty = true;
     }
 
     public long getLastAccessed() {
         return DosUtils.decodeDateTime(
-                LittleEndian.getUInt16(entry.getData(), 0x12),
+                LittleEndian.getUInt16(data, 0x12),
                 0); /* time is not recorded */
     }
     
     public void setLastAccessed(long lastAccessed) {
-        LittleEndian.setInt16(entry.getData(), 0x12,
+        LittleEndian.setInt16(data, 0x12,
                 DosUtils.encodeDate(lastAccessed));
-        entry.markDirty();
+
+        this.dirty = true;
     }
     
     /**
@@ -108,7 +212,7 @@ final class FatDirectoryEntry {
      * @return boolean
      */
     public boolean isDeleted() {
-        return  (LittleEndian.getUInt8(entry.getData(), 0) == 0xe5);
+        return  (LittleEndian.getUInt8(data, 0) == 0xe5);
     }
     
     /**
@@ -117,15 +221,14 @@ final class FatDirectoryEntry {
      * @return long
      */
     public long getLength() {
-        return LittleEndian.getUInt32(entry.getData(), 0x1c);
+        return LittleEndian.getUInt32(data, 0x1c);
     }
     
     public void setLength(long length) throws IllegalArgumentException {
         if (length > Integer.MAX_VALUE)
             throw new IllegalArgumentException("too big");
         
-        LittleEndian.setInt32(entry.getData(), 0x1c, (int) length);
-        entry.markDirty();
+        LittleEndian.setInt32(data, 0x1c, (int) length);
     }
 
     /**
@@ -133,12 +236,25 @@ final class FatDirectoryEntry {
      * 
      * @return String
      */
-    public ShortName getName() {
-        return ShortName.parse(entry);
+    public ShortName getShortName() {
+        return ShortName.parse(this.data);
     }
     
-    public void setName(ShortName sn) {
-        sn.write(entry);
+    /**
+     * Does this entry refer to a file?
+     *
+     * @return
+     * @see org.jnode.fs.FSDirectoryEntry#isFile()
+     */
+    public boolean isFile() {
+        return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == 0);
+    }
+    
+    public void setShortName(ShortName sn) {
+        if (sn.equals(this.getShortName())) return;
+        
+        sn.write(this.data);
+        this.dirty = true;
     }
 
     /**
@@ -147,7 +263,7 @@ final class FatDirectoryEntry {
      * @return int
      */
     public long getStartCluster() {
-        return LittleEndian.getUInt16(entry.getData(), 0x1a);
+        return LittleEndian.getUInt16(data, 0x1a);
     }
     
     /**
@@ -158,14 +274,22 @@ final class FatDirectoryEntry {
     void setStartCluster(long startCluster) {
         if (startCluster > Integer.MAX_VALUE) throw new AssertionError();
 
-        LittleEndian.setInt16(entry.getData(), 0x1a, (int) startCluster);
-        entry.markDirty();
+        LittleEndian.setInt16(data, 0x1a, (int) startCluster);
     }
     
     @Override
     public String toString() {
         return getClass().getSimpleName() +
-                " [name=" + getName() + "]"; //NOI18N
+                " [name=" + getShortName() + "]"; //NOI18N
+    }
+
+    void write(ByteBuffer buff, int offset) {
+        buff.put(data, offset, SIZE);
+        this.dirty = false;
+    }
+    
+    public boolean isReadonlyFlag() {
+        return ((getFlags() & F_READONLY) != 0);
     }
     
 }

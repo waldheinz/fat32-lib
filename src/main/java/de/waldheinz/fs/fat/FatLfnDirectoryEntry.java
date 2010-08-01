@@ -28,20 +28,20 @@ import java.io.IOException;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  * @since 0.6
  */
-public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
-    private final FatDirectoryEntry realEntry;
+public final class FatLfnDirectoryEntry
+        extends FatDirectoryEntry
+        implements FsDirectoryEntry {
+    
     private final FatLfnDirectory parent;
 
     private String fileName;
 
-    FatLfnDirectoryEntry(FatDirectoryEntry realEntry, String name,
-            FatLfnDirectory lfnDir) {
-        
+    FatLfnDirectoryEntry(String name, FatLfnDirectory lfnDir) {
         this.parent = lfnDir;
-        this.realEntry = realEntry;
         this.fileName = name;
+        super.setShortName(parent.sng.generateShortName(name));
     }
-
+    
     FatLfnDirectoryEntry(
             int offset, int length, FatLfnDirectory parent) {
         
@@ -63,7 +63,7 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
                     parent.dir.getEntry(offset + length - 1));
         }
     }
-    
+
     private int totalEntrySize() {
         int result = (fileName.length() / 13) + 1;
 
@@ -74,123 +74,114 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
         return result;
     }
 
-    AbstractDirectoryEntry[] compactForm() {
-        if (realEntry.getName().equals(ShortName.DOT) ||
-                realEntry.getName().equals(ShortName.DOT_DOT)) {
+    FatDirectoryEntry[] compactForm() {
+        if (getShortName().equals(ShortName.DOT) ||
+                getShortName().equals(ShortName.DOT_DOT)) {
             /* the dot entries must not have a LFN */
-            return new AbstractDirectoryEntry[]{realEntry.getEntry()};
+            return new FatDirectoryEntry[]{this};
         }
     
         int totalEntrySize = totalEntrySize();
-        final AbstractDirectoryEntry[] entries =
-                new AbstractDirectoryEntry[totalEntrySize];
 
-        final byte checkSum = realEntry.getName().checkSum();
+        final FatDirectoryEntry[] entries =
+                new FatDirectoryEntry[totalEntrySize];
+
+        final byte checkSum = getShortName().checkSum();
         int j = 0;
         for (int i = totalEntrySize - 2; i > 0; i--) {
-            entries[i] = new AbstractDirectoryEntry();
+            entries[i] = new FatDirectoryEntry();
 
             set(entries[i], fileName.substring(
                     j * 13, j * 13 + 13), j + 1, checkSum, false);
             j++;
         }
 
-        entries[0] = new AbstractDirectoryEntry();
+        entries[0] = new FatDirectoryEntry();
         set(entries[0],
                 fileName.substring(j * 13), j + 1, checkSum, true);
-        entries[totalEntrySize - 1] = realEntry.getEntry();
+        entries[totalEntrySize - 1] = this;
         return entries;
     }
 
     @Override
     public String getName() {
+        checkValid();
+        
         return fileName;
     }
 
     @Override
     public FsDirectory getParent() {
+        checkValid();
+        
         return parent;
     }
 
     @Override
     public long getCreated() {
-        return realEntry.getCreated();
+        return super.getCreated();
     }
 
     @Override
     public long getLastModified() {
-        return realEntry.getLastModified();
+        return super.getLastModified();
     }
 
     @Override
     public long getLastAccessed() {
-        return realEntry.getLastAccessed();
+        return super.getLastAccessed();
     }
 
     @Override
     public boolean isFile() {
-        return realEntry.getEntry().isFile();
+        return super.isFile();
     }
 
     @Override
     public boolean isDirectory() {
-        return realEntry.getEntry().isDirectory();
+        return super.isDirectory();
     }
 
     @Override
     public void setName(String newName) {
         parent.checkReadOnly();
         fileName = newName;
-        realEntry.setName(parent.sng.generateShortName(newName));
+        super.setShortName(parent.sng.generateShortName(newName));
     }
 
+    @Override
     public void setCreated(long created) {
         parent.checkReadOnly();
-        realEntry.setCreated(created);
+        super.setCreated(created);
     }
 
     @Override
     public void setLastModified(long lastModified) {
         parent.checkReadOnly();
-        realEntry.setLastModified(lastModified);
+        super.setLastModified(lastModified);
     }
 
+    @Override
     public void setLastAccessed(long lastAccessed) {
         parent.checkReadOnly();
-        realEntry.setLastAccessed(lastAccessed);
+        super.setLastAccessed(lastAccessed);
     }
 
     @Override
     public FatFile getFile() throws IOException {
-        return parent.getFile(realEntry);
+        return parent.getFile(this);
     }
 
     @Override
     public FsDirectory getDirectory() throws IOException {
-        return parent.getDirectory(realEntry);
-    }
-
-    @Override
-    public boolean isValid() {
-        return realEntry.getEntry().isValid();
-    }
-
-    public boolean isDeleted() {
-        return realEntry.isDeleted();
+        return parent.getDirectory(this);
     }
 
     @Override
     public String toString() {
-        return "LFN = " + fileName + " / SFN = " + realEntry.getName();
+        return "LFN = " + fileName + " / SFN = " + super.getShortName();
     }
-
-    /**
-     * @return Returns the realEntry.
-     */
-    FatDirectoryEntry getRealEntry() {
-        return realEntry;
-    }
-
+    
     /**
      * Indicate if the entry has been modified in memory (ie need to be saved)
      *
@@ -201,9 +192,9 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
         return true;
     }
     
-    static void set(AbstractDirectoryEntry entry, String subName,
+    static FatDirectoryEntry createLfnPart(String subName,
             int ordinal, byte checkSum, boolean isLast) {
-
+            
         final char[] unicodechar = new char[13];
         subName.getChars(0, subName.length(), unicodechar, 0);
 
@@ -215,7 +206,7 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
             }
         }
 
-        final byte[] rawData = entry.getData();
+        final byte[] rawData = new byte[FatDirectoryEntry.SIZE];
 
         if (isLast) {
             LittleEndian.setInt8(rawData, 0, ordinal + (1 << 6));
@@ -243,26 +234,25 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
         LittleEndian.setInt16(rawData, 28, unicodechar[11]);
         LittleEndian.setInt16(rawData, 30, unicodechar[12]);
 
+        return new FatDirectoryEntry(rawData);
     }
 
-    static String getSubstring(AbstractDirectoryEntry entry) {
-        final byte[] rawData = entry.getData();
-
+    String getLfnPart() {
         final char[] unicodechar = new char[13];
 
-        unicodechar[0] = (char) LittleEndian.getUInt16(rawData, 1);
-        unicodechar[1] = (char) LittleEndian.getUInt16(rawData, 3);
-        unicodechar[2] = (char) LittleEndian.getUInt16(rawData, 5);
-        unicodechar[3] = (char) LittleEndian.getUInt16(rawData, 7);
-        unicodechar[4] = (char) LittleEndian.getUInt16(rawData, 9);
-        unicodechar[5] = (char) LittleEndian.getUInt16(rawData, 14);
-        unicodechar[6] = (char) LittleEndian.getUInt16(rawData, 16);
-        unicodechar[7] = (char) LittleEndian.getUInt16(rawData, 18);
-        unicodechar[8] = (char) LittleEndian.getUInt16(rawData, 20);
-        unicodechar[9] = (char) LittleEndian.getUInt16(rawData, 22);
-        unicodechar[10] = (char) LittleEndian.getUInt16(rawData, 24);
-        unicodechar[11] = (char) LittleEndian.getUInt16(rawData, 28);
-        unicodechar[12] = (char) LittleEndian.getUInt16(rawData, 30);
+        unicodechar[0] = (char) LittleEndian.getUInt16(data, 1);
+        unicodechar[1] = (char) LittleEndian.getUInt16(data, 3);
+        unicodechar[2] = (char) LittleEndian.getUInt16(data, 5);
+        unicodechar[3] = (char) LittleEndian.getUInt16(data, 7);
+        unicodechar[4] = (char) LittleEndian.getUInt16(data, 9);
+        unicodechar[5] = (char) LittleEndian.getUInt16(data, 14);
+        unicodechar[6] = (char) LittleEndian.getUInt16(data, 16);
+        unicodechar[7] = (char) LittleEndian.getUInt16(data, 18);
+        unicodechar[8] = (char) LittleEndian.getUInt16(data, 20);
+        unicodechar[9] = (char) LittleEndian.getUInt16(data, 22);
+        unicodechar[10] = (char) LittleEndian.getUInt16(data, 24);
+        unicodechar[11] = (char) LittleEndian.getUInt16(data, 28);
+        unicodechar[12] = (char) LittleEndian.getUInt16(data, 30);
 
         int end = 0;
 

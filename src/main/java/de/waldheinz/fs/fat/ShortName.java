@@ -133,20 +133,20 @@ final class ShortName {
         }
     }
     
-    public static ShortName parse(AbstractDirectoryEntry entry) {
+    public static ShortName parse(byte[] data) {
         final char[] nameArr = new char[8];
         
         for (int i = 0; i < nameArr.length; i++) {
-            nameArr[i] = (char) LittleEndian.getUInt8(entry.getData(), i);
+            nameArr[i] = (char) LittleEndian.getUInt8(data, i);
         }
 
-        if (LittleEndian.getUInt8(entry.getData(), 0) == 0x05) {
+        if (LittleEndian.getUInt8(data, 0) == 0x05) {
             nameArr[0] = (char) 0xe5;
         }
         
         final char[] extArr = new char[3];
         for (int i = 0; i < extArr.length; i++) {
-            extArr[i] = (char) LittleEndian.getUInt8(entry.getData(), 0x08 + i);
+            extArr[i] = (char) LittleEndian.getUInt8(data, 0x08 + i);
         }
 
         return new ShortName(
@@ -154,14 +154,10 @@ final class ShortName {
                 new String(extArr).trim());
     }
 
-    public void write(AbstractDirectoryEntry entry) {
-        final byte[] dest = entry.getData();
-        
+    public void write(byte[] dest) {
         for (int i = 0; i < 11; i++) {
             dest[i] = (byte) name[i];
         }
-        
-        entry.markDirty();
     }
 
     public String asSimpleString() {

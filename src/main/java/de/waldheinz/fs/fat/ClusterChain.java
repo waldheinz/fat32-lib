@@ -33,7 +33,6 @@ final class ClusterChain extends FatObject {
     private final BlockDevice device;
     private final int clusterSize;
     protected final long dataOffset;
-    private final boolean readOnly;
     
     private long startCluster;
     
@@ -48,6 +47,8 @@ final class ClusterChain extends FatObject {
     }
     
     public ClusterChain(Fat fat, long startCluster, boolean readOnly) {
+        super(readOnly);
+        
         this.fat = fat;
         
         if (startCluster != 0) {
@@ -62,13 +63,8 @@ final class ClusterChain extends FatObject {
         this.dataOffset = FatUtils.getFilesOffset(fat.getBootSector());
         this.startCluster = startCluster;
         this.clusterSize = fat.getBootSector().getBytesPerCluster();
-        this.readOnly = readOnly;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
-    }
-    
     public int getClusterSize() {
         return clusterSize;
     }

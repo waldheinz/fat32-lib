@@ -36,6 +36,8 @@ public final class FatFile extends FatObject implements FsFile {
     private final ClusterChain chain;
     
     private FatFile(FatDirectoryEntry myEntry, ClusterChain chain) {
+        super(myEntry.isReadOnly());
+        
         this.entry = myEntry;
         this.chain = chain;
     }
@@ -43,14 +45,14 @@ public final class FatFile extends FatObject implements FsFile {
     static FatFile get(Fat fat, FatDirectoryEntry entry)
             throws IOException {
         
-        if (entry.getEntry().isDirectory())
+        if (entry.isDirectory())
             throw new IllegalArgumentException(entry + " is a directory");
             
         final ClusterChain cc = new ClusterChain(
-                fat, entry.getStartCluster(), entry.getEntry().isReadOnly());
+                fat, entry.getStartCluster(), entry.isReadonlyFlag());
                 
         if (entry.getLength() > cc.getLengthOnDisk()) throw new IOException(
-                "entry is largen than associated cluster chain");
+                "entry is larger than associated cluster chain");
                 
         return new FatFile(entry, cc);
     }
@@ -63,6 +65,8 @@ public final class FatFile extends FatObject implements FsFile {
      */
     @Override
     public long getLength() {
+        checkValid();
+        
         return entry.getLength();
     }
     
@@ -74,14 +78,11 @@ public final class FatFile extends FatObject implements FsFile {
 
     @Override
     public void setLength(long length) throws ReadOnlyException, IOException {
-        if (getLength() == length) return;
-
-        if (!chain.isReadOnly()) {
-            updateTimeStamps(true);
-        } else {
-            throw new ReadOnlyException();
-        }
+        checkWritable();
         
+        if (getLength() == length) return;
+        
+        updateTimeStamps(true);
         chain.setSize(length);
         
         this.entry.setStartCluster(chain.getStartCluster());
@@ -104,6 +105,8 @@ public final class FatFile extends FatObject implements FsFile {
      */
     @Override
     public void read(long offset, ByteBuffer dest) throws IOException {
+        checkValid();
+        
         final int len = dest.remaining();
         
         if (len == 0) return;
@@ -135,12 +138,10 @@ public final class FatFile extends FatObject implements FsFile {
     @Override
     public void write(long offset, ByteBuffer srcBuf)
             throws ReadOnlyException, IOException {
-        
-        if (!chain.isReadOnly()) {
-            updateTimeStamps(true);
-        } else {
-            throw new ReadOnlyException();
-        }
+
+        checkWritable();
+
+        updateTimeStamps(true);
         
         final long lastByte = offset + srcBuf.remaining();
 
@@ -162,7 +163,8 @@ public final class FatFile extends FatObject implements FsFile {
     
     @Override
     public void flush() throws IOException {
-        /* nothing to do */
+        checkWritable();
+        /* nothing else to do */
     }
     
     /**
@@ -172,6 +174,8 @@ public final class FatFile extends FatObject implements FsFile {
      * @return the file's {@code ClusterChain}
      */
     ClusterChain getChain() {
+        checkValid();
+        
         return chain;
     }
     

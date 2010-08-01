@@ -20,20 +20,25 @@
 package de.waldheinz.fs.fat;
 
 import de.waldheinz.fs.FsObject;
+import de.waldheinz.fs.ReadOnlyException;
 
 /**
+ * TODO: move this to fs package as AbstractFsObject
+ *
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @since 0.6
  */
-abstract class FatObject implements FsObject {
+public class FatObject implements FsObject {
     
     /** 
      * Is this object still valid?
      */
     private boolean valid;
+    private boolean readOnly;
     
-    public FatObject() {
+    FatObject(boolean readOnly) {
         this.valid = true;
+        this.readOnly = readOnly;
     }
 
     /** 
@@ -45,13 +50,38 @@ abstract class FatObject implements FsObject {
      */
     @Override
     public final boolean isValid() {
-        return valid;
+        return this.valid;
     }
 
     /**
      * Mark this object as invalid.
      */
-    void invalidate() {
-        valid = false;
+    protected final void invalidate() {
+        this.valid = false;
     }
+
+    /**
+     * @since 0.6
+     */
+    protected final void checkValid() {
+        if (!isValid()) throw new IllegalStateException(
+                this + " is not valid any more");
+    }
+
+    /**
+     * @since 0.6
+     */
+    protected final void checkWritable() {
+        checkValid();
+
+        if (isReadOnly()) {
+            throw new ReadOnlyException();
+        }
+    }
+    
+    @Override
+    public final boolean isReadOnly() {
+        return this.readOnly;
+    }
+    
 }

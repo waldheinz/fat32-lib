@@ -20,7 +20,8 @@
 package de.waldheinz.fs;
 
 /**
- * This interface is the base interface for objects that are part of a FileSystem.
+ * This interface is the base interface for objects that are part of a
+ * {@link FileSystem}.
  * 
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  */
@@ -30,10 +31,19 @@ public interface FsObject {
      * Is this object still valid.
      * 
      * An object is not valid anymore if it has been removed from the
-     * filesystem. All invocations on methods (exception this method) of invalid
-     * objects must throw an IOException.
+     * filesystem. All invocations on methods (except this method and the
+     * methods inherited from {@link java.lang.Object}) of
+     * invalid objects must throw an {@link IllegalStateException}.
      * 
      * @return if this {@code FsObject} is still valid
      */
     public boolean isValid();
+    
+    /**
+     * 
+     *
+     * @return if this {@code FsObject} is read-only
+     * @since 0.6
+     */
+    public boolean isReadOnly();
 }

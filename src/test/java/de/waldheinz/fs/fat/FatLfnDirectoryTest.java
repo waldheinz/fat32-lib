@@ -248,13 +248,6 @@ public class FatLfnDirectoryTest {
     }
     
     @Test
-    public void testGetStorageDirectory() {
-        System.out.println("getStorageDirectory");
-        
-        assertEquals(rootDirStore, dir.getStorageDirectory());
-    }
-    
-    @Test
     public void testAddFile() throws Exception {
         System.out.println("addFile");
         

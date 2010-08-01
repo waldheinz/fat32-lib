@@ -40,7 +40,7 @@ abstract class AbstractDirectory {
      */
     public static final int MAX_LABEL_LENGTH = 11;
     
-    private final List<AbstractDirectoryEntry> entries;
+    private final List<FatDirectoryEntry> entries;
     private final boolean readOnly;
     private final boolean isRoot;
     
@@ -59,7 +59,7 @@ abstract class AbstractDirectory {
     protected AbstractDirectory(
             int capacity, boolean readOnly, boolean isRoot) {
         
-        this.entries = new ArrayList<AbstractDirectoryEntry>();
+        this.entries = new ArrayList<FatDirectoryEntry>();
         this.capacity = capacity;
         this.readOnly = readOnly;
         this.isRoot = isRoot;
@@ -128,7 +128,7 @@ abstract class AbstractDirectory {
      *
      * @param newEntries the new directory entries
      */
-    public void setEntries(List<AbstractDirectoryEntry> newEntries) {
+    public void setEntries(List<FatDirectoryEntry> newEntries) {
         if (newEntries.size() > capacity)
             throw new IllegalArgumentException("too many entries");
         
@@ -143,14 +143,14 @@ abstract class AbstractDirectory {
      * @see #changeSize(int) 
      */
     protected final void sizeChanged(long newSize) throws IOException {
-        final long newCount = newSize / AbstractDirectoryEntry.SIZE;
+        final long newCount = newSize / FatDirectoryEntry.SIZE;
         if (newCount > Integer.MAX_VALUE)
             throw new IOException("directory too large");
         
         this.capacity = (int) newCount;
     }
 
-    public final AbstractDirectoryEntry getEntry(int idx) {
+    public final FatDirectoryEntry getEntry(int idx) {
         return this.entries.get(idx);
     }
     
@@ -226,32 +226,24 @@ abstract class AbstractDirectory {
      */
     public void flush() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
-                getCapacity() * AbstractDirectoryEntry.SIZE);
+                getCapacity() * FatDirectoryEntry.SIZE);
 
-        final int volLabelOffset;
+        int offset = 0;
 
         if (this.volumeLabel != null) {
-            volLabelOffset = 32;
-            final AbstractDirectoryEntry labelEntry =
-                    new AbstractDirectoryEntry();
-            labelEntry.setFlags(AbstractDirectoryEntry.F_VOLUME_ID);
+            offset = 32;
+            final FatDirectoryEntry labelEntry =
+                    FatDirectoryEntry.createVolumeLabel(volumeLabel);
             
-            System.arraycopy(
-                    volumeLabel.getBytes(), 0,
-                    labelEntry.getData(), 0,
-                    volumeLabel.length());
-
-            labelEntry.write(data.array(), 0);
-        } else {
-            volLabelOffset = 0;
+            labelEntry.write(data, 0);
         }
         
         for (int i=0; i < entries.size(); i++) {
-            final AbstractDirectoryEntry entry = entries.get(i);
-
+            final FatDirectoryEntry entry = entries.get(i);
+            
             if (entry != null) {
-                entry.write(data.array(),
-                        i * AbstractDirectoryEntry.SIZE + volLabelOffset);
+                entry.write(data, offset);
+                offset += FatDirectoryEntry.SIZE;
             }
         }
         
@@ -261,28 +253,26 @@ abstract class AbstractDirectory {
     
     protected final void read() throws IOException {
         final ByteBuffer data = ByteBuffer.allocate(
-                getCapacity() * AbstractDirectoryEntry.SIZE);
+                getCapacity() * FatDirectoryEntry.SIZE);
                 
         read(data);
         
         final byte[] src = data.array();
 
         for (int i = 0; i < getCapacity(); i++) {
-            final int offset = i * 32;
-            if (src[offset] != 0) {
-                final AbstractDirectoryEntry entry =
-                        new AbstractDirectoryEntry(src, offset);
-
-                if (entry.isVolumeLabel()) {
-                    parseVolumeLabel(entry);
-                } else {
-                    entries.add(entry);
-                }
+            final int offset = i * FatDirectoryEntry.SIZE;
+            final FatDirectoryEntry e = FatDirectoryEntry.read(data, offset);
+            if (e == null) break;
+            
+            if (e.isVolumeLabel()) {
+                this.volumeLabel = e.getVolumeLabel();
+            } else {
+                entries.add(e);
             }
         }
     }
     
-    public void addEntry(AbstractDirectoryEntry e) throws IOException {
+    public void addEntry(FatDirectoryEntry e) throws IOException {
         assert (e != null);
         
         if (getSize() == getCapacity()) {
@@ -292,7 +282,7 @@ abstract class AbstractDirectory {
         entries.add(e);
     }
     
-    public void addEntries(AbstractDirectoryEntry[] entries)
+    public void addEntries(FatDirectoryEntry[] entries)
             throws IOException {
         
         if (getSize() + entries.length > getCapacity()) {
@@ -302,7 +292,7 @@ abstract class AbstractDirectory {
         this.entries.addAll(Arrays.asList(entries));
     }
     
-    public void removeEntry(AbstractDirectoryEntry entry) throws IOException {
+    public void removeEntry(FatDirectoryEntry entry) throws IOException {
         assert (entry != null);
         
         this.entries.remove(entry);
@@ -359,21 +349,4 @@ abstract class AbstractDirectory {
         this.dirty = true;
     }
     
-    private void parseVolumeLabel(AbstractDirectoryEntry entry) {
-        if (!entry.isVolumeLabel()) throw new IllegalArgumentException();
-
-        final StringBuilder sb = new StringBuilder();
-
-        for (int i=0; i < MAX_LABEL_LENGTH; i++) {
-            final byte b = entry.getData()[i];
-            
-            if (b != 0) {
-                sb.append((char) b);
-            } else {
-                break;
-            }
-        }
-        
-        this.volumeLabel = sb.toString();
-    }
 }

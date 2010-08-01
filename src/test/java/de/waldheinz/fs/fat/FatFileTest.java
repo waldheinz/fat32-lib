@@ -18,7 +18,6 @@
 
 package de.waldheinz.fs.fat;
 
-import de.waldheinz.fs.fat.FatLfnDirectoryEntry;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +34,6 @@ public class FatFileTest {
 
     private Fat fat;
     private FatLfnDirectoryEntry entry;
-    private FatDirectoryEntry fatEntry;
     private FatFile ff;
 
     @Before
@@ -47,16 +45,15 @@ public class FatFileTest {
         final FatFileSystem fatFs = new FatFileSystem(rd, false);
 
         this.entry = (FatLfnDirectoryEntry) fatFs.getRoot().getEntry("Readme.txt");
-        this.fatEntry = entry.getRealEntry();
         this.fat = fatFs.getFat();
-        this.ff = FatFile.get(fat, fatEntry);
+        this.ff = FatFile.get(fat, entry);
     }
     
     @Test
     public void testGet() throws Exception {
         System.out.println("get");
         
-        assertEquals(ff, FatFile.get(fat, fatEntry));
+        assertEquals(ff, FatFile.get(fat, entry));
     }
     
     @Test

@@ -43,7 +43,7 @@ class ClusterChainDirectory extends AbstractDirectory {
     
     protected ClusterChainDirectory(ClusterChain chain, boolean isRoot) {
         
-        super((int)(chain.getLengthOnDisk() / AbstractDirectoryEntry.SIZE),
+        super((int)(chain.getLengthOnDisk() / FatDirectoryEntry.SIZE),
                 chain.isReadOnly(), isRoot);
         
         this.chain = chain;   
@@ -108,7 +108,7 @@ class ClusterChainDirectory extends AbstractDirectory {
             
         checkEntryCount(entryCount);
         
-        final int size = entryCount * AbstractDirectoryEntry.SIZE;
+        final int size = entryCount * FatDirectoryEntry.SIZE;
 
         if (size > MAX_SIZE) throw new DirectoryFullException(
                 "directory would grow beyond " + MAX_SIZE + " bytes",
