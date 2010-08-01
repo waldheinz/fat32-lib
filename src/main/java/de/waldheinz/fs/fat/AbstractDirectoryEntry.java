@@ -65,10 +65,6 @@ final class AbstractDirectoryEntry extends FatObject {
     public byte[] getData() {
         return this.rawData;
     }
-
-    public AbstractDirectory getDir() {
-        return dir;
-    }
     
     public void write(byte[] dest, int offset) {
         System.arraycopy(rawData, 0, dest, offset, SIZE);
