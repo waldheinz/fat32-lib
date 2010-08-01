@@ -29,8 +29,6 @@ import java.io.IOException;
  */
 final class FatDirEntry {
     
-    public final static int OFFSET_LENGTH = 0x1c;
-    
     private final AbstractDirectoryEntry entry;
     
     /**
