@@ -30,37 +30,37 @@ import java.io.IOException;
  */
 public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
     private final FatDirEntry realEntry;
-    private final FatLfnDirectory lfnDir;
+    private final FatLfnDirectory parent;
 
     private String fileName;
 
     FatLfnDirectoryEntry(FatDirEntry realEntry, String name,
             FatLfnDirectory lfnDir) {
         
-        this.lfnDir = lfnDir;
+        this.parent = lfnDir;
         this.realEntry = realEntry;
         this.fileName = name;
     }
 
     FatLfnDirectoryEntry(
-            int offset, int length, FatLfnDirectory lfnDir) {
+            int offset, int length, FatLfnDirectory parent) {
         
-        this.lfnDir = lfnDir;
+        this.parent = parent;
         
         /* this is just an old plain 8.3 entry */
         if (length == 1) {
-            realEntry = FatDirEntry.read(lfnDir.dir.getEntry(offset));
+            realEntry = FatDirEntry.read(parent.dir.getEntry(offset));
             fileName = realEntry.getName().asSimpleString();
         } else {
             /* stored in reverse order */
             final StringBuilder name = new StringBuilder(13 * (length - 1));
             for (int i = length - 2; i >= 0; i--) {
-                AbstractDirectoryEntry entry = lfnDir.dir.getEntry(i + offset);
+                AbstractDirectoryEntry entry = parent.dir.getEntry(i + offset);
                 name.append(getSubstring(entry));
             }
             fileName = name.toString().trim();
             realEntry = FatDirEntry.read(
-                    lfnDir.dir.getEntry(offset + length - 1));
+                    parent.dir.getEntry(offset + length - 1));
         }
     }
     
@@ -87,14 +87,14 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
         int j = 0;
         for (int i = totalEntrySize - 2; i > 0; i--) {
             entries[i] = new AbstractDirectoryEntry(
-                    lfnDir.getStorageDirectory());
+                    parent.getStorageDirectory());
 
             set(entries[i], fileName.substring(
                     j * 13, j * 13 + 13), j + 1, checkSum, false);
             j++;
         }
 
-        entries[0] = new AbstractDirectoryEntry(lfnDir.getStorageDirectory());
+        entries[0] = new AbstractDirectoryEntry(parent.getStorageDirectory());
         set(entries[0],
                 fileName.substring(j * 13), j + 1, checkSum, true);
         entries[totalEntrySize - 1] = realEntry.getEntry();
@@ -108,7 +108,7 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
 
     @Override
     public FsDirectory getParent() {
-        return lfnDir;
+        return parent;
     }
 
     @Override
@@ -138,35 +138,35 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
 
     @Override
     public void setName(String newName) {
-        lfnDir.checkReadOnly();
+        parent.checkReadOnly();
         fileName = newName;
-        realEntry.setName(lfnDir.sng.generateShortName(newName));
+        realEntry.setName(parent.sng.generateShortName(newName));
     }
 
     public void setCreated(long created) {
-        lfnDir.checkReadOnly();
+        parent.checkReadOnly();
         realEntry.setCreated(created);
     }
 
     @Override
     public void setLastModified(long lastModified) {
-        lfnDir.checkReadOnly();
+        parent.checkReadOnly();
         realEntry.setLastModified(lastModified);
     }
 
     public void setLastAccessed(long lastAccessed) {
-        lfnDir.checkReadOnly();
+        parent.checkReadOnly();
         realEntry.setLastAccessed(lastAccessed);
     }
 
     @Override
     public FatFile getFile() throws IOException {
-        return lfnDir.getFile(realEntry);
+        return parent.getFile(realEntry);
     }
 
     @Override
     public FsDirectory getDirectory() throws IOException {
-        return lfnDir.getDirectory(realEntry);
+        return parent.getDirectory(realEntry);
     }
 
     @Override
@@ -201,7 +201,7 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
     }
 
     void remove() throws IOException {
-        lfnDir.checkReadOnly();
+        parent.checkReadOnly();
 
         if (realEntry.getName().equals(ShortName.DOT) ||
                 realEntry.getName().equals(ShortName.DOT_DOT)) {
@@ -210,18 +210,18 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
         }
 
         final ClusterChain cc = new ClusterChain(
-                lfnDir.fat, realEntry.getStartCluster(), false);
+                parent.fat, realEntry.getStartCluster(), false);
         
         cc.setChainLength(0);
-        lfnDir.longNameIndex.remove(this.getName());
-        lfnDir.shortNameIndex.remove(realEntry.getName());
+        parent.longNameIndex.remove(this.getName());
+        parent.shortNameIndex.remove(realEntry.getName());
         if (isFile()) {
-            lfnDir.files.remove(this.realEntry);
+            parent.files.remove(this.realEntry);
         } else {
-            lfnDir.files.remove(this.realEntry);
+            parent.files.remove(this.realEntry);
         }
         realEntry.remove();
-        lfnDir.updateLFN();
+        parent.updateLFN();
     }
 
 
