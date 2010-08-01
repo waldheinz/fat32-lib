@@ -40,8 +40,8 @@ import java.util.Map;
 public final class FatLfnDirectory implements FsDirectory {
     final Map<ShortName, FatLfnDirectoryEntry> shortNameIndex;
     final Map<String, FatLfnDirectoryEntry> longNameIndex;
-    final Map<FatDirEntry, FatFile> files;
-    private final Map<FatDirEntry, FatLfnDirectory> directories;
+    final Map<FatDirectoryEntry, FatFile> files;
+    private final Map<FatDirectoryEntry, FatLfnDirectory> directories;
     final ShortNameGenerator sng;
     final AbstractDirectory dir;
     final Fat fat;
@@ -55,8 +55,8 @@ public final class FatLfnDirectory implements FsDirectory {
                 new LinkedHashMap<ShortName, FatLfnDirectoryEntry>();
         this.longNameIndex = new LinkedHashMap<String, FatLfnDirectoryEntry>();
         this.sng = new ShortNameGenerator(shortNameIndex.keySet());
-        this.files = new LinkedHashMap<FatDirEntry, FatFile>();
-        this.directories = new LinkedHashMap<FatDirEntry, FatLfnDirectory>();
+        this.files = new LinkedHashMap<FatDirectoryEntry, FatFile>();
+        this.directories = new LinkedHashMap<FatDirectoryEntry, FatLfnDirectory>();
         
         parseLfn();
     }
@@ -67,7 +67,7 @@ public final class FatLfnDirectory implements FsDirectory {
         }
     }
     
-    FatFile getFile(FatDirEntry entry) throws IOException {
+    FatFile getFile(FatDirectoryEntry entry) throws IOException {
         FatFile file = files.get(entry);
 
         if (file == null) {
@@ -78,7 +78,7 @@ public final class FatLfnDirectory implements FsDirectory {
         return file;
     }
 
-    FsDirectory getDirectory(FatDirEntry entry) throws IOException {
+    FsDirectory getDirectory(FatDirectoryEntry entry) throws IOException {
         FatLfnDirectory result = directories.get(entry);
 
         if (result == null) {
@@ -114,7 +114,7 @@ public final class FatLfnDirectory implements FsDirectory {
         final ShortName shortName = makeShortName(name);
         final AbstractDirectoryEntry entryData =
                 new AbstractDirectoryEntry(dir);
-        FatDirEntry realEntry = FatDirEntry.create(entryData);
+        FatDirectoryEntry realEntry = FatDirectoryEntry.create(entryData);
         realEntry.setName(shortName);
 
         final FatLfnDirectoryEntry entry =
@@ -160,7 +160,7 @@ public final class FatLfnDirectory implements FsDirectory {
         
         final ShortName sn = makeShortName(name);
         final FatDirectory newDir = FatDirectory.createSub(dir, fat);
-        final FatDirEntry realEntry = newDir.getEntry();
+        final FatDirectoryEntry realEntry = newDir.getEntry();
         
         realEntry.setName(sn);
         

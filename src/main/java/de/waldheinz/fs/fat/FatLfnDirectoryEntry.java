@@ -29,12 +29,12 @@ import java.io.IOException;
  * @since 0.6
  */
 public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
-    private final FatDirEntry realEntry;
+    private final FatDirectoryEntry realEntry;
     private final FatLfnDirectory parent;
 
     private String fileName;
 
-    FatLfnDirectoryEntry(FatDirEntry realEntry, String name,
+    FatLfnDirectoryEntry(FatDirectoryEntry realEntry, String name,
             FatLfnDirectory lfnDir) {
         
         this.parent = lfnDir;
@@ -49,7 +49,7 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
         
         /* this is just an old plain 8.3 entry */
         if (length == 1) {
-            realEntry = FatDirEntry.read(parent.dir.getEntry(offset));
+            realEntry = FatDirectoryEntry.read(parent.dir.getEntry(offset));
             fileName = realEntry.getName().asSimpleString();
         } else {
             /* stored in reverse order */
@@ -59,7 +59,7 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
                 name.append(getSubstring(entry));
             }
             fileName = name.toString().trim();
-            realEntry = FatDirEntry.read(
+            realEntry = FatDirectoryEntry.read(
                     parent.dir.getEntry(offset + length - 1));
         }
     }
@@ -186,7 +186,7 @@ public final class FatLfnDirectoryEntry implements FsDirectoryEntry {
     /**
      * @return Returns the realEntry.
      */
-    FatDirEntry getRealEntry() {
+    FatDirectoryEntry getRealEntry() {
         return realEntry;
     }
 

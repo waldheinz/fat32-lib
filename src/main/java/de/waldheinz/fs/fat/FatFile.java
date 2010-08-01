@@ -32,15 +32,15 @@ import java.nio.ByteBuffer;
  * @since 0.6
  */
 public final class FatFile extends FatObject implements FsFile {
-    private final FatDirEntry entry;
+    private final FatDirectoryEntry entry;
     private final ClusterChain chain;
     
-    private FatFile(FatDirEntry myEntry, ClusterChain chain) {
+    private FatFile(FatDirectoryEntry myEntry, ClusterChain chain) {
         this.entry = myEntry;
         this.chain = chain;
     }
     
-    static FatFile get(Fat fat, FatDirEntry entry)
+    static FatFile get(Fat fat, FatDirectoryEntry entry)
             throws IOException {
         
         if (entry.getEntry().isDirectory())
@@ -57,7 +57,7 @@ public final class FatFile extends FatObject implements FsFile {
     
     /**
      * Returns the length of this file. This is actually the length that
-     * is stored in the {@link FatDirEntry} that is associated with this file.
+     * is stored in the {@link FatDirectoryEntry} that is associated with this file.
      * 
      * @return long the length that is recorded for this file
      */
@@ -93,14 +93,14 @@ public final class FatFile extends FatObject implements FsFile {
      * {@inheritDoc}
      * </p><p>
      * Unless this file is read-ony, this method also updates the
-     * "last accessed" field in the {@link FatDirEntry} that is associated with
+     * "last accessed" field in the {@link FatDirectoryEntry} that is associated with
      * this file.
      * </p>
      * 
      * @param offset {@inheritDoc}
      * @param dest {@inheritDoc}
      * @throws FileSystemException {@inheritDoc}
-     * @see FatDirEntry#setLastAccessed(long) 
+     * @see FatDirectoryEntry#setLastAccessed(long)
      */
     @Override
     public void read(long offset, ByteBuffer dest) throws IOException {
@@ -124,7 +124,7 @@ public final class FatFile extends FatObject implements FsFile {
      * {@inheritDoc}
      * </p><p>
      * Unless this file is read-ony, this method also updates the
-     * "last accessed" and "last modified" fields in the {@link FatDirEntry}
+     * "last accessed" and "last modified" fields in the {@link FatDirectoryEntry}
      * that is associated with this file.
      * </p>
      *

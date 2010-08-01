@@ -56,7 +56,7 @@ public class ClusterChainDirectoryTest {
         
         while (true) {
             AbstractDirectoryEntry e = new AbstractDirectoryEntry(dir);
-            FatDirEntry fe = FatDirEntry.create(e);
+            FatDirectoryEntry fe = FatDirectoryEntry.create(e);
             dir.addEntry(e);
             
             assertTrue(

@@ -27,7 +27,7 @@ import java.io.IOException;
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-final class FatDirEntry {
+final class FatDirectoryEntry {
     
     private final AbstractDirectoryEntry entry;
     
@@ -38,16 +38,16 @@ final class FatDirEntry {
      * @param src
      * @param offset
      */
-    private FatDirEntry(AbstractDirectoryEntry entry) {
+    private FatDirectoryEntry(AbstractDirectoryEntry entry) {
         this.entry = entry;
     }
 
-    public static FatDirEntry read(AbstractDirectoryEntry e) {
-        return new FatDirEntry(e);
+    public static FatDirectoryEntry read(AbstractDirectoryEntry e) {
+        return new FatDirectoryEntry(e);
     }
 
-    public static FatDirEntry create(AbstractDirectoryEntry e) {
-        final FatDirEntry result = new FatDirEntry(e);
+    public static FatDirectoryEntry create(AbstractDirectoryEntry e) {
+        final FatDirectoryEntry result = new FatDirectoryEntry(e);
 
         final long now = System.currentTimeMillis();
 

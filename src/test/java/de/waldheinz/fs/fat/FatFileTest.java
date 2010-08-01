@@ -35,7 +35,7 @@ public class FatFileTest {
 
     private Fat fat;
     private FatLfnDirectoryEntry entry;
-    private FatDirEntry fatEntry;
+    private FatDirectoryEntry fatEntry;
     private FatFile ff;
 
     @Before
