@@ -61,9 +61,20 @@ public final class SuperFloppyFormatter {
 
     /**
      * The default number of heads.
+     * 
+     * @since 0.6
      */
-    public final static int DEFULT_HEADS = 64;
-    
+    public final static int DEFAULT_HEADS = 64;
+
+    /**
+     * The default number of heads.
+     * 
+     * @deprecated the name of this constant was mistyped
+     * @see #DEFAULT_HEADS
+     */
+    @Deprecated
+    public final static int DEFULT_HEADS = DEFAULT_HEADS;
+
     /**
      * The default OEM name for file systems created by this class.
      */
@@ -163,7 +174,7 @@ public final class SuperFloppyFormatter {
         bs.setSectorsPerCluster(sectorsPerCluster);
         bs.setMediumDescriptor(MEDIUM_DESCRIPTOR_HD);
         bs.setSectorsPerTrack(DEFAULT_SECTORS_PER_TRACK);
-        bs.setNrHeads(DEFULT_HEADS);
+        bs.setNrHeads(DEFAULT_HEADS);
         bs.setOemName(oemName);
     }
 
