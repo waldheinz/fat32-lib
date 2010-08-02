@@ -50,23 +50,23 @@ class FatDirectoryEntry extends FatObject {
 
     private boolean dirty;
     
-    /**
-     * Create a new entry from a FAT directory image.
-     * 
-     * @param dir
-     * @param src
-     * @param offset
-     */
-    FatDirectoryEntry(byte[] data) {
+    FatDirectoryEntry(byte[] data, boolean readOnly) {
+        super(readOnly);
+        
         this.data = data;
     }
 
-    public FatDirectoryEntry() {
-        this.data = new byte[SIZE];
+    FatDirectoryEntry() {
+        this(new byte[SIZE], false);
     }
     
-    public static FatDirectoryEntry read(ByteBuffer buff, int offset) {
-        throw new UnsupportedOperationException();
+    public static FatDirectoryEntry read(
+            ByteBuffer buff, int offset, boolean readOnly) {
+        
+        final byte[] data = new byte[SIZE];
+        buff.get(data, offset, SIZE);
+        
+        return new FatDirectoryEntry(data, readOnly);
     }
     
     /**
@@ -139,7 +139,7 @@ class FatDirectoryEntry extends FatObject {
                     data, 0,
                     volumeLabel.length());
 
-        final FatDirectoryEntry result = new FatDirectoryEntry(data);
+        final FatDirectoryEntry result = new FatDirectoryEntry(data, false);
         result.setFlags(FatDirectoryEntry.F_VOLUME_ID);
         return result;
     }

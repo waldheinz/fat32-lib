@@ -36,34 +36,12 @@ public final class FatLfnDirectoryEntry
 
     private String fileName;
 
-    FatLfnDirectoryEntry(String name, FatLfnDirectory lfnDir) {
-        this.parent = lfnDir;
+    FatLfnDirectoryEntry(String name, ShortName sn, FatLfnDirectory parent) {
+        this.parent = parent;
         this.fileName = name;
-        super.setShortName(parent.sng.generateShortName(name));
+        super.setShortName(sn);
     }
     
-    FatLfnDirectoryEntry(
-            int offset, int length, FatLfnDirectory parent) {
-        
-        this.parent = parent;
-        
-        /* this is just an old plain 8.3 entry */
-        if (length == 1) {
-            realEntry = FatDirectoryEntry.read(parent.dir.getEntry(offset));
-            fileName = realEntry.getName().asSimpleString();
-        } else {
-            /* stored in reverse order */
-            final StringBuilder name = new StringBuilder(13 * (length - 1));
-            for (int i = length - 2; i >= 0; i--) {
-                AbstractDirectoryEntry entry = parent.dir.getEntry(i + offset);
-                name.append(getSubstring(entry));
-            }
-            fileName = name.toString().trim();
-            realEntry = FatDirectoryEntry.read(
-                    parent.dir.getEntry(offset + length - 1));
-        }
-    }
-
     private int totalEntrySize() {
         int result = (fileName.length() / 13) + 1;
 
@@ -88,18 +66,18 @@ public final class FatLfnDirectoryEntry
 
         final byte checkSum = getShortName().checkSum();
         int j = 0;
+        
         for (int i = totalEntrySize - 2; i > 0; i--) {
-            entries[i] = new FatDirectoryEntry();
-
-            set(entries[i], fileName.substring(
-                    j * 13, j * 13 + 13), j + 1, checkSum, false);
+            entries[i] = createLfnPart(fileName.substring(j * 13, j * 13 + 13),
+                    j + 1, checkSum, false);
             j++;
         }
 
-        entries[0] = new FatDirectoryEntry();
-        set(entries[0],
-                fileName.substring(j * 13), j + 1, checkSum, true);
+        entries[0] = createLfnPart(fileName.substring(j * 13),
+                j + 1, checkSum, true);
+        
         entries[totalEntrySize - 1] = this;
+        
         return entries;
     }
 
@@ -144,7 +122,8 @@ public final class FatLfnDirectoryEntry
 
     @Override
     public void setName(String newName) {
-        parent.checkReadOnly();
+        checkWritable();
+        
         fileName = newName;
         super.setShortName(parent.sng.generateShortName(newName));
     }
@@ -234,7 +213,7 @@ public final class FatLfnDirectoryEntry
         LittleEndian.setInt16(rawData, 28, unicodechar[11]);
         LittleEndian.setInt16(rawData, 30, unicodechar[12]);
 
-        return new FatDirectoryEntry(rawData);
+        return new FatDirectoryEntry(rawData, false);
     }
 
     String getLfnPart() {

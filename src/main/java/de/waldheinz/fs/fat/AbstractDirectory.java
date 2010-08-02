@@ -257,11 +257,10 @@ abstract class AbstractDirectory {
                 
         read(data);
         
-        final byte[] src = data.array();
-
         for (int i = 0; i < getCapacity(); i++) {
             final int offset = i * FatDirectoryEntry.SIZE;
-            final FatDirectoryEntry e = FatDirectoryEntry.read(data, offset);
+            final FatDirectoryEntry e =
+                    FatDirectoryEntry.read(data, offset, isReadOnly());
             if (e == null) break;
             
             if (e.isVolumeLabel()) {

@@ -55,8 +55,7 @@ public class ClusterChainDirectoryTest {
         System.out.println("maximumSize");
         
         while (true) {
-            AbstractDirectoryEntry e = new AbstractDirectoryEntry();
-            FatDirectoryEntry fe = FatDirectoryEntry.create(e);
+            FatDirectoryEntry e = new FatDirectoryEntry();
             dir.addEntry(e);
             
             assertTrue(
@@ -76,7 +75,7 @@ public class ClusterChainDirectoryTest {
         System.out.println("create");
 
         assertEquals(
-                chain.getLengthOnDisk() / AbstractDirectoryEntry.SIZE,
+                chain.getLengthOnDisk() / FatDirectoryEntry.SIZE,
                 dir.getCapacity());
     }
     

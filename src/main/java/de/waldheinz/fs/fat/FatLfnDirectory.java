@@ -107,19 +107,17 @@ public final class FatLfnDirectory implements FsDirectory {
         checkReadOnly();
         
         name = name.trim();
-        final ShortName shortName = makeShortName(name);
-        FatDirectoryEntry realEntry = FatDirectoryEntry.create();
-        realEntry.setShortName(shortName);
-
+        final ShortName sn = makeShortName(name);
+        
         final FatLfnDirectoryEntry entry =
-                new FatLfnDirectoryEntry(name, this);
+                new FatLfnDirectoryEntry(name, sn, this);
 
         dir.addEntries(entry.compactForm());
         
-        shortNameIndex.put(shortName, entry);
+        shortNameIndex.put(sn, entry);
         longNameIndex.put(name, entry);
 
-        getFile(realEntry);
+        getFile(entry);
         
         dir.setDirty();
         return entry;
@@ -151,29 +149,25 @@ public final class FatLfnDirectory implements FsDirectory {
         checkReadOnly();
         
         name = name.trim();
-        
         final ShortName sn = makeShortName(name);
-        final FatDirectoryEntry realEntry = createSub(dir, fat);
-        
-        realEntry.setName(sn);
         
         final FatLfnDirectoryEntry entry =
-                new FatLfnDirectoryEntry(realEntry, name, this);
+                new FatLfnDirectoryEntry(name, sn, this);
         
         try {
             dir.addEntries(entry.compactForm());
         } catch (IOException ex) {
-            new ClusterChain(
-                    fat, realEntry.getStartCluster(), false).setChainLength(0);
-//            realEntry.getEntry().remove();
-            dir.removeEntry(realEntry);
+            final ClusterChain cc =
+                    new ClusterChain(fat, entry.getStartCluster(), false);
+            cc.setChainLength(0);
+            dir.removeEntry(entry);
             throw ex;
         }
         
         shortNameIndex.put(sn, entry);
         longNameIndex.put(name, entry);
 
-        getDirectory(realEntry);
+        getDirectory(entry);
         
         flush();
         return entry;
@@ -222,13 +216,33 @@ public final class FatLfnDirectory implements FsDirectory {
             }
             
             final FatLfnDirectoryEntry current =
-                    new FatLfnDirectoryEntry(offset, ++i - offset, this);
+                    readLfnEntry(offset, ++i - offset);
             
             if (!current.isDeleted() && current.isValid()) {
                 shortNameIndex.put(current.getShortName(), current);
                 longNameIndex.put(current.getName(), current);
             }
         }
+    }
+
+    private FatLfnDirectoryEntry readLfnEntry(int offset, int length) {
+        throw new UnsupportedOperationException();
+        
+//        if (length == 1) {
+//            /* this is just an old plain 8.3 entry */
+//            realEntry = FatDirectoryEntry.read(parent.dir.getEntry(offset));
+//            fileName = realEntry.getName().asSimpleString();
+//        } else {
+//            /* stored in reverse order */
+//            final StringBuilder name = new StringBuilder(13 * (length - 1));
+//            for (int i = length - 2; i >= 0; i--) {
+//                AbstractDirectoryEntry entry = parent.dir.getEntry(i + offset);
+//                name.append(getSubstring(entry));
+//            }
+//            fileName = name.toString().trim();
+//            realEntry = FatDirectoryEntry.read(
+//                    parent.dir.getEntry(offset + length - 1));
+//        }
     }
 
     void updateLFN() throws IOException {
