@@ -17,18 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-package de.waldheinz.fs.fat;
-
-import de.waldheinz.fs.FsObject;
-import de.waldheinz.fs.ReadOnlyException;
+package de.waldheinz.fs;
 
 /**
- * TODO: move this to fs package as AbstractFsObject
  *
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @since 0.6
  */
-public class FatObject implements FsObject {
+public class AbstractFsObject implements FsObject {
     
     /** 
      * Is this object still valid?
@@ -36,7 +32,7 @@ public class FatObject implements FsObject {
     private boolean valid;
     private boolean readOnly;
     
-    FatObject(boolean readOnly) {
+    protected AbstractFsObject(boolean readOnly) {
         this.valid = true;
         this.readOnly = readOnly;
     }

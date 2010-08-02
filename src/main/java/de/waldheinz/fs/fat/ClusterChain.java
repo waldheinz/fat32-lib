@@ -18,6 +18,7 @@
 
 package de.waldheinz.fs.fat;
 
+import de.waldheinz.fs.AbstractFsObject;
 import de.waldheinz.fs.BlockDevice;
 import java.io.EOFException;
 import java.io.IOException;
@@ -28,7 +29,7 @@ import java.nio.ByteBuffer;
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-final class ClusterChain extends FatObject {
+final class ClusterChain extends AbstractFsObject {
     protected final Fat fat;
     private final BlockDevice device;
     private final int clusterSize;

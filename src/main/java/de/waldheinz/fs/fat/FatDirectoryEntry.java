@@ -19,6 +19,7 @@
  
 package de.waldheinz.fs.fat;
 
+import de.waldheinz.fs.AbstractFsObject;
 import java.nio.ByteBuffer;
 
 /**
@@ -27,7 +28,7 @@ import java.nio.ByteBuffer;
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class FatDirectoryEntry extends FatObject {
+class FatDirectoryEntry extends AbstractFsObject {
     
     /**
      * The size in bytes of an FAT directory entry.

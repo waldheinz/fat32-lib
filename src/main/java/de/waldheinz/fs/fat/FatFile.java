@@ -18,6 +18,7 @@
  
 package de.waldheinz.fs.fat;
 
+import de.waldheinz.fs.AbstractFsObject;
 import java.io.IOException;
 import de.waldheinz.fs.FsFile;
 import de.waldheinz.fs.ReadOnlyException;
@@ -31,7 +32,7 @@ import java.nio.ByteBuffer;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  * @since 0.6
  */
-public final class FatFile extends FatObject implements FsFile {
+public final class FatFile extends AbstractFsObject implements FsFile {
     private final FatDirectoryEntry entry;
     private final ClusterChain chain;
     
