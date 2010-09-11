@@ -132,9 +132,19 @@ public class SuperFloppyFormatterTest {
         
         assertEquals(FatType.FAT32, fs.getFatType());
         assertEquals("FAT32   ", fs.getBootSector().getFileSystemTypeLabel());
+        
+        final FatLfnDirectoryEntry fileEntry =
+                fs.getRoot().addFile("this is another looooong name");
 
-        fs.getRoot().addFile("this is another looooong name");
-        fs.getRoot().addDirectory("this is a sub-directory!!!");
+        assertTrue(fileEntry.isFile());
+        assertFalse(fileEntry.isDirectory());
+        
+        final FatLfnDirectoryEntry dirEntry =
+                fs.getRoot().addDirectory("this is a sub-directory!!!");
+
+        assertTrue(dirEntry.isDirectory());
+        assertFalse(dirEntry.isFile());
+
         fs.close();
     }
     
