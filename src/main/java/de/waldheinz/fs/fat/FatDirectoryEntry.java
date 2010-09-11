@@ -60,13 +60,32 @@ class FatDirectoryEntry extends AbstractFsObject {
     FatDirectoryEntry() {
         this(new byte[SIZE], false);
     }
-    
-    public static FatDirectoryEntry read(
-            ByteBuffer buff, int offset, boolean readOnly) {
+
+    /**
+     * Reads a {@code FatDirectoryEntry} from the specified {@code ByteBuffer}.
+     * The buffer must have at least {@link #SIZE} bytes remaining. The entry
+     * is read from the buffer's current position, and if this method returns
+     * non-null the position will have advanced by {@link #SIZE} bytes,
+     * otherwise the position will remain unchanged.
+     *
+     * @param buff the buffer to read the entry from
+     * @param readOnly if the resulting {@code FatDirecoryEntry} should be
+     *      read-only
+     * @return the directory entry that was read from the buffer or {@code null}
+     *      if there was no entry to read from the specified position (first
+     *      byte was 0)
+     */
+    public static FatDirectoryEntry read(ByteBuffer buff, boolean readOnly) {
+        assert (buff.remaining() >= SIZE);
+
+        /* peek into the buffer to see if we're done with reading */
         
+        if (buff.get(buff.position()) == 0) return null;
+
+        /* read the directory entry */
+
         final byte[] data = new byte[SIZE];
-        buff.get(data, offset, SIZE);
-        
+        buff.get(data);
         return new FatDirectoryEntry(data, readOnly);
     }
     
@@ -147,7 +166,7 @@ class FatDirectoryEntry extends AbstractFsObject {
     
     public String getVolumeLabel() {
         if (!isVolumeLabel())
-            throw new IllegalStateException("not a volume label");
+            throw new UnsupportedOperationException("not a volume label");
             
         final StringBuilder sb = new StringBuilder();
         

@@ -256,14 +256,18 @@ abstract class AbstractDirectory {
                 getCapacity() * FatDirectoryEntry.SIZE);
                 
         read(data);
+        data.flip();
         
-        for (int i = 0; i < getCapacity(); i++) {
-            final int offset = i * FatDirectoryEntry.SIZE;
+        for (int i=0; i < getCapacity(); i++) {
             final FatDirectoryEntry e =
-                    FatDirectoryEntry.read(data, offset, isReadOnly());
+                    FatDirectoryEntry.read(data, isReadOnly());
+            
             if (e == null) break;
             
             if (e.isVolumeLabel()) {
+                if (!this.isRoot) throw new IOException(
+                        "volume label in non-root directory");
+                
                 this.volumeLabel = e.getVolumeLabel();
             } else {
                 entries.add(e);
