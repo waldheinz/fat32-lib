@@ -225,28 +225,27 @@ abstract class AbstractDirectory {
      * Flush the contents of this directory to the persistent storage
      */
     public void flush() throws IOException {
+        
         final ByteBuffer data = ByteBuffer.allocate(
                 getCapacity() * FatDirectoryEntry.SIZE);
-
-        int offset = 0;
-
-        if (this.volumeLabel != null) {
-            offset = 32;
-            final FatDirectoryEntry labelEntry =
-                    FatDirectoryEntry.createVolumeLabel(volumeLabel);
-            
-            labelEntry.write(data, 0);
-        }
         
         for (int i=0; i < entries.size(); i++) {
             final FatDirectoryEntry entry = entries.get(i);
             
             if (entry != null) {
-                entry.write(data, offset);
-                offset += FatDirectoryEntry.SIZE;
+                entry.write(data);
             }
         }
         
+        /* TODO: the label could be placed directly the dot entries */
+        
+        if (this.volumeLabel != null) {
+            final FatDirectoryEntry labelEntry =
+                    FatDirectoryEntry.createVolumeLabel(volumeLabel);
+
+            labelEntry.write(data);
+        }
+
         write(data);
         resetDirty();
     }

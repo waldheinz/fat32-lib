@@ -318,8 +318,13 @@ final class FatDirectoryEntry extends AbstractFsObject {
                 " [name=" + getShortName() + "]"; //NOI18N
     }
 
-    void write(ByteBuffer buff, int offset) {
-        buff.put(data, offset, SIZE);
+    /**
+     * Writes this directory entry into the specified buffer.
+     *
+     * @param buff the buffer to write this entry to
+     */
+    void write(ByteBuffer buff) {
+        buff.put(data);
         this.dirty = false;
     }
     
