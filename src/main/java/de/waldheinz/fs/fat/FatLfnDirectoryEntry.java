@@ -19,6 +19,7 @@
 
 package de.waldheinz.fs.fat;
 
+import de.waldheinz.fs.AbstractFsObject;
 import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
 import java.io.IOException;
@@ -29,19 +30,63 @@ import java.io.IOException;
  * @since 0.6
  */
 public final class FatLfnDirectoryEntry
-        extends FatDirectoryEntry
+        extends AbstractFsObject
         implements FsDirectoryEntry {
     
     private final FatLfnDirectory parent;
-
+    final FatDirectoryEntry realEntry;
+    
     private String fileName;
-
-    FatLfnDirectoryEntry(String name, ShortName sn, FatLfnDirectory parent) {
+    
+    FatLfnDirectoryEntry(String name, ShortName sn,
+            FatLfnDirectory parent, boolean directory) {
+        
+        super(false);
+        
         this.parent = parent;
         this.fileName = name;
-        super.setShortName(sn);
+        
+        final long now = System.currentTimeMillis();
+        this.realEntry = FatDirectoryEntry.create(directory);
+        this.realEntry.setShortName(sn);
+        this.realEntry.setCreated(now);
+        this.realEntry.setLastAccessed(now);
+    }
+
+    private FatLfnDirectoryEntry(FatLfnDirectory parent,
+            FatDirectoryEntry realEntry, String fileName) {
+        
+        super(parent.isReadOnly());
+        
+        this.parent = parent;
+        this.realEntry = realEntry;
+        this.fileName = fileName;
     }
     
+    static FatLfnDirectoryEntry extract(
+            FatLfnDirectory dir, int offset, int len) {
+            
+        final FatDirectoryEntry realEntry = dir.dir.getEntry(offset + len - 1);
+        final String fileName;
+        
+        if (len == 1) {
+            /* this is just an old plain 8.3 entry */
+            fileName = realEntry.getShortName().asSimpleString();
+        } else {
+            /* stored in reverse order */
+            final StringBuilder name = new StringBuilder(13 * (len - 1));
+            
+            for (int i = len - 2; i >= 0; i--) {
+                FatDirectoryEntry entry = dir.dir.getEntry(i + offset);
+                name.append(entry.getLfnPart());
+            }
+            
+            fileName = name.toString().trim();
+        }
+        
+        return new FatLfnDirectoryEntry(dir, realEntry, fileName);
+    }
+
     private int totalEntrySize() {
         int result = (fileName.length() / 13) + 1;
 
@@ -53,30 +98,30 @@ public final class FatLfnDirectoryEntry
     }
 
     FatDirectoryEntry[] compactForm() {
-        if (getShortName().equals(ShortName.DOT) ||
-                getShortName().equals(ShortName.DOT_DOT)) {
+        if (this.realEntry.getShortName().equals(ShortName.DOT) ||
+                this.realEntry.getShortName().equals(ShortName.DOT_DOT)) {
             /* the dot entries must not have a LFN */
-            return new FatDirectoryEntry[]{this};
+            return new FatDirectoryEntry[]{this.realEntry};
         }
     
-        int totalEntrySize = totalEntrySize();
+        final int totalEntrySize = totalEntrySize();
 
         final FatDirectoryEntry[] entries =
                 new FatDirectoryEntry[totalEntrySize];
 
-        final byte checkSum = getShortName().checkSum();
+        final byte checkSum = this.realEntry.getShortName().checkSum();
         int j = 0;
         
         for (int i = totalEntrySize - 2; i > 0; i--) {
-            entries[i] = createLfnPart(fileName.substring(j * 13, j * 13 + 13),
+            entries[i] = createPart(fileName.substring(j * 13, j * 13 + 13),
                     j + 1, checkSum, false);
             j++;
         }
 
-        entries[0] = createLfnPart(fileName.substring(j * 13),
+        entries[0] = createPart(fileName.substring(j * 13),
                 j + 1, checkSum, true);
         
-        entries[totalEntrySize - 1] = this;
+        entries[totalEntrySize - 1] = this.realEntry;
         
         return entries;
     }
@@ -100,43 +145,31 @@ public final class FatLfnDirectoryEntry
         checkWritable();
         
         fileName = newName;
-        super.setShortName(parent.sng.generateShortName(newName));
+        realEntry.setShortName(parent.sng.generateShortName(newName));
     }
-
-    @Override
-    public void setCreated(long created) {
-        parent.checkReadOnly();
-        super.setCreated(created);
-    }
-
+    
     @Override
     public void setLastModified(long lastModified) {
         parent.checkReadOnly();
-        super.setLastModified(lastModified);
+        realEntry.setLastModified(lastModified);
     }
-
-    @Override
-    public void setLastAccessed(long lastAccessed) {
-        parent.checkReadOnly();
-        super.setLastAccessed(lastAccessed);
-    }
-
+    
     @Override
     public FatFile getFile() throws IOException {
-        return parent.getFile(this);
+        return parent.getFile(realEntry);
     }
 
     @Override
     public FsDirectory getDirectory() throws IOException {
-        return parent.getDirectory(this);
+        return parent.getDirectory(realEntry);
     }
     
     @Override
     public String toString() {
-        return "LFN = " + fileName + " / SFN = " + super.getShortName();
+        return "LFN = " + fileName + " / SFN = " + realEntry.getShortName();
     }
     
-    static FatDirectoryEntry createLfnPart(String subName,
+    private static FatDirectoryEntry createPart(String subName,
             int ordinal, byte checkSum, boolean isLast) {
             
         final char[] unicodechar = new char[13];
@@ -151,13 +184,13 @@ public final class FatLfnDirectoryEntry
         }
 
         final byte[] rawData = new byte[FatDirectoryEntry.SIZE];
-
+        
         if (isLast) {
             LittleEndian.setInt8(rawData, 0, ordinal + (1 << 6));
         } else {
             LittleEndian.setInt8(rawData, 0, ordinal);
         }
-
+        
         LittleEndian.setInt16(rawData, 1, unicodechar[0]);
         LittleEndian.setInt16(rawData, 3, unicodechar[1]);
         LittleEndian.setInt16(rawData, 5, unicodechar[2]);
@@ -177,8 +210,38 @@ public final class FatLfnDirectoryEntry
         LittleEndian.setInt16(rawData, 26, 0); // sector... unused
         LittleEndian.setInt16(rawData, 28, unicodechar[11]);
         LittleEndian.setInt16(rawData, 30, unicodechar[12]);
-
+        
         return new FatDirectoryEntry(rawData, false);
+    }
+
+    @Override
+    public long getLastModified() throws IOException {
+        return realEntry.getLastModified();
+    }
+
+    @Override
+    public long getCreated() throws IOException {
+        return realEntry.getCreated();
+    }
+
+    @Override
+    public long getLastAccessed() throws IOException {
+        return realEntry.getLastAccessed();
+    }
+
+    @Override
+    public boolean isFile() {
+        return realEntry.isFile();
+    }
+
+    @Override
+    public boolean isDirectory() {
+        return realEntry.isDirectory();
+    }
+
+    @Override
+    public boolean isDirty() {
+        return realEntry.isDirty();
     }
     
 }

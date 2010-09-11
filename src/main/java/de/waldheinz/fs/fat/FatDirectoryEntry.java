@@ -56,11 +56,12 @@ class FatDirectoryEntry extends AbstractFsObject {
         
         this.data = data;
     }
-
-    FatDirectoryEntry() {
+    
+    private FatDirectoryEntry() {
         this(new byte[SIZE], false);
+        
     }
-
+    
     /**
      * Reads a {@code FatDirectoryEntry} from the specified {@code ByteBuffer}.
      * The buffer must have at least {@link #SIZE} bytes remaining. The entry
@@ -143,15 +144,20 @@ class FatDirectoryEntry extends AbstractFsObject {
         return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == F_DIRECTORY);
     }
     
-    public static FatDirectoryEntry create() {
+    public static FatDirectoryEntry create(boolean directory) {
         final FatDirectoryEntry result = new FatDirectoryEntry();
 
-        final long now = System.currentTimeMillis();
+        if (directory) {
+            result.setFlags(F_DIRECTORY);
+        }
+        
+        /* initialize date and time fields */
 
+        final long now = System.currentTimeMillis();
         result.setCreated(now);
         result.setLastAccessed(now);
         result.setLastModified(now);
-
+        
         return result;
     }
     

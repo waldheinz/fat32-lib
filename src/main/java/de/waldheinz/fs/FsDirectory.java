@@ -79,4 +79,6 @@ public interface FsDirectory extends Iterable<FsDirectoryEntry> {
      * @throws IOException on write error
      */
     public void flush() throws IOException;
+
+    
 }

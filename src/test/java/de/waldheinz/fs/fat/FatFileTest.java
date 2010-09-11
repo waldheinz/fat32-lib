@@ -46,14 +46,14 @@ public class FatFileTest {
 
         this.entry = (FatLfnDirectoryEntry) fatFs.getRoot().getEntry("Readme.txt");
         this.fat = fatFs.getFat();
-        this.ff = FatFile.get(fat, entry);
+        this.ff = FatFile.get(fat, entry.realEntry);
     }
     
     @Test
     public void testGet() throws Exception {
         System.out.println("get");
         
-        assertEquals(ff, FatFile.get(fat, entry));
+        assertEquals(ff, FatFile.get(fat, entry.realEntry));
     }
     
     @Test

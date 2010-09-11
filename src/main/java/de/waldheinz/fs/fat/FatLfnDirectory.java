@@ -67,6 +67,10 @@ public final class FatLfnDirectory implements FsDirectory {
         }
     }
     
+    boolean isReadOnly() {
+        return dir.isReadOnly();
+    }
+
     FatFile getFile(FatDirectoryEntry entry) throws IOException {
         FatFile file = files.get(entry);
 
@@ -110,14 +114,14 @@ public final class FatLfnDirectory implements FsDirectory {
         final ShortName sn = makeShortName(name);
         
         final FatLfnDirectoryEntry entry =
-                new FatLfnDirectoryEntry(name, sn, this);
+                new FatLfnDirectoryEntry(name, sn, this, false);
 
         dir.addEntries(entry.compactForm());
         
         shortNameIndex.put(sn, entry);
         longNameIndex.put(name, entry);
 
-        getFile(entry);
+        getFile(entry.realEntry);
         
         dir.setDirty();
         return entry;
@@ -152,22 +156,22 @@ public final class FatLfnDirectory implements FsDirectory {
         final ShortName sn = makeShortName(name);
         
         final FatLfnDirectoryEntry entry =
-                new FatLfnDirectoryEntry(name, sn, this);
+                new FatLfnDirectoryEntry(name, sn, this, false);
         
         try {
             dir.addEntries(entry.compactForm());
         } catch (IOException ex) {
             final ClusterChain cc =
-                    new ClusterChain(fat, entry.getStartCluster(), false);
+                    new ClusterChain(fat, entry.realEntry.getStartCluster(), false);
             cc.setChainLength(0);
-            dir.removeEntry(entry);
+            dir.removeEntry(entry.realEntry);
             throw ex;
         }
         
         shortNameIndex.put(sn, entry);
         longNameIndex.put(name, entry);
 
-        getDirectory(entry);
+        getDirectory(entry.realEntry);
         
         flush();
         return entry;
@@ -216,35 +220,15 @@ public final class FatLfnDirectory implements FsDirectory {
             }
             
             final FatLfnDirectoryEntry current =
-                    readLfnEntry(offset, ++i - offset);
+                    FatLfnDirectoryEntry.extract(this, offset, ++i - offset);
             
-            if (!current.isDeleted() && current.isValid()) {
-                shortNameIndex.put(current.getShortName(), current);
+            if (!current.realEntry.isDeleted() && current.isValid()) {
+                shortNameIndex.put(current.realEntry.getShortName(), current);
                 longNameIndex.put(current.getName(), current);
             }
         }
     }
-
-    private FatLfnDirectoryEntry readLfnEntry(int offset, int length) {
-        throw new UnsupportedOperationException();
-        
-//        if (length == 1) {
-//            /* this is just an old plain 8.3 entry */
-//            realEntry = FatDirectoryEntry.read(parent.dir.getEntry(offset));
-//            fileName = realEntry.getName().asSimpleString();
-//        } else {
-//            /* stored in reverse order */
-//            final StringBuilder name = new StringBuilder(13 * (length - 1));
-//            for (int i = length - 2; i >= 0; i--) {
-//                AbstractDirectoryEntry entry = parent.dir.getEntry(i + offset);
-//                name.append(getSubstring(entry));
-//            }
-//            fileName = name.toString().trim();
-//            realEntry = FatDirectoryEntry.read(
-//                    parent.dir.getEntry(offset + length - 1));
-//        }
-    }
-
+    
     void updateLFN() throws IOException {
         ArrayList<FatDirectoryEntry> dest =
                 new ArrayList<FatDirectoryEntry>();
@@ -320,23 +304,23 @@ public final class FatLfnDirectory implements FsDirectory {
     }
 
     private void removeImpl(FatLfnDirectoryEntry entry) throws IOException {
-        final ShortName sn = entry.getShortName();
+        final ShortName sn = entry.realEntry.getShortName();
         
         if (sn.equals(ShortName.DOT) || sn.equals(ShortName.DOT_DOT)) throw
                 new IllegalArgumentException(
                     "the dot entries can not be removed");
 
         final ClusterChain cc = new ClusterChain(
-                fat, entry.getStartCluster(), false);
+                fat, entry.realEntry.getStartCluster(), false);
 
         cc.setChainLength(0);
         longNameIndex.remove(entry.getName());
         shortNameIndex.remove(sn);
 
         if (entry.isFile()) {
-            files.remove(entry);
+            files.remove(entry.realEntry);
         } else {
-            directories.remove(entry);
+            directories.remove(entry.realEntry);
         }
 
         updateLFN();
@@ -389,8 +373,7 @@ public final class FatLfnDirectory implements FsDirectory {
         final ClusterChain chain = new ClusterChain(fat, false);
         chain.setChainLength(1);
         
-        final FatDirectoryEntry realEntry = FatDirectoryEntry.create();
-        realEntry.setFlags(FatDirectoryEntry.F_DIRECTORY);
+        final FatDirectoryEntry realEntry = FatDirectoryEntry.create(true);
         realEntry.setStartCluster(chain.getStartCluster());
 
         final ClusterChainDirectory dir =
@@ -398,7 +381,7 @@ public final class FatLfnDirectory implements FsDirectory {
 
         /* add "." entry */
         
-        final FatDirectoryEntry dot = FatDirectoryEntry.create();
+        final FatDirectoryEntry dot = FatDirectoryEntry.create(true);
         dot.setFlags(FatDirectoryEntry.F_DIRECTORY);
         dot.setShortName(ShortName.DOT);
         dot.setStartCluster((int) dir.getStorageCluster());
@@ -407,7 +390,7 @@ public final class FatLfnDirectory implements FsDirectory {
 
         /* add ".." entry */
         
-        final FatDirectoryEntry dotDot = FatDirectoryEntry.create();
+        final FatDirectoryEntry dotDot = FatDirectoryEntry.create(true);
         dotDot.setFlags(FatDirectoryEntry.F_DIRECTORY);
         dotDot.setShortName(ShortName.DOT_DOT);
         dotDot.setStartCluster((int) parent.getStorageCluster());
