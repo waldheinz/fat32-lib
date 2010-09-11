@@ -156,7 +156,7 @@ public final class FatLfnDirectory implements FsDirectory {
         final ShortName sn = makeShortName(name);
         
         final FatLfnDirectoryEntry entry =
-                new FatLfnDirectoryEntry(name, sn, this, false);
+                new FatLfnDirectoryEntry(name, sn, this, true);
         
         try {
             dir.addEntries(entry.compactForm());
