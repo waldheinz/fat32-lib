@@ -94,32 +94,7 @@ public final class FatLfnDirectoryEntry
         
         return parent;
     }
-
-    @Override
-    public long getCreated() {
-        return super.getCreated();
-    }
-
-    @Override
-    public long getLastModified() {
-        return super.getLastModified();
-    }
-
-    @Override
-    public long getLastAccessed() {
-        return super.getLastAccessed();
-    }
-
-    @Override
-    public boolean isFile() {
-        return super.isFile();
-    }
-
-    @Override
-    public boolean isDirectory() {
-        return super.isDirectory();
-    }
-
+    
     @Override
     public void setName(String newName) {
         checkWritable();
@@ -155,20 +130,10 @@ public final class FatLfnDirectoryEntry
     public FsDirectory getDirectory() throws IOException {
         return parent.getDirectory(this);
     }
-
+    
     @Override
     public String toString() {
         return "LFN = " + fileName + " / SFN = " + super.getShortName();
-    }
-    
-    /**
-     * Indicate if the entry has been modified in memory (ie need to be saved)
-     *
-     * @return true if the entry need to be saved
-     */
-    @Override
-    public boolean isDirty() {
-        return true;
     }
     
     static FatDirectoryEntry createLfnPart(String subName,
@@ -215,30 +180,5 @@ public final class FatLfnDirectoryEntry
 
         return new FatDirectoryEntry(rawData, false);
     }
-
-    String getLfnPart() {
-        final char[] unicodechar = new char[13];
-
-        unicodechar[0] = (char) LittleEndian.getUInt16(data, 1);
-        unicodechar[1] = (char) LittleEndian.getUInt16(data, 3);
-        unicodechar[2] = (char) LittleEndian.getUInt16(data, 5);
-        unicodechar[3] = (char) LittleEndian.getUInt16(data, 7);
-        unicodechar[4] = (char) LittleEndian.getUInt16(data, 9);
-        unicodechar[5] = (char) LittleEndian.getUInt16(data, 14);
-        unicodechar[6] = (char) LittleEndian.getUInt16(data, 16);
-        unicodechar[7] = (char) LittleEndian.getUInt16(data, 18);
-        unicodechar[8] = (char) LittleEndian.getUInt16(data, 20);
-        unicodechar[9] = (char) LittleEndian.getUInt16(data, 22);
-        unicodechar[10] = (char) LittleEndian.getUInt16(data, 24);
-        unicodechar[11] = (char) LittleEndian.getUInt16(data, 28);
-        unicodechar[12] = (char) LittleEndian.getUInt16(data, 30);
-
-        int end = 0;
-
-        while ((end < 13) && (unicodechar[end] != '\0')) {
-            end++;
-        }
-
-        return new String(unicodechar).substring(0, end);
-    }
+    
 }
