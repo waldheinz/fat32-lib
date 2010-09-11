@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-class FatDirectoryEntry extends AbstractFsObject {
+final class FatDirectoryEntry extends AbstractFsObject {
     
     /**
      * The size in bytes of an FAT directory entry.
@@ -262,12 +262,17 @@ class FatDirectoryEntry extends AbstractFsObject {
     }
 
     /**
-     * Returns the name.
+     * Returns the {@code ShortName} that is stored in this directory entry or
+     * {@code null} if this entry has not been initialized.
      * 
-     * @return String
+     * @return the {@code ShortName} stored in this entry or {@code null}
      */
     public ShortName getShortName() {
-        return ShortName.parse(this.data);
+        if (this.data[0] == 0) {
+            return null;
+        } else {
+            return ShortName.parse(this.data);
+        }
     }
     
     /**
