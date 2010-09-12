@@ -100,24 +100,46 @@ final class FatDirectoryEntry extends AbstractFsObject {
         if (isLfnEntry()) return false;
         else return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == F_VOLUME_ID);
     }
-    
-    public final boolean isSystem() {
+
+    private void setFlag(int mask, boolean set) {
+        final int oldFlags = getFlags();
+
+        if (((oldFlags & mask) != 0) == set) return;
+        
+        if (set) {
+            setFlags(oldFlags | mask);
+        } else {
+            setFlags(oldFlags & ~mask);
+        }
+
+        this.dirty = true;
+    }
+
+    public final boolean isSystemFlag() {
         return ((getFlags() & F_SYSTEM) != 0);
     }
 
-    public final boolean isHidden() {
-        return ((getFlags() & F_HIDDEN) != 0);
+    public final void setSystemFlag(boolean isSystem) {
+        setFlag(F_SYSTEM, isSystem);
     }
     
-    public final boolean isLabel() {
+    public final boolean isHiddenFlag() {
+        return ((getFlags() & F_HIDDEN) != 0);
+    }
+
+    public final void setHiddenFlag(boolean isHidden) {
+        setFlag(F_HIDDEN, isHidden);
+    }
+    
+    public boolean isVolumeIdFlag() {
         return ((getFlags() & F_VOLUME_ID) != 0);
     }
     
     public final boolean isLfnEntry() {
-        return isReadonlyFlag() && isSystem() &&
-                isHidden() && isLabel();
+        return isReadonlyFlag() && isSystemFlag() &&
+                isHiddenFlag() && isVolumeIdFlag();
     }
-
+    
     public final boolean isDirty() {
         return dirty;
     }
@@ -162,6 +184,8 @@ final class FatDirectoryEntry extends AbstractFsObject {
     }
     
     public static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
+        assert(volumeLabel != null);
+        
         final byte[] data = new byte[SIZE];
         
         System.arraycopy(
