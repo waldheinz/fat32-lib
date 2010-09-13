@@ -34,11 +34,16 @@ final class FatDirectoryEntry extends AbstractFsObject {
      * The size in bytes of an FAT directory entry.
      */
     public final static int SIZE = 32;
-
+    
     /**
-     * The offset to the flags byte in a directory entry.
+     * The offset to the attributes byte.
      */
-    public static final int FLAGS_OFFSET = 0x0b;
+    public static final int OFFSET_ATTRIBUTES = 0x0b;
+    
+    /**
+     * The offset to the file size dword.
+     */
+    public static final int OFFSET_FILE_SIZE = 0x1c;
 
     public static final int F_READONLY = 0x01;
     public static final int F_HIDDEN = 0x02;
@@ -150,7 +155,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
      * @return int
      */
     public int getFlags() {
-        return LittleEndian.getUInt8(data, FLAGS_OFFSET);
+        return LittleEndian.getUInt8(data, OFFSET_ATTRIBUTES);
     }
     
     /**
@@ -159,7 +164,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
      * @param flags
      */
     public void setFlags(int flags) {
-        LittleEndian.setInt8(data, FLAGS_OFFSET, flags);
+        LittleEndian.setInt8(data, OFFSET_ATTRIBUTES, flags);
     }
     
     public final boolean isDirectory() {
@@ -270,21 +275,24 @@ final class FatDirectoryEntry extends AbstractFsObject {
     }
     
     /**
-     * Returns the length.
+     * Returns the size of this entry as stored at {@link #OFFSET_FILE_SIZE}.
      * 
-     * @return long
+     * @return the size of the file represented by this entry
      */
     public long getLength() {
-        return LittleEndian.getUInt32(data, 0x1c);
-    }
-    
-    public void setLength(long length) throws IllegalArgumentException {
-        if (length > Integer.MAX_VALUE)
-            throw new IllegalArgumentException("too big");
-        
-        LittleEndian.setInt32(data, 0x1c, (int) length);
+        return LittleEndian.getUInt32(data, OFFSET_FILE_SIZE);
     }
 
+    /**
+     * Sets the size of this entry stored at {@link #OFFSET_FILE_SIZE}.
+     * 
+     * @param length the new size of the file represented by this entry
+     * @throws IllegalArgumentException if {@code length} is out of range
+     */
+    public void setLength(long length) throws IllegalArgumentException {
+        LittleEndian.setInt32(data, OFFSET_FILE_SIZE, length);
+    }
+    
     /**
      * Returns the {@code ShortName} that is stored in this directory entry or
      * {@code null} if this entry has not been initialized.

@@ -159,35 +159,7 @@ public class FatDirectoryEntryTest {
         assertFalse(result.isVolumeLabel());
         assertFalse(result.isLfnEntry());
     }
-
-    /**
-     * Test of createVolumeLabel method, of class FatDirectoryEntry.
-     */
-    @Test
-    public void testCreateVolumeLabel() {
-        System.out.println("createVolumeLabel");
-        String volumeLabel = "";
-        FatDirectoryEntry expResult = null;
-        FatDirectoryEntry result = FatDirectoryEntry.createVolumeLabel(volumeLabel);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getVolumeLabel method, of class FatDirectoryEntry.
-     */
-    @Test
-    public void testGetVolumeLabel() {
-        System.out.println("getVolumeLabel");
-        FatDirectoryEntry instance = null;
-        String expResult = "";
-        String result = instance.getVolumeLabel();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
+    
     /**
      * Test of getCreated method, of class FatDirectoryEntry.
      */
@@ -282,34 +254,19 @@ public class FatDirectoryEntryTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-
-    /**
-     * Test of getLength method, of class FatDirectoryEntry.
-     */
+    
     @Test
-    public void testGetLength() {
-        System.out.println("getLength");
-        FatDirectoryEntry instance = null;
-        long expResult = 0L;
-        long result = instance.getLength();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+    public void testLength() {
+        System.out.println("length");
+        
+        final FatDirectoryEntry e = FatDirectoryEntry.create(false);
+        assertEquals(0, e.getLength());
+        
+        e.setLength(100000);
 
-    /**
-     * Test of setLength method, of class FatDirectoryEntry.
-     */
-    @Test
-    public void testSetLength() {
-        System.out.println("setLength");
-        long length = 0L;
-        FatDirectoryEntry instance = null;
-        instance.setLength(length);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(100000, e.getLength());
     }
-
+    
     /**
      * Test of getShortName method, of class FatDirectoryEntry.
      */

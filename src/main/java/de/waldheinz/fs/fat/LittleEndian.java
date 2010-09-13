@@ -85,10 +85,18 @@ final class LittleEndian {
     /**
      * Sets a 32-bit integer in the given byte array at the given offset.
      */
-    public static void setInt32(byte[] dst, int offset, int value) {
+    public static void setInt32(byte[] dst, int offset, long value)
+            throws IllegalArgumentException {
+        
+        if (value > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException(
+                    value + " can not be represented in a 32bit dword");
+        }
+        
         dst[offset + 0] = (byte) (value & 0xFF);
         dst[offset + 1] = (byte) ((value >>> 8) & 0xFF);
         dst[offset + 2] = (byte) ((value >>> 16) & 0xFF);
         dst[offset + 3] = (byte) ((value >>> 24) & 0xFF);
     }
+    
 }
