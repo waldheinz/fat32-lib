@@ -51,6 +51,14 @@ final class FatDirectoryEntry extends AbstractFsObject {
     public static final int F_VOLUME_ID = 0x08;
     public static final int F_DIRECTORY = 0x10;
     public static final int F_ARCHIVE = 0x20;
+
+    /**
+     * The magic byte denoting that this entry was deleted and is free
+     * for reuse.
+     *
+     * @see #isDeleted() 
+     */
+    public static final int ENTRY_DELETED_MAGIC = 0xe5;
     
     protected final byte[] data;
 
@@ -266,12 +274,13 @@ final class FatDirectoryEntry extends AbstractFsObject {
     }
     
     /**
-     * Returns the deleted.
+     * Returns if this entry has been marked as deleted. A deleted entry has
+     * its first byte set to the magic {@link #ENTRY_DELETED_MAGIC} value.
      * 
-     * @return boolean
+     * @return if this entry is marked as deleted
      */
-    public boolean isDeleted() {
-        return  (LittleEndian.getUInt8(data, 0) == 0xe5);
+    public final boolean isDeleted() {
+        return  (LittleEndian.getUInt8(data, 0) == ENTRY_DELETED_MAGIC);
     }
     
     /**

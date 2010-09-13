@@ -240,19 +240,19 @@ public class FatDirectoryEntryTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-
-    /**
-     * Test of isDeleted method, of class FatDirectoryEntry.
-     */
+    
     @Test
     public void testIsDeleted() {
         System.out.println("isDeleted");
-        FatDirectoryEntry instance = null;
-        boolean expResult = false;
-        boolean result = instance.isDeleted();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        
+        FatDirectoryEntry e = FatDirectoryEntry.create(false);
+        assertFalse (e.isDeleted());
+
+        final ByteBuffer bb = ByteBuffer.allocate(512);
+        bb.put(0, (byte) 0xe5);
+
+        e = FatDirectoryEntry.read(bb, false);
+        assertTrue(e.isDeleted());
     }
     
     @Test
