@@ -71,7 +71,8 @@ public class ClusterChainDirectoryTest {
     @Test
     public void testCreate() {
         System.out.println("create");
-        
+
+        assertFalse(bs.getRootDirFirstCluster() == 0);
         assertEquals(
                 dir.chain.getLengthOnDisk() / FatDirectoryEntry.SIZE,
                 dir.getCapacity());
