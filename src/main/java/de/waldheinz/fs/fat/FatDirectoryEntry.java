@@ -368,9 +368,28 @@ final class FatDirectoryEntry extends AbstractFsObject {
         buff.put(data);
         this.dirty = false;
     }
-    
-    public boolean isReadonlyFlag() {
+
+    /**
+     * Returns if the read-only flag is set for this entry. Do not confuse
+     * this with {@link #isReadOnly()}.
+     *
+     * @return if the read only file system flag is set on this entry
+     * @see #F_READONLY
+     * @see #setReadonlyFlag(boolean) 
+     */
+    public final boolean isReadonlyFlag() {
         return ((getFlags() & F_READONLY) != 0);
+    }
+
+    /**
+     * Updates the read-only file system flag for this entry.
+     *
+     * @param isReadonly the new value for the read-only flag
+     * @see #F_READONLY
+     * @see #isReadonlyFlag() 
+     */
+    public final void setReadonlyFlag(boolean isReadonly) {
+        setFlag(F_READONLY, isReadonly);
     }
     
     final String getLfnPart() {
