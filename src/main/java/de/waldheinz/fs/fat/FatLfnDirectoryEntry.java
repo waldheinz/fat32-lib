@@ -53,7 +53,7 @@ public final class FatLfnDirectoryEntry
         this.realEntry.setLastAccessed(now);
     }
 
-    private FatLfnDirectoryEntry(FatLfnDirectory parent,
+    FatLfnDirectoryEntry(FatLfnDirectory parent,
             FatDirectoryEntry realEntry, String fileName) {
         
         super(parent.isReadOnly());

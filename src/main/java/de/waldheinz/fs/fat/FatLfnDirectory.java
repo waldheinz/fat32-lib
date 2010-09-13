@@ -155,26 +155,28 @@ public final class FatLfnDirectory implements FsDirectory {
         name = name.trim();
         final ShortName sn = makeShortName(name);
         
-        final FatLfnDirectoryEntry entry =
-                new FatLfnDirectoryEntry(name, sn, this, true);
+        final FatDirectoryEntry real = createSub(dir, fat);
+        real.setShortName(sn);
+        final FatLfnDirectoryEntry e =
+                new FatLfnDirectoryEntry(this, real, name);
         
         try {
-            dir.addEntries(entry.compactForm());
+            dir.addEntries(e.compactForm());
         } catch (IOException ex) {
             final ClusterChain cc =
-                    new ClusterChain(fat, entry.realEntry.getStartCluster(), false);
+                    new ClusterChain(fat, real.getStartCluster(), false);
             cc.setChainLength(0);
-            dir.removeEntry(entry.realEntry);
+            dir.removeEntry(real);
             throw ex;
         }
         
-        shortNameIndex.put(sn, entry);
-        longNameIndex.put(name, entry);
+        shortNameIndex.put(sn, e);
+        longNameIndex.put(name, e);
 
-        getDirectory(entry.realEntry);
+        getDirectory(real);
         
         flush();
-        return entry;
+        return e;
     }
     
     private FatLfnDirectoryEntry getEntryImpl(String name) {
