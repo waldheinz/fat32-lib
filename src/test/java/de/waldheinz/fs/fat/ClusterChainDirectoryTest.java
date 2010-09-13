@@ -33,7 +33,6 @@ public class ClusterChainDirectoryTest {
     private RamDisk rd;
     private Fat32BootSector bs;
     private Fat fat;
-    private ClusterChain chain;
     private ClusterChainDirectory dir;
 
     @Before
@@ -46,10 +45,9 @@ public class ClusterChainDirectoryTest {
         this.bs.setSectorsPerFat(4096);
         
         this.fat = Fat.create(bs, 0);
-        this.chain = new ClusterChain(fat, false);
-        this.dir = ClusterChainDirectory.createRoot(chain);
+        this.dir = ClusterChainDirectory.createRoot(fat);
     }
-
+    
     @Test(expected=DirectoryFullException.class)
     public void testMaximumSize() throws IOException {
         System.out.println("maximumSize");
@@ -58,8 +56,8 @@ public class ClusterChainDirectoryTest {
             FatDirectoryEntry e = FatDirectoryEntry.create(false);
             dir.addEntry(e);
             
-            assertTrue(
-                    chain.getLengthOnDisk() <= ClusterChainDirectory.MAX_SIZE);
+            assertTrue(dir.chain.getLengthOnDisk() <=
+                    ClusterChainDirectory.MAX_SIZE);
         }
     }
 
@@ -73,9 +71,9 @@ public class ClusterChainDirectoryTest {
     @Test
     public void testCreate() {
         System.out.println("create");
-
+        
         assertEquals(
-                chain.getLengthOnDisk() / FatDirectoryEntry.SIZE,
+                dir.chain.getLengthOnDisk() / FatDirectoryEntry.SIZE,
                 dir.getCapacity());
     }
     

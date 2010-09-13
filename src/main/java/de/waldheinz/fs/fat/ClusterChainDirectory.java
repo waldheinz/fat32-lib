@@ -38,8 +38,12 @@ class ClusterChainDirectory extends AbstractDirectory {
      * @see #changeSize(int) 
      */
     public final static int MAX_SIZE = 65536 * 32;
-    
-    private final ClusterChain chain;
+
+    /**
+     * The {@code ClusterChain} that stores this directory. Package-visible
+     * for testing.
+     */
+    final ClusterChain chain;
     
     protected ClusterChainDirectory(ClusterChain chain, boolean isRoot) {
         
@@ -59,10 +63,19 @@ class ClusterChainDirectory extends AbstractDirectory {
         return result;
     }
     
-    public static ClusterChainDirectory createRoot(ClusterChain cc)
-            throws IOException {
+    public static ClusterChainDirectory createRoot(Fat fat) throws IOException {
 
+        if (fat.getFatType() != FatType.FAT32) {
+            throw new IllegalArgumentException(
+                    "only FAT32 stores root directory in a cluster chain");
+        }
+
+        final Fat32BootSector bs = (Fat32BootSector) fat.getBootSector();
+        final ClusterChain cc = new ClusterChain(fat, false);
         cc.setChainLength(1);
+        
+        bs.setRootDirFirstCluster(cc.getStartCluster());
+        
         final ClusterChainDirectory result =
                 new ClusterChainDirectory(cc, true);
         

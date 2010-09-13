@@ -237,10 +237,7 @@ public final class SuperFloppyFormatter {
         
         final AbstractDirectory rootDirStore;
         if (fatType == FatType.FAT32) {
-            final Fat32BootSector f32bs = (Fat32BootSector) bs;
-            final ClusterChain rootDirChain = new ClusterChain(fat, false);
-            rootDirStore = ClusterChainDirectory.createRoot(rootDirChain);
-            f32bs.setRootDirFirstCluster(rootDirChain.getStartCluster());
+            rootDirStore = ClusterChainDirectory.createRoot(fat);
             fsi.setFreeClusterCount(fat.getFreeClusterCount());
             fsi.setLastAllocatedCluster(fat.getLastAllocatedCluster());
             fsi.write();
