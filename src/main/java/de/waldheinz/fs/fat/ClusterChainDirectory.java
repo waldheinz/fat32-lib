@@ -103,14 +103,17 @@ class ClusterChainDirectory extends AbstractDirectory {
     }
 
     /**
-     * 
-     * @return
+     * Returns the first cluster of the chain that stores this directory for
+     * non-root instances or 0 if this is the root directory.
+     *
+     * @return the first storage cluster of this directory
+     * @see #isRoot() 
      */
     @Override
     protected final long getStorageCluster() {
         return isRoot() ? 0 : chain.getStartCluster();
     }
-
+    
     public final void delete() throws IOException {
         chain.setChainLength(0);
     }
