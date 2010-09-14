@@ -47,7 +47,17 @@ public class ClusterChainDirectoryTest {
         this.fat = Fat.create(bs, 0);
         this.dir = ClusterChainDirectory.createRoot(fat);
     }
-    
+
+    @Test
+    public void testAddEntry() throws IOException {
+        System.out.println("addEntry");
+
+        assertEquals(0, this.dir.getEntryCount());
+        FatDirectoryEntry e = FatDirectoryEntry.create(false);
+        dir.addEntry(e);
+        assertEquals(1, this.dir.getEntryCount());
+    }
+
     @Test(expected=DirectoryFullException.class)
     public void testMaximumSize() throws IOException {
         System.out.println("maximumSize");
