@@ -102,6 +102,12 @@ final class FatDirectoryEntry extends AbstractFsObject {
         buff.get(data);
         return new FatDirectoryEntry(data, readOnly);
     }
+
+    public static void writeNullEntry(ByteBuffer buff) {
+        for (int i=0; i < SIZE; i++) {
+            buff.put((byte) 0);
+        }
+    }
     
     /**
      * Decides if this entry is a "volume label" entry according to the FAT

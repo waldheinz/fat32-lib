@@ -230,7 +230,13 @@ abstract class AbstractDirectory {
 
             labelEntry.write(data);
         }
+        
+        if (data.hasRemaining()) {
+            FatDirectoryEntry.writeNullEntry(data);
+        }
 
+        data.flip();
+        
         write(data);
         resetDirty();
     }

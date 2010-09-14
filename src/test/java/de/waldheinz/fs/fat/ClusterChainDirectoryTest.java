@@ -47,7 +47,7 @@ public class ClusterChainDirectoryTest {
         this.fat = Fat.create(bs, 0);
         this.dir = ClusterChainDirectory.createRoot(fat);
     }
-
+    
     @Test
     public void testAddEntry() throws IOException {
         System.out.println("addEntry");
