@@ -55,10 +55,11 @@ public class ListAllTest {
             final FsDirectoryEntry e = i.next();
             
             if (e.isDirectory()) {
+                System.out.println(ident + "- " + e.getName());
+
                 if (e.getName().equals(".") || e.getName().equals(".."))
                     continue;
                 
-                System.out.println(ident + "- " + e.getName());
                 listDirectories(e.getDirectory(), ident + "   ");
             } else {
                 checkFile(e, ident);
