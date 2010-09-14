@@ -123,9 +123,15 @@ public class ClusterChainTest {
         
         cc.setSize(bs.getBytesPerCluster());
         assertEquals(1, cc.getChainLength());
-        
+
+        cc.setSize(bs.getBytesPerCluster() + 1);
+        assertEquals(2, cc.getChainLength());
+
         cc.setSize(0);
         assertEquals(0, cc.getChainLength());
+
+        cc.setSize(1);
+        assertEquals(1, cc.getChainLength());
     }
 
     @Test
