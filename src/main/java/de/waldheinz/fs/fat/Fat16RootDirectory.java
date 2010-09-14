@@ -104,11 +104,7 @@ final class Fat16RootDirectory extends AbstractDirectory {
      * @param entryCount {@inheritDoc}
      */
     @Override
-    protected void changeSize(int entryCount)
-            throws DirectoryFullException {
-
-        checkEntryCount(entryCount);
-        
+    protected void changeSize(int entryCount) throws DirectoryFullException {
         if (getCapacity() < entryCount) {
             throw new DirectoryFullException(getCapacity(), entryCount);
         }

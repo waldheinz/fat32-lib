@@ -121,9 +121,9 @@ class ClusterChainDirectory extends AbstractDirectory {
     @Override
     protected final void changeSize(int entryCount)
             throws IOException, IllegalArgumentException {
-            
-        checkEntryCount(entryCount);
-        
+
+        assert (entryCount >= 0);
+
         final int size = entryCount * FatDirectoryEntry.SIZE;
 
         if (size > MAX_SIZE) throw new DirectoryFullException(
