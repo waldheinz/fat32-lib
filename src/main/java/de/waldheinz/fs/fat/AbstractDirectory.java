@@ -315,6 +315,47 @@ abstract class AbstractDirectory {
         return volumeLabel;
     }
 
+    public FatDirectoryEntry createSub(Fat fat) throws IOException {
+        final ClusterChain chain = new ClusterChain(fat, false);
+        chain.setChainLength(1);
+
+        final FatDirectoryEntry entry = FatDirectoryEntry.create(true);
+        entry.setStartCluster(chain.getStartCluster());
+        
+        final ClusterChainDirectory dir =
+                new ClusterChainDirectory(chain, false);
+
+        /* add "." entry */
+
+        final FatDirectoryEntry dot = FatDirectoryEntry.create(true);
+        dot.setFlags(FatDirectoryEntry.F_DIRECTORY);
+        dot.setShortName(ShortName.DOT);
+        dot.setStartCluster(dir.getStorageCluster());
+        copyDateTimeFields(entry, dot);
+        dir.addEntry(dot);
+
+        /* add ".." entry */
+
+        final FatDirectoryEntry dotDot = FatDirectoryEntry.create(true);
+        dotDot.setFlags(FatDirectoryEntry.F_DIRECTORY);
+        dotDot.setShortName(ShortName.DOT_DOT);
+        dotDot.setStartCluster(getStorageCluster());
+        copyDateTimeFields(entry, dotDot);
+        dir.addEntry(dotDot);
+
+        dir.flush();
+
+        return entry;
+    }
+    
+    private static void copyDateTimeFields(
+            FatDirectoryEntry src, FatDirectoryEntry dst) {
+        
+        dst.setCreated(src.getCreated());
+        dst.setLastAccessed(src.getLastAccessed());
+        dst.setLastModified(src.getLastModified());
+    }
+
     /**
      * Sets the volume label that is stored in this directory. Setting the
      * volume label is supported on the root directory only.

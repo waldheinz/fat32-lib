@@ -154,8 +154,7 @@ public final class FatLfnDirectory implements FsDirectory {
         
         name = name.trim();
         final ShortName sn = makeShortName(name);
-        
-        final FatDirectoryEntry real = createSub(dir, fat);
+        final FatDirectoryEntry real = dir.createSub(fat);
         real.setShortName(sn);
         final FatLfnDirectoryEntry e =
                 new FatLfnDirectoryEntry(this, real, name);
@@ -369,46 +368,4 @@ public final class FatLfnDirectory implements FsDirectory {
         return result;
     }
     
-    private static FatDirectoryEntry createSub(
-            AbstractDirectory parent, Fat fat) throws IOException {
-
-        final ClusterChain chain = new ClusterChain(fat, false);
-        chain.setChainLength(1);
-        
-        final FatDirectoryEntry realEntry = FatDirectoryEntry.create(true);
-        realEntry.setStartCluster(chain.getStartCluster());
-
-        final ClusterChainDirectory dir =
-                new ClusterChainDirectory(chain, false);
-
-        /* add "." entry */
-        
-        final FatDirectoryEntry dot = FatDirectoryEntry.create(true);
-        dot.setFlags(FatDirectoryEntry.F_DIRECTORY);
-        dot.setShortName(ShortName.DOT);
-        dot.setStartCluster((int) dir.getStorageCluster());
-        copyDateTimeFields(realEntry, dot);
-        dir.addEntry(dot);
-
-        /* add ".." entry */
-        
-        final FatDirectoryEntry dotDot = FatDirectoryEntry.create(true);
-        dotDot.setFlags(FatDirectoryEntry.F_DIRECTORY);
-        dotDot.setShortName(ShortName.DOT_DOT);
-        dotDot.setStartCluster((int) parent.getStorageCluster());
-        copyDateTimeFields(realEntry, dotDot);
-        dir.addEntry(dotDot);
-
-        dir.flush();
-
-        return realEntry;
-    }
-
-    private static void copyDateTimeFields(
-            FatDirectoryEntry src, FatDirectoryEntry dst) {
-        
-        dst.setCreated(src.getCreated());
-        dst.setLastAccessed(src.getLastAccessed());
-        dst.setLastModified(src.getLastModified());
-    }
 }

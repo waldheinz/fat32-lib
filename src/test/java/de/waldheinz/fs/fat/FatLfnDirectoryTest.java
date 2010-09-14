@@ -62,6 +62,7 @@ public class FatLfnDirectoryTest {
         final FatLfnDirectory subDir =
                 (FatLfnDirectory) subEntry.getDirectory();
 
+        assertNotNull(subDir.getEntry("."));
 
         try {
             subDir.remove(".");
