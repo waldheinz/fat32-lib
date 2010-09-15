@@ -51,7 +51,7 @@ public class FatLfnDirectoryTest {
         this.rootDirStore = Fat16RootDirectory.read(
                 (Fat16BootSector) bs, false);
         this.fat = Fat.read(bs, 0);
-        this.dir = new FatLfnDirectory(rootDirStore, fat);
+        this.dir = new FatLfnDirectory(rootDirStore, fat, false);
     }
 
     @Test

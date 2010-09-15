@@ -245,7 +245,8 @@ public final class SuperFloppyFormatter {
             rootDirStore = Fat16RootDirectory.create((Fat16BootSector) bs);
         }
         
-        final FatLfnDirectory rootDir = new FatLfnDirectory(rootDirStore, fat);
+        final FatLfnDirectory rootDir =
+                new FatLfnDirectory(rootDirStore, fat, false);
         
         rootDir.flush();
         

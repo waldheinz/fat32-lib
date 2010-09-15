@@ -28,8 +28,8 @@ import java.util.Iterator;
  * @author Ewout Prangsma &lt; epr at jnode.org&gt;
  * @author Matthias Treydte
  */
-public interface FsDirectory extends Iterable<FsDirectoryEntry> {
-
+public interface FsDirectory extends Iterable<FsDirectoryEntry>, FsObject {
+    
     /**
      * Gets an iterator to iterate over the entries of this directory.
      *
@@ -79,6 +79,5 @@ public interface FsDirectory extends Iterable<FsDirectoryEntry> {
      * @throws IOException on write error
      */
     public void flush() throws IOException;
-
     
 }

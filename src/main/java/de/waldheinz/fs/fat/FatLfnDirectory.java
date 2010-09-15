@@ -19,6 +19,7 @@
 
 package de.waldheinz.fs.fat;
 
+import de.waldheinz.fs.AbstractFsObject;
 import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
 import de.waldheinz.fs.ReadOnlyException;
@@ -37,7 +38,10 @@ import java.util.Map;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  * @since 0.6
  */
-public final class FatLfnDirectory implements FsDirectory {
+public final class FatLfnDirectory
+        extends AbstractFsObject
+        implements FsDirectory {
+    
     final Map<ShortName, FatLfnDirectoryEntry> shortNameIndex;
     final Map<String, FatLfnDirectoryEntry> longNameIndex;
     final Map<FatDirectoryEntry, FatFile> files;
@@ -46,7 +50,9 @@ public final class FatLfnDirectory implements FsDirectory {
     final AbstractDirectory dir;
     final Fat fat;
     
-    FatLfnDirectory(AbstractDirectory dir, Fat fat) {
+    FatLfnDirectory(AbstractDirectory dir, Fat fat, boolean readOnly) {
+        super(readOnly);
+        
         if ((dir == null) || (fat == null)) throw new NullPointerException();
         
         this.fat = fat;
@@ -67,10 +73,6 @@ public final class FatLfnDirectory implements FsDirectory {
         }
     }
     
-    boolean isReadOnly() {
-        return dir.isReadOnly();
-    }
-
     FatFile getFile(FatDirectoryEntry entry) throws IOException {
         FatFile file = files.get(entry);
 
@@ -87,7 +89,7 @@ public final class FatLfnDirectory implements FsDirectory {
 
         if (result == null) {
             final ClusterChainDirectory storage = read(entry, fat);
-            result = new FatLfnDirectory(storage, fat);
+            result = new FatLfnDirectory(storage, fat, isReadOnly());
             directories.put(entry, result);
         }
         

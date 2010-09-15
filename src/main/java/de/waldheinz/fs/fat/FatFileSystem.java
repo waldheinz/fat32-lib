@@ -102,7 +102,7 @@ public final class FatFileSystem extends AbstractFileSystem {
             this.fsiSector = null;
         }
 
-        this.rootDir = new FatLfnDirectory(rootDirStore, fat);
+        this.rootDir = new FatLfnDirectory(rootDirStore, fat, isReadOnly());
             
     }
 
