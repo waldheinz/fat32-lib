@@ -24,11 +24,12 @@ package de.waldheinz.fs;
  * {@link FileSystem}.
  * 
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public interface FsObject {
-
+    
     /**
-     * Is this object still valid.
+     * Checks if this {@code FsObject} is still valid.
      * 
      * An object is not valid anymore if it has been removed from the
      * filesystem. All invocations on methods (except this method and the
@@ -40,10 +41,13 @@ public interface FsObject {
     public boolean isValid();
     
     /**
-     * 
+     * Checks if this {@code FsObject} is read-only. Any attempt to modify a
+     * read-only {@code FsObject} must result in a {@link ReadOnlyException}
+     * being thrown, and the modification must not be performed.
      *
      * @return if this {@code FsObject} is read-only
      * @since 0.6
      */
     public boolean isReadOnly();
+    
 }

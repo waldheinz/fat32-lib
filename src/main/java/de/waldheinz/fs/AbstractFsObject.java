@@ -20,29 +20,41 @@
 package de.waldheinz.fs;
 
 /**
+ * A base class that helps to implement the {@code FsObject} interface.
  *
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
+ * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  * @since 0.6
  */
 public class AbstractFsObject implements FsObject {
+
+    /**
+     * Holds the read-only state of this object.
+     */
+    private final boolean readOnly;
     
-    /** 
-     * Is this object still valid?
+    /**
+     * Remembers if this object still valid.
      */
     private boolean valid;
-    private boolean readOnly;
-    
+
+    /**
+     * Creates a new instance of {@code AbstractFsObject} which will be valid
+     * and have the specified read-only state.
+     *
+     * @param readOnly if the new object will be read-only
+     */
     protected AbstractFsObject(boolean readOnly) {
         this.valid = true;
         this.readOnly = readOnly;
     }
-
+    
     /** 
-     * An object is not valid anymore if it has been removed from the filesystem.
-     * All invocations on methods (exception this method) of invalid objects 
-     * must throw an IOException.
-     * 
-     * @return if this object is still valid
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @see #checkValid()
+     * @see #invalidate() 
      */
     @Override
     public final boolean isValid() {
@@ -50,24 +62,41 @@ public class AbstractFsObject implements FsObject {
     }
 
     /**
-     * Mark this object as invalid.
+     * Marks this object as invalid.
+     * 
+     * @see #isValid()
+     * @see #checkValid()
      */
     protected final void invalidate() {
         this.valid = false;
     }
 
     /**
+     * Convience method to check if this object is still valid and throw an
+     * {@code IllegalStateException} if it is not.
+     *
+     * @throws IllegalStateException if this object was invalidated
      * @since 0.6
+     * @see #isValid()
+     * @see #invalidate() 
      */
-    protected final void checkValid() {
+    protected final void checkValid() throws IllegalStateException {
         if (!isValid()) throw new IllegalStateException(
-                this + " is not valid any more");
+                this + " is not valid");
     }
 
     /**
+     * Convience method to check if this object is writable. An object is
+     * writable if it is both, valid and not read-only. 
+     *
+     * @throws IllegalStateException if this object was invalidated
+     * @throws ReadOnlyException if this object was created with the read-only
+     *      flag set
      * @since 0.6
      */
-    protected final void checkWritable() {
+    protected final void checkWritable()
+            throws IllegalStateException, ReadOnlyException {
+        
         checkValid();
 
         if (isReadOnly()) {
