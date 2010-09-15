@@ -163,21 +163,11 @@ final class FatDirectoryEntry extends AbstractFsObject {
         return dirty;
     }
     
-    /**
-     * Returns the attribute.
-     *
-     * @return int
-     */
-    public int getFlags() {
+    private int getFlags() {
         return LittleEndian.getUInt8(data, OFFSET_ATTRIBUTES);
     }
     
-    /**
-     * Sets the flags.
-     *
-     * @param flags
-     */
-    public void setFlags(int flags) {
+    private void setFlags(int flags) {
         LittleEndian.setInt8(data, OFFSET_ATTRIBUTES, flags);
     }
     

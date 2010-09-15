@@ -319,7 +319,6 @@ abstract class AbstractDirectory {
         /* add "." entry */
 
         final FatDirectoryEntry dot = FatDirectoryEntry.create(true);
-        dot.setFlags(FatDirectoryEntry.F_DIRECTORY);
         dot.setShortName(ShortName.DOT);
         dot.setStartCluster(dir.getStorageCluster());
         copyDateTimeFields(entry, dot);
@@ -328,7 +327,6 @@ abstract class AbstractDirectory {
         /* add ".." entry */
 
         final FatDirectoryEntry dotDot = FatDirectoryEntry.create(true);
-        dotDot.setFlags(FatDirectoryEntry.F_DIRECTORY);
         dotDot.setShortName(ShortName.DOT_DOT);
         dotDot.setStartCluster(getStorageCluster());
         copyDateTimeFields(entry, dotDot);
