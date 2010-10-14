@@ -517,7 +517,7 @@ final class FatLfnDirectory implements FsDirectory {
             if (isFile()) {
                 files.remove(this.realEntry);
             } else {
-                files.remove(this.realEntry);
+                directories.remove(this.realEntry);
             }
             
             realEntry.remove();
