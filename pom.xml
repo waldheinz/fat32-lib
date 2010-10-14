@@ -5,7 +5,7 @@
     <groupId>de.waldheinz</groupId>
     <artifactId>fat32-lib</artifactId>
     <packaging>jar</packaging>
-    <version>0.5.1</version>
+    <version>0.5.2-SNAPSHOT</version>
     <name>FAT32 Library</name>
     <description>A library for manipulating FAT file systems.</description>
     <url>http://code.google.com/p/fat32-lib/</url>
