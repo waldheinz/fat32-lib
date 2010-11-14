@@ -117,7 +117,7 @@ public final class FatFileSystem extends AbstractFileSystem {
      * @throws IOException on read error or if the file system structure could
      *      not be parsed
      */
-    public static FatFileSystem read (BlockDevice device, boolean readOnly)
+    public static FatFileSystem read(BlockDevice device, boolean readOnly)
             throws IOException {
         
         return new FatFileSystem(device, readOnly);
@@ -128,8 +128,13 @@ public final class FatFileSystem extends AbstractFileSystem {
         
         return filesOffset;
     }
-    
-    FatType getFatType() {
+
+    /**
+     * Returns the size of the FAT entries of this {@code FatFileSystem}.
+     *
+     * @return the exact type of the FAT used by this file system
+     */
+    public FatType getFatType() {
         checkClosed();
 
         return this.fatType;
@@ -230,19 +235,49 @@ public final class FatFileSystem extends AbstractFileSystem {
         
         return bs;
     }
-    
+
+    /**
+     * <p>
+     * {@inheritDoc}
+     * </p><p>
+     * This method is currently not implemented for {@code FatFileSystem} and
+     * always returns -1.
+     * </p>
+     * 
+     * @return always -1
+     */
     @Override
     public long getFreeSpace() {
         // TODO implement me
         return -1;
     }
 
+    /**
+     * <p>
+     * {@inheritDoc}
+     * </p><p>
+     * This method is currently not implemented for {@code FatFileSystem} and
+     * always returns -1.
+     * </p>
+     *
+     * @return always -1
+     */
     @Override
     public long getTotalSpace() {
         // TODO implement me
         return -1;
     }
 
+    /**
+     * <p>
+     * {@inheritDoc}
+     * </p><p>
+     * This method is currently not implemented for {@code FatFileSystem} and
+     * always returns -1.
+     * </p>
+     *
+     * @return always -1
+     */
     @Override
     public long getUsableSpace() {
         // TODO implement me
