@@ -55,6 +55,22 @@ public class FatLfnDirectoryTest {
     }
 
     @Test
+    public void testHiddenFlag() throws IOException {
+        System.out.println("hiddenFlag");
+        
+        final FatLfnDirectoryEntry f = dir.addFile("testFile");
+        assertFalse(f.isHidden());
+
+        f.setHidden(true);
+        assertTrue(f.isHidden());
+        assertTrue(f.isFile());
+
+        f.setHidden(false);
+        assertFalse(f.isHidden());
+        assertTrue(f.isFile());
+    }
+    
+    @Test
     public void testRemoveDotEntries() throws IOException {
         System.out.println("removeDotEntries");
 
@@ -255,8 +271,13 @@ public class FatLfnDirectoryTest {
     @Test
     public void testAddFile() throws Exception {
         System.out.println("addFile");
+
+        final String name = "A good file";
+        final FatLfnDirectoryEntry f = dir.addFile(name);
         
-        assertNotNull(dir.addFile("A good file"));
+        assertNotNull(f);
+        assertFalse(f.isHidden());
+        assertEquals(name, f.getName());
     }
     
     @Test
@@ -265,7 +286,9 @@ public class FatLfnDirectoryTest {
         
         final String name = "A nice directory";
         final FatLfnDirectoryEntry newDir = dir.addDirectory(name);
+        
         assertNotNull(newDir);
+        assertFalse(newDir.isHidden());
         assertTrue(newDir == dir.getEntry(name));
         assertTrue(newDir.getDirectory() == dir.getEntry(name).getDirectory());
     }
