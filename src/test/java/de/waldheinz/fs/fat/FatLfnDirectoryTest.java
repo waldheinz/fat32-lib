@@ -55,18 +55,34 @@ public class FatLfnDirectoryTest {
     }
 
     @Test
+    public void testReadOnlyFlag() throws IOException {
+        System.out.println("readOnlyFlag");
+
+        final FatLfnDirectoryEntry f = dir.addDirectory("testDir");
+        assertFalse(f.isReadOnlyFlag());
+
+        f.setReadOnlyFlag(true);
+        assertTrue(f.isReadOnlyFlag());
+        assertTrue(f.isDirectory());
+
+        f.setReadOnlyFlag(false);
+        assertFalse(f.isReadOnlyFlag());
+        assertTrue(f.isDirectory());
+    }
+
+    @Test
     public void testSystemFlag() throws IOException {
         System.out.println("systemFlag");
 
         final FatLfnDirectoryEntry f = dir.addDirectory("testDir");
-        assertFalse(f.isSystemEntry());
+        assertFalse(f.isSystemFlag());
 
-        f.setSystemEntry(true);
-        assertTrue(f.isSystemEntry());
+        f.setSystemFlag(true);
+        assertTrue(f.isSystemFlag());
         assertTrue(f.isDirectory());
 
-        f.setSystemEntry(false);
-        assertFalse(f.isSystemEntry());
+        f.setSystemFlag(false);
+        assertFalse(f.isSystemFlag());
         assertTrue(f.isDirectory());
     }
     
@@ -75,14 +91,14 @@ public class FatLfnDirectoryTest {
         System.out.println("hiddenFlag");
         
         final FatLfnDirectoryEntry f = dir.addFile("testFile");
-        assertFalse(f.isHidden());
+        assertFalse(f.isHiddenFlag());
 
-        f.setHidden(true);
-        assertTrue(f.isHidden());
+        f.setHiddenFlag(true);
+        assertTrue(f.isHiddenFlag());
         assertTrue(f.isFile());
 
-        f.setHidden(false);
-        assertFalse(f.isHidden());
+        f.setHiddenFlag(false);
+        assertFalse(f.isHiddenFlag());
         assertTrue(f.isFile());
     }
     
@@ -292,7 +308,7 @@ public class FatLfnDirectoryTest {
         final FatLfnDirectoryEntry f = dir.addFile(name);
         
         assertNotNull(f);
-        assertFalse(f.isHidden());
+        assertFalse(f.isHiddenFlag());
         assertEquals(name, f.getName());
     }
     
@@ -304,7 +320,7 @@ public class FatLfnDirectoryTest {
         final FatLfnDirectoryEntry newDir = dir.addDirectory(name);
         
         assertNotNull(newDir);
-        assertFalse(newDir.isHidden());
+        assertFalse(newDir.isHiddenFlag());
         assertTrue(newDir == dir.getEntry(name));
         assertTrue(newDir.getDirectory() == dir.getEntry(name).getDirectory());
     }

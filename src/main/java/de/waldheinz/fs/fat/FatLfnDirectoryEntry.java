@@ -22,6 +22,7 @@ package de.waldheinz.fs.fat;
 import de.waldheinz.fs.AbstractFsObject;
 import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
+import de.waldheinz.fs.ReadOnlyException;
 import java.io.IOException;
 
 /**
@@ -91,9 +92,9 @@ public final class FatLfnDirectoryEntry
      * Returns if this directory entry has the FAT "hidden" flag set.
      *
      * @return if this is a hidden directory entry
-     * @see #setHidden(boolean) 
+     * @see #setHiddenFlag(boolean)
      */
-    public boolean isHidden() {
+    public boolean isHiddenFlag() {
         return this.realEntry.isHiddenFlag();
     }
     
@@ -102,9 +103,12 @@ public final class FatLfnDirectoryEntry
      * specified value.
      *
      * @param hidden if this entry should have the hidden flag set
-     * @see #isHidden() 
+     * @throws ReadOnlyException if this entry is read-only
+     * @see #isHiddenFlag()
      */
-    public void setHidden(boolean hidden) {
+    public void setHiddenFlag(boolean hidden) throws ReadOnlyException {
+        checkWritable();
+        
         this.realEntry.setHiddenFlag(hidden);
     }
     
@@ -112,9 +116,9 @@ public final class FatLfnDirectoryEntry
      * Returns if this directory entry has the FAT "system" flag set.
      *
      * @return if this is a "system" directory entry
-     * @see #setSystemEntry(boolean) 
+     * @see #setSystemFlag(boolean)
      */
-    public boolean isSystemEntry() {
+    public boolean isSystemFlag() {
         return this.realEntry.isSystemFlag();
     }
     
@@ -123,12 +127,43 @@ public final class FatLfnDirectoryEntry
      * specified value.
      *
      * @param systemEntry if this entry should have the system flag set
-     * @see #isSystemEntry() 
+     * @throws ReadOnlyException if this entry is read-only
+     * @see #isSystemFlag()
      */
-    public void setSystemEntry(boolean systemEntry) {
+    public void setSystemFlag(boolean systemEntry) throws ReadOnlyException {
+        checkWritable();
+        
         this.realEntry.setSystemFlag(systemEntry);
     }
-    
+
+    /**
+     * Sets the "read on" flag on this {@code FatLfnDirectoryEntry} to the
+     * specified value.
+     *
+     * @return if this entry has the read-only flag set
+     * @see #setReadOnlyFlag(boolean) 
+     */
+    public boolean isReadOnlyFlag() {
+        return this.realEntry.isReadonlyFlag();
+    }
+
+    /**
+     * Sets the "read only" flag on this {@code FatLfnDirectoryEntry} to the
+     * specified value. This method only modifies the read-only flag as
+     * specified by the FAT file system, which is essentially ignored by the
+     * fat32-lib. The true indicator if it is possible to alter this 
+     *
+     * @param readOnly if this entry should be flagged as read only
+     * @throws ReadOnlyException if this entry is read-only as given by
+     *      {@link #isReadOnly()} method
+     * 
+     */
+    public void setReadOnlyFlag(boolean readOnly) throws ReadOnlyException {
+        checkWritable();
+        
+        this.realEntry.setReadonlyFlag(readOnly);
+    }
+
     private int totalEntrySize() {
         int result = (fileName.length() / 13) + 1;
 
