@@ -26,6 +26,13 @@ import de.waldheinz.fs.ReadOnlyException;
 import java.io.IOException;
 
 /**
+ * Represents an entry in a {@link FatLfnDirectory}. Besides implementing the
+ * {@link FsDirectoryEntry} interface for FAT file systems, it allows access
+ * to the {@link #setArchiveFlag(boolean) archive},
+ * {@link #setHiddenFlag(boolean) hidden},
+ * {@link #setReadOnlyFlag(boolean) read-only} and
+ * {@link #setSystemFlag(boolean) system} flags specifed for the FAT file
+ * system.
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  * @since 0.6
