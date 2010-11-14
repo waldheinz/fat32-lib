@@ -86,24 +86,47 @@ public final class FatLfnDirectoryEntry
         
         return new FatLfnDirectoryEntry(dir, realEntry, fileName);
     }
-
+    
     /**
      * Returns if this directory entry has the FAT "hidden" flag set.
      *
      * @return if this is a hidden directory entry
+     * @see #setHidden(boolean) 
      */
     public boolean isHidden() {
         return this.realEntry.isHiddenFlag();
     }
-
+    
     /**
      * Sets the "hidden" flag on this {@code FatLfnDirectoryEntry} to the
      * specified value.
      *
      * @param hidden if this entry should have the hidden flag set
+     * @see #isHidden() 
      */
     public void setHidden(boolean hidden) {
         this.realEntry.setHiddenFlag(hidden);
+    }
+    
+    /**
+     * Returns if this directory entry has the FAT "system" flag set.
+     *
+     * @return if this is a "system" directory entry
+     * @see #setSystemEntry(boolean) 
+     */
+    public boolean isSystemEntry() {
+        return this.realEntry.isSystemFlag();
+    }
+    
+    /**
+     * Sets the "system" flag on this {@code FatLfnDirectoryEntry} to the
+     * specified value.
+     *
+     * @param systemEntry if this entry should have the system flag set
+     * @see #isSystemEntry() 
+     */
+    public void setSystemEntry(boolean systemEntry) {
+        this.realEntry.setSystemFlag(systemEntry);
     }
     
     private int totalEntrySize() {

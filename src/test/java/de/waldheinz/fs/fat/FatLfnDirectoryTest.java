@@ -55,6 +55,22 @@ public class FatLfnDirectoryTest {
     }
 
     @Test
+    public void testSystemFlag() throws IOException {
+        System.out.println("systemFlag");
+
+        final FatLfnDirectoryEntry f = dir.addDirectory("testDir");
+        assertFalse(f.isSystemEntry());
+
+        f.setSystemEntry(true);
+        assertTrue(f.isSystemEntry());
+        assertTrue(f.isDirectory());
+
+        f.setSystemEntry(false);
+        assertFalse(f.isSystemEntry());
+        assertTrue(f.isDirectory());
+    }
+    
+    @Test
     public void testHiddenFlag() throws IOException {
         System.out.println("hiddenFlag");
         
