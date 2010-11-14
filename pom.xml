@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>4</version>
+        <version>5</version>
     </parent>
     
     <licenses>
