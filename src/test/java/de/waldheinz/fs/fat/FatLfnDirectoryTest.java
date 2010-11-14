@@ -80,14 +80,14 @@ public class FatLfnDirectoryTest {
         final FatLfnDirectory subDir =
                 (FatLfnDirectory) subEntry.getDirectory();
         
-        FatLfnDirectoryEntry entry = (FatLfnDirectoryEntry) subDir.getEntry(".");
+        FatLfnDirectoryEntry entry = subDir.getEntry(".");
         assertNotNull(entry);
         
         System.out.println(entry);
         /* dot entries should not have a LFN */
         assertEquals(1, entry.compactForm().length);
 
-        entry = (FatLfnDirectoryEntry) subDir.getEntry("..");
+        entry = subDir.getEntry("..");
         assertNotNull(entry);
         
         System.out.println(entry);
