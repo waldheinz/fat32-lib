@@ -54,6 +54,22 @@ public class FatLfnDirectoryTest {
         this.dir = new FatLfnDirectory(rootDirStore, fat, false);
     }
 
+    @Test(expected=IOException.class)
+    public void testUniqueFileName() throws IOException {
+        System.out.println("uniqueFileName");
+
+        dir.addFile("testFile");
+        dir.addFile("testFile");
+    }
+    
+    @Test(expected=IOException.class)
+    public void testUniqueDirName() throws IOException {
+        System.out.println("uniqueDirName");
+
+        dir.addDirectory("testDir");
+        dir.addDirectory("testDir");
+    }
+
     @Test
     public void testArchiveFlag() throws IOException {
         System.out.println("archiveFlag");
@@ -295,7 +311,8 @@ public class FatLfnDirectoryTest {
             final int freeBeforeAdd = fat.getFreeClusterCount();
             
             try {
-                dir.addDirectory("this is test directory with index " + count);
+                dir.addDirectory("this is test directory with index " +
+                        count++);
             } catch (DirectoryFullException ex) {
                 assertEquals(freeBeforeAdd, fat.getFreeClusterCount());
                 return;

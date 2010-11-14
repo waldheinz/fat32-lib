@@ -111,6 +111,7 @@ public final class FatLfnDirectory
     @Override
     public FatLfnDirectoryEntry addFile(String name) throws IOException {
         checkReadOnly();
+        checkUniqueName(name);
         
         name = name.trim();
         final ShortName sn = makeShortName(name);
@@ -129,6 +130,13 @@ public final class FatLfnDirectory
         return entry;
     }
 
+    private void checkUniqueName(String name) throws IOException {
+        if (getEntry(name) != null) {
+            throw new IOException(
+                    "an entry named " + name + " already exists");
+        }
+    }
+    
     private ShortName makeShortName(String name) throws IOException {
         try {
             return sng.generateShortName(name);
@@ -153,6 +161,7 @@ public final class FatLfnDirectory
     @Override
     public FatLfnDirectoryEntry addDirectory(String name) throws IOException {
         checkReadOnly();
+        checkUniqueName(name);
         
         name = name.trim();
         final ShortName sn = makeShortName(name);
