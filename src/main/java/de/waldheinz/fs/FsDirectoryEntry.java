@@ -116,7 +116,7 @@ public interface FsDirectoryEntry extends FsObject {
     public void setName(String newName) throws IOException;
 
     /**
-     * Gets the last modification time of this entry.
+     * Sets the last modification time of this entry.
      * 
      * @param lastModified the new last modification time of this entry
      * @throws IOException on write error
