@@ -180,7 +180,19 @@ public final class FatLfnDirectory
         return e;
     }
     
-    private FatLfnDirectoryEntry getEntryImpl(String name) {
+    /**
+     * <p>
+     * {@inheritDoc}
+     * </p><p>
+     * According to the FAT file system specification, leading and trailing
+     * spaces in the {@code name} are ignored by this method.
+     * </p>
+     *
+     * @param name {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public FatLfnDirectoryEntry getEntry(String name) {
         name = name.trim();
         
         final FatLfnDirectoryEntry entry = longNameIndex.get(name);
@@ -301,7 +313,7 @@ public final class FatLfnDirectory
         
         checkReadOnly();
         
-        final FatLfnDirectoryEntry entry = getEntryImpl(name);
+        final FatLfnDirectoryEntry entry = getEntry(name);
         if (entry == null) return;
         removeImpl(entry);
     }
@@ -336,23 +348,6 @@ public final class FatLfnDirectory
                 ", dir=" + dir + "]"; //NOI18N
     }
     
-    /**
-     * <p>
-     * {@inheritDoc}
-     * </p><p>
-     * According to the FAT file system specification, leading and trailing
-     * spaces in the {@code name} are ignored by this method.
-     * </p>
-     * 
-     * @param name {@inheritDoc}
-     * @return {@inheritDoc}
-     * @throws IOException {@inheritDoc}
-     */
-    @Override
-    public FsDirectoryEntry getEntry(String name) throws IOException {
-        return getEntryImpl(name);
-    }
-
     private static ClusterChainDirectory read(FatDirectoryEntry entry, Fat fat)
             throws IOException {
 
