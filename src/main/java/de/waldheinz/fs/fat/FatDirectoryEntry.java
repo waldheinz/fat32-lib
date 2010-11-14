@@ -50,7 +50,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
     public static final int F_SYSTEM = 0x04;
     public static final int F_VOLUME_ID = 0x08;
     public static final int F_DIRECTORY = 0x10;
-    public static final int F_ARCHIVE = 0x20;
+    private static final int F_ARCHIVE = 0x20;
 
     /**
      * The magic byte denoting that this entry was deleted and is free
@@ -140,6 +140,14 @@ final class FatDirectoryEntry extends AbstractFsObject {
 
     public final void setSystemFlag(boolean isSystem) {
         setFlag(F_SYSTEM, isSystem);
+    }
+
+    public final boolean isArchiveFlag() {
+        return ((getFlags() & F_ARCHIVE) != 0);
+    }
+
+    public final void setArchiveFlag(boolean isArchive) {
+        setFlag(F_ARCHIVE, isArchive);
     }
     
     public final boolean isHiddenFlag() {

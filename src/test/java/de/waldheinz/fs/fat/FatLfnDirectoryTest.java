@@ -55,6 +55,22 @@ public class FatLfnDirectoryTest {
     }
 
     @Test
+    public void testArchiveFlag() throws IOException {
+        System.out.println("archiveFlag");
+
+        final FatLfnDirectoryEntry f = dir.addDirectory("testDir");
+        assertFalse(f.isArchiveFlag());
+
+        f.setArchiveFlag(true);
+        assertTrue(f.isArchiveFlag());
+        assertTrue(f.isDirectory());
+
+        f.setArchiveFlag(false);
+        assertFalse(f.isArchiveFlag());
+        assertTrue(f.isDirectory());
+    }
+
+    @Test
     public void testReadOnlyFlag() throws IOException {
         System.out.println("readOnlyFlag");
 

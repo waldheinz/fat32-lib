@@ -137,8 +137,8 @@ public final class FatLfnDirectoryEntry
     }
 
     /**
-     * Sets the "read on" flag on this {@code FatLfnDirectoryEntry} to the
-     * specified value.
+     * Returns if this directory entry has the FAT "read-only" flag set. This
+     * entry may still modified if {@link #isReadOnly()} returns {@code true}.
      *
      * @return if this entry has the read-only flag set
      * @see #setReadOnlyFlag(boolean) 
@@ -156,7 +156,7 @@ public final class FatLfnDirectoryEntry
      * @param readOnly if this entry should be flagged as read only
      * @throws ReadOnlyException if this entry is read-only as given by
      *      {@link #isReadOnly()} method
-     * 
+     * @see #isReadOnlyFlag() 
      */
     public void setReadOnlyFlag(boolean readOnly) throws ReadOnlyException {
         checkWritable();
@@ -164,6 +164,29 @@ public final class FatLfnDirectoryEntry
         this.realEntry.setReadonlyFlag(readOnly);
     }
 
+    /**
+     * Returns if this directory entry has the FAT "archive" flag set.
+     * 
+     * @return if this entry has the archive flag set
+     */
+    public boolean isArchiveFlag() {
+        return this.realEntry.isArchiveFlag();
+    }
+
+    /**
+     * Sets the "archive" flag on this {@code FatLfnDirectoryEntry} to the
+     * specified value.
+     *
+     * @param archive if this entry should have the archive flag set
+     * @throws ReadOnlyException if this entry is
+     *      {@link #isReadOnly() read-only}
+     */
+    public void setArchiveFlag(boolean archive) throws ReadOnlyException {
+        checkWritable();
+
+        this.realEntry.setArchiveFlag(archive);
+    }
+    
     private int totalEntrySize() {
         int result = (fileName.length() / 13) + 1;
 
