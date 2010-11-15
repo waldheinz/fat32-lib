@@ -53,7 +53,16 @@ public class FatLfnDirectoryTest {
         this.fat = Fat.read(bs, 0);
         this.dir = new FatLfnDirectory(rootDirStore, fat, false);
     }
+    
+    @Test(expected=IOException.class)
+    public void testRenameEntryClash() throws IOException {
+        System.out.println("renameEntryClash");
 
+        dir.addDirectory("An Entry for Testing");
+        final FatLfnDirectoryEntry f = dir.addFile("A Name to change");
+        f.setName("An Entry for Testing");
+    }
+    
     @Test
     public void testRenameEntry() throws IOException {
         System.out.println("renameEntry");
