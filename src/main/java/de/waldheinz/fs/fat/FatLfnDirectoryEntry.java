@@ -41,9 +41,9 @@ public final class FatLfnDirectoryEntry
         extends AbstractFsObject
         implements FsDirectoryEntry {
     
-    private final FatLfnDirectory parent;
     final FatDirectoryEntry realEntry;
     
+    private FatLfnDirectory parent;
     private String fileName;
     
     FatLfnDirectoryEntry(String name, ShortName sn,
@@ -250,13 +250,30 @@ public final class FatLfnDirectoryEntry
     @Override
     public void setName(String newName) throws IOException {
         checkWritable();
-
-        this.parent.unlinkEntry(this);
         
+        if (!this.parent.isFreeName(newName)) {
+            throw new IOException(
+                    "the name \"" + newName + "\" is already in use");
+        }
+        
+        this.parent.unlinkEntry(this);
         this.fileName = newName;
-        this.realEntry.setShortName(
-                this.parent.sng.generateShortName(newName));
+        this.parent.linkEntry(this);
+    }
+    
+    public void moveTo(FatLfnDirectory newDir, String newName) 
+            throws IOException {
 
+        checkWritable();
+
+        if (!newDir.isFreeName(newName)) {
+            throw new IOException(
+                    "the name \"" + newName + "\" is already in use");
+        }
+        
+        this.parent.unlinkEntry(this);
+        this.parent = newDir;
+        this.fileName = newName;
         this.parent.linkEntry(this);
     }
     

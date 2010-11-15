@@ -58,8 +58,8 @@ public final class FatLfnDirectory
     private final Map<String, FatLfnDirectoryEntry> longNameIndex;
     private final Map<FatDirectoryEntry, FatFile> entryToFile;
     private final Map<FatDirectoryEntry, FatLfnDirectory> entryToDirectory;
+    private final ShortNameGenerator sng;
     
-    final ShortNameGenerator sng;
     final AbstractDirectory dir;
     
     FatLfnDirectory(AbstractDirectory dir, Fat fat, boolean readOnly)
@@ -147,6 +147,10 @@ public final class FatLfnDirectory
         return entry;
     }
     
+    boolean isFreeName(String name) {
+        return !this.usedNames.contains(name.toLowerCase());
+    }
+    
     private void checkUniqueName(String name) throws IOException {
         final String lowerName = name.toLowerCase();
 
@@ -155,7 +159,7 @@ public final class FatLfnDirectory
                     "an entry named " + name + " already exists");
         }
     }
-
+    
     private void freeUniqueName(String name) {
         final String lowerName = name.toLowerCase();
 
@@ -402,17 +406,21 @@ public final class FatLfnDirectory
     }
     
     /**
-     * Links the specified entry to this directory.
+     * Links the specified entry to this directory, updating the entrie's
+     * short name.
      *
      * @param entry the entry to be linked (added) to this directory
      * @see #unlinkEntry(de.waldheinz.fs.fat.FatLfnDirectoryEntry) 
      */
     void linkEntry(FatLfnDirectoryEntry entry) throws IOException {
         checkUniqueName(entry.getName());
-
+        
+        entry.realEntry.setShortName(
+            this.sng.generateShortName(entry.getName()));
+        
         this.longNameIndex.put(entry.getName().toLowerCase(), entry);
         this.shortNameIndex.put(entry.realEntry.getShortName(), entry);
-
+        
         updateLFN();
     }
     

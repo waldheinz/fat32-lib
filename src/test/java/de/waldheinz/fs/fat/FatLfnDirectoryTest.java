@@ -54,13 +54,22 @@ public class FatLfnDirectoryTest {
         this.dir = new FatLfnDirectory(rootDirStore, fat, false);
     }
     
-    @Test(expected=IOException.class)
+    @Test
     public void testRenameEntryClash() throws IOException {
         System.out.println("renameEntryClash");
 
-        dir.addDirectory("An Entry for Testing");
+        final String name = "An Entry for Testing";
+        
+        dir.addDirectory(name);
         final FatLfnDirectoryEntry f = dir.addFile("A Name to change");
-        f.setName("An Entry for Testing");
+        
+        try {
+            f.setName(name);
+            fail("file should not have been renamed");
+        } catch (IOException ex) {
+            System.out.println("cought " + ex);
+            assertNotNull("file was lost", dir.getEntry("A Name to change"));
+        }
     }
     
     @Test
