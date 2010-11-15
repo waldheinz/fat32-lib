@@ -59,8 +59,8 @@ public final class FatFile extends AbstractFsObject implements FsFile {
     }
     
     /**
-     * Returns the length of this file. This is actually the length that
-     * is stored in the {@link FatDirectoryEntry} that is associated with this file.
+     * Returns the length of this file in bytes. This is the length that
+     * is stored in the directory entry that is associated with this file.
      * 
      * @return long the length that is recorded for this file
      */
@@ -71,12 +71,16 @@ public final class FatFile extends AbstractFsObject implements FsFile {
         return entry.getLength();
     }
     
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + " [length=" + getLength() +
-                ", first cluster=" + chain.getStartCluster() + "]";
-    }
-
+    /**
+     * Sets the size (in bytes) of this file. Because
+     * {@link #write(long, java.nio.ByteBuffer) writing} to the file will grow
+     * it automatically if needed, this method is mainly usefull for truncating
+     * a file. 
+     *
+     * @param length the new length of the file in bytes
+     * @throws ReadOnlyException if this file is read-only
+     * @throws IOException on error updating the file size
+     */
     @Override
     public void setLength(long length) throws ReadOnlyException, IOException {
         checkWritable();
@@ -89,7 +93,7 @@ public final class FatFile extends AbstractFsObject implements FsFile {
         this.entry.setStartCluster(chain.getStartCluster());
         this.entry.setLength(length);
     }
-
+    
     /**
      * <p>
      * {@inheritDoc}
@@ -126,8 +130,11 @@ public final class FatFile extends AbstractFsObject implements FsFile {
      * <p>
      * {@inheritDoc}
      * </p><p>
-     * This method also updates the "last accessed" and "last modified" fields
-     * in the directory entry that is associated with this file.
+     * If the data to be written extends beyond the current
+     * {@link #getLength() length} of this file, an attempt is made to
+     * {@link #setLength(long) grow} the file so that the data will fit.
+     * Additionally, this method updates the "last accessed" and "last modified"
+     * fields on the directory entry that is associated with this file.
      * </p>
      *
      * @param offset {@inheritDoc}
@@ -158,10 +165,18 @@ public final class FatFile extends AbstractFsObject implements FsFile {
             entry.setLastModified(now);
         }
     }
-    
+
+    /**
+     * Has no effect besides possibly throwing an {@code ReadOnlyException}. To
+     * make sure that all data is written out to disk use the
+     * {@link FatFileSystem#flush()} method.
+     *
+     * @throws ReadOnlyException if this {@code FatFile} is read-only
+     */
     @Override
-    public void flush() throws IOException {
+    public void flush() throws ReadOnlyException {
         checkWritable();
+        
         /* nothing else to do */
     }
     
@@ -175,6 +190,18 @@ public final class FatFile extends AbstractFsObject implements FsFile {
         checkValid();
         
         return chain;
+    }
+    
+    /**
+     * Returns a human-readable string representation of this {@code FatFile},
+     * mainly for debugging purposes.
+     *
+     * @return a string describing this {@code FatFile}
+     */
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " [length=" + getLength() +
+                ", first cluster=" + chain.getStartCluster() + "]";
     }
     
 }
