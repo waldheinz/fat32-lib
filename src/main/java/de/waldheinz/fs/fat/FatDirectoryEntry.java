@@ -38,18 +38,18 @@ final class FatDirectoryEntry extends AbstractFsObject {
     /**
      * The offset to the attributes byte.
      */
-    public static final int OFFSET_ATTRIBUTES = 0x0b;
+    private static final int OFFSET_ATTRIBUTES = 0x0b;
     
     /**
      * The offset to the file size dword.
      */
-    public static final int OFFSET_FILE_SIZE = 0x1c;
-
-    public static final int F_READONLY = 0x01;
-    public static final int F_HIDDEN = 0x02;
-    public static final int F_SYSTEM = 0x04;
-    public static final int F_VOLUME_ID = 0x08;
-    public static final int F_DIRECTORY = 0x10;
+    private static final int OFFSET_FILE_SIZE = 0x1c;
+    
+    private static final int F_READONLY = 0x01;
+    private static final int F_HIDDEN = 0x02;
+    private static final int F_SYSTEM = 0x04;
+    private static final int F_VOLUME_ID = 0x08;
+    private static final int F_DIRECTORY = 0x10;
     private static final int F_ARCHIVE = 0x20;
 
     /**
@@ -60,8 +60,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
      */
     public static final int ENTRY_DELETED_MAGIC = 0xe5;
     
-    protected final byte[] data;
-
+    private final byte[] data;
     private boolean dirty;
     
     FatDirectoryEntry(byte[] data, boolean readOnly) {
@@ -115,7 +114,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
      *
      * @return if this is a volume label entry
      */
-    public final boolean isVolumeLabel() {
+    public boolean isVolumeLabel() {
         if (isLfnEntry()) return false;
         else return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == F_VOLUME_ID);
     }
@@ -134,27 +133,27 @@ final class FatDirectoryEntry extends AbstractFsObject {
         this.dirty = true;
     }
 
-    public final boolean isSystemFlag() {
+    public boolean isSystemFlag() {
         return ((getFlags() & F_SYSTEM) != 0);
     }
 
-    public final void setSystemFlag(boolean isSystem) {
+    public void setSystemFlag(boolean isSystem) {
         setFlag(F_SYSTEM, isSystem);
     }
 
-    public final boolean isArchiveFlag() {
+    public boolean isArchiveFlag() {
         return ((getFlags() & F_ARCHIVE) != 0);
     }
 
-    public final void setArchiveFlag(boolean isArchive) {
+    public void setArchiveFlag(boolean isArchive) {
         setFlag(F_ARCHIVE, isArchive);
     }
     
-    public final boolean isHiddenFlag() {
+    public boolean isHiddenFlag() {
         return ((getFlags() & F_HIDDEN) != 0);
     }
 
-    public final void setHiddenFlag(boolean isHidden) {
+    public void setHiddenFlag(boolean isHidden) {
         setFlag(F_HIDDEN, isHidden);
     }
     
@@ -162,12 +161,12 @@ final class FatDirectoryEntry extends AbstractFsObject {
         return ((getFlags() & F_VOLUME_ID) != 0);
     }
     
-    public final boolean isLfnEntry() {
+    public boolean isLfnEntry() {
         return isReadonlyFlag() && isSystemFlag() &&
                 isHiddenFlag() && isVolumeIdFlag();
     }
     
-    public final boolean isDirty() {
+    public boolean isDirty() {
         return dirty;
     }
     
@@ -179,7 +178,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
         LittleEndian.setInt8(data, OFFSET_ATTRIBUTES, flags);
     }
     
-    public final boolean isDirectory() {
+    public boolean isDirectory() {
         return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == F_DIRECTORY);
     }
     
@@ -234,7 +233,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
         return sb.toString();
     }
 
-    public final long getCreated() {
+    public long getCreated() {
         return DosUtils.decodeDateTime(
                 LittleEndian.getUInt16(data, 0x10),
                 LittleEndian.getUInt16(data, 0x0e));
@@ -249,7 +248,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
         this.dirty = true;
     }
 
-    public final long getLastModified() {
+    public long getLastModified() {
         return DosUtils.decodeDateTime(
                 LittleEndian.getUInt16(data, 0x18),
                 LittleEndian.getUInt16(data, 0x16));
@@ -264,7 +263,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
         this.dirty = true;
     }
 
-    public final long getLastAccessed() {
+    public long getLastAccessed() {
         return DosUtils.decodeDateTime(
                 LittleEndian.getUInt16(data, 0x12),
                 0); /* time is not recorded */
@@ -283,7 +282,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
      * 
      * @return if this entry is marked as deleted
      */
-    public final boolean isDeleted() {
+    public boolean isDeleted() {
         return  (LittleEndian.getUInt8(data, 0) == ENTRY_DELETED_MAGIC);
     }
     
@@ -326,7 +325,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
      * @return
      * @see org.jnode.fs.FSDirectoryEntry#isFile()
      */
-    public final boolean isFile() {
+    public boolean isFile() {
         return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == 0);
     }
     
@@ -381,7 +380,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
      * @see #F_READONLY
      * @see #setReadonlyFlag(boolean) 
      */
-    public final boolean isReadonlyFlag() {
+    public boolean isReadonlyFlag() {
         return ((getFlags() & F_READONLY) != 0);
     }
 
@@ -392,11 +391,11 @@ final class FatDirectoryEntry extends AbstractFsObject {
      * @see #F_READONLY
      * @see #isReadonlyFlag() 
      */
-    public final void setReadonlyFlag(boolean isReadonly) {
+    public void setReadonlyFlag(boolean isReadonly) {
         setFlag(F_READONLY, isReadonly);
     }
     
-    final String getLfnPart() {
+    String getLfnPart() {
         final char[] unicodechar = new char[13];
 
         unicodechar[0] = (char) LittleEndian.getUInt16(data, 1);
