@@ -54,6 +54,22 @@ public class FatLfnDirectoryTest {
         this.dir = new FatLfnDirectory(rootDirStore, fat, false);
     }
 
+    @Test
+    public void testCaseSensitiveDirectory() throws IOException {
+        System.out.println("caseSensitiveDirectory");
+
+        dir.addDirectory("hateCamelCase.BAK");
+        assertNotNull(dir.getEntry("hatecamelcase.bak"));
+    }
+    
+    @Test
+    public void testCaseSensitiveFile() throws IOException {
+        System.out.println("caseSensitiveFile");
+
+        dir.addFile("loveCamelCase");
+        assertNotNull(dir.getEntry("LOVECAMELCASE"));
+    }
+    
     @Test(expected=IOException.class)
     public void testUniqueShortNameFileClash() throws IOException {
         System.out.println("uniqueShortNameFileClash");

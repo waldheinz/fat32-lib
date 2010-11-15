@@ -32,9 +32,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This class implements the "long file name" logic atop an
- * {@link AbstractDirectory} instance.
- *
+ * The {@link FsDirectory} implementation for FAT file systems. This
+ * implementation aims to fully comply to the FAT specification, including
+ * the quite complex naming system regarding the long file names (LFNs) and
+ * their corresponding 8+3 short file names. This also means that an
+ * {@code FatLfnDirectory} is case-preserving but <em>not</em> case-sensitive.
+ * 
  * @author gbin
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  * @since 0.6
@@ -136,7 +139,7 @@ public final class FatLfnDirectory
         dir.addEntries(entry.compactForm());
         
         shortNameIndex.put(sn, entry);
-        longNameIndex.put(name, entry);
+        longNameIndex.put(name.toLowerCase(), entry);
 
         getFile(entry.realEntry);
         
@@ -210,7 +213,7 @@ public final class FatLfnDirectory
         }
         
         shortNameIndex.put(sn, e);
-        longNameIndex.put(name, e);
+        longNameIndex.put(name.toLowerCase(), e);
 
         getDirectory(real);
         
@@ -231,10 +234,10 @@ public final class FatLfnDirectory
      */
     @Override
     public FatLfnDirectoryEntry getEntry(String name) {
-        name = name.trim();
+        name = name.trim().toLowerCase();
         
         final FatLfnDirectoryEntry entry = longNameIndex.get(name);
-
+        
         if (entry == null) {
             if (!ShortName.canConvert(name)) return null;
             return shortNameIndex.get(ShortName.get(name));
@@ -279,7 +282,7 @@ public final class FatLfnDirectory
                 checkUniqueName(current.getName());
                 
                 shortNameIndex.put(current.realEntry.getShortName(), current);
-                longNameIndex.put(current.getName(), current);
+                longNameIndex.put(current.getName().toLowerCase(), current);
             }
         }
     }
@@ -369,7 +372,7 @@ public final class FatLfnDirectory
 
         cc.setChainLength(0);
         
-        this.longNameIndex.remove(entry.getName());
+        this.longNameIndex.remove(entry.getName().toLowerCase());
         this.shortNameIndex.remove(sn);
         
         if (entry.isFile()) {
