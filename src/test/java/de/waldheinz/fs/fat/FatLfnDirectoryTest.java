@@ -55,6 +55,18 @@ public class FatLfnDirectoryTest {
     }
 
     @Test
+    public void testRenameEntry() throws IOException {
+        System.out.println("renameEntry");
+        
+        FatLfnDirectoryEntry f = dir.addFile("oldFileName");
+        f.setName("newFileName");
+        
+        assertNull(dir.getEntry("oldFileName"));
+        assertNotNull(dir.getEntry("newFileName"));
+        assertEquals("newFileName", f.getName());
+    }
+    
+    @Test
     public void testCaseSensitiveDirectory() throws IOException {
         System.out.println("caseSensitiveDirectory");
 

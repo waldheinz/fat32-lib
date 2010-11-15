@@ -361,16 +361,29 @@ public final class FatLfnDirectory
         final FatLfnDirectoryEntry entry = getEntry(name);
         if (entry == null) return;
         
-        final ShortName sn = entry.realEntry.getShortName();
+        unlinkEntry(entry);
         
-        if (sn.equals(ShortName.DOT) || sn.equals(ShortName.DOT_DOT)) throw
-                new IllegalArgumentException(
-                    "the dot entries can not be removed");
-
         final ClusterChain cc = new ClusterChain(
                 fat, entry.realEntry.getStartCluster(), false);
 
         cc.setChainLength(0);
+        
+        freeUniqueName(name);
+        updateLFN();
+    }
+    
+    /**
+     * Unlinks the specified entry from this directory without actually
+     * deleting it.
+     *
+     * @param e the entry to be unlinked
+     */
+    void unlinkEntry(FatLfnDirectoryEntry entry) {
+        final ShortName sn = entry.realEntry.getShortName();
+
+        if (sn.equals(ShortName.DOT) || sn.equals(ShortName.DOT_DOT)) throw
+                new IllegalArgumentException(
+                    "the dot entries can not be removed");
         
         this.longNameIndex.remove(entry.getName().toLowerCase());
         this.shortNameIndex.remove(sn);
@@ -380,9 +393,6 @@ public final class FatLfnDirectory
         } else {
             this.entryToDirectory.remove(entry.realEntry);
         }
-        
-        freeUniqueName(name);
-        updateLFN();
     }
 
     @Override
