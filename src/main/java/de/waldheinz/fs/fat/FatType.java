@@ -23,7 +23,7 @@ package de.waldheinz.fs.fat;
  * Enumerates the different entry sizes of 12, 16 and 32 bits for the different
  * FAT flavours.
  *
- * @author Ewout Prangsma &lt; epr at jnode.org&gt;
+ * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 public enum FatType {
