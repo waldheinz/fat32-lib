@@ -296,9 +296,9 @@ public final class FatLfnDirectoryEntry
     public FatFile getFile() throws IOException {
         return parent.getFile(realEntry);
     }
-
+    
     @Override
-    public FsDirectory getDirectory() throws IOException {
+    public FatLfnDirectory getDirectory() throws IOException {
         return parent.getDirectory(realEntry);
     }
     

@@ -100,8 +100,8 @@ public final class FatLfnDirectory
         
         return file;
     }
-
-    FsDirectory getDirectory(FatDirectoryEntry entry) throws IOException {
+    
+    FatLfnDirectory getDirectory(FatDirectoryEntry entry) throws IOException {
         FatLfnDirectory result = entryToDirectory.get(entry);
 
         if (result == null) {
