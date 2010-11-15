@@ -55,6 +55,31 @@ public class FatLfnDirectoryTest {
     }
 
     @Test(expected=IOException.class)
+    public void testUniqueShortNameFileClash() throws IOException {
+        System.out.println("uniqueShortNameFileClash");
+
+        final FatLfnDirectoryEntry de = dir.addFile("a testing File");
+        dir.addDirectory(de.realEntry.getShortName().asSimpleString());
+    }
+    
+    @Test(expected=IOException.class)
+    public void testUniqueShortNameDirClash() throws IOException {
+        System.out.println("uniqueShortNameDirClash");
+
+        final FatLfnDirectoryEntry de = dir.addDirectory("testDirectory");
+        dir.addFile(de.realEntry.getShortName().asSimpleString());
+    }
+    
+    @Test
+    public void testReuseUniqueEntry() throws IOException {
+        System.out.println("reuseUniqueEntry");
+
+        dir.addFile("testFile");
+        dir.remove("testFile");
+        dir.addFile("testFile");
+    }
+
+    @Test(expected=IOException.class)
     public void testUniqueFileName() throws IOException {
         System.out.println("uniqueFileName");
 

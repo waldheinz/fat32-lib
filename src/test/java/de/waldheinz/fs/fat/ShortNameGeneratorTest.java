@@ -47,7 +47,7 @@ public class ShortNameGeneratorTest {
         System.out.println("onlyDots");
         
         final ShortNameGenerator sng =
-                new ShortNameGenerator(new HashSet<ShortName>());
+                new ShortNameGenerator(new HashSet<String>());
         sng.generateShortName("....");
     }
 
@@ -55,7 +55,7 @@ public class ShortNameGeneratorTest {
     public void testGenerateShortName() {
         System.out.println("generateShortName");
 
-        final Set<ShortName> used = new HashSet<ShortName>();
+        final Set<String> used = new HashSet<String>();
         final ShortNameGenerator sng = new ShortNameGenerator(used);
         
         assertEquals(ShortName.get("FOO.TXT"),
@@ -78,10 +78,10 @@ public class ShortNameGeneratorTest {
     public void testGenerateTildeSuffix() {
         System.out.println("generateTildeSuffix");
         
-        final Set<ShortName> used = new HashSet<ShortName>();
+        final Set<String> used = new HashSet<String>();
         final ShortNameGenerator sng = new ShortNameGenerator(used);
         
-        used.add(sng.generateShortName("foo.txt"));
+        used.add(sng.generateShortName("foo.txt").asSimpleString().toLowerCase());
         assertEquals(ShortName.get("FOO~1.TXT"),
                 sng.generateShortName("foo.txt"));
     }

@@ -28,7 +28,7 @@ import java.util.Set;
  */
 final class ShortNameGenerator {
     
-    private final Set<ShortName> usedNames;
+    private final Set<String> usedNames;
 
     /**
      * Creates a new instance of {@code ShortNameGenerator} that will use
@@ -39,7 +39,7 @@ final class ShortNameGenerator {
      *
      * @param usedNames the look-up for already used 8.3 names
      */
-    public ShortNameGenerator(Set<ShortName> usedNames) {
+    public ShortNameGenerator(Set<String> usedNames) {
         this.usedNames = Collections.unmodifiableSet(usedNames);
     }
     
@@ -137,9 +137,10 @@ final class ShortNameGenerator {
         
         final String shortExt = (longExt.length() > 3) ?
             longExt.substring(0, 3) : longExt;
-
+            
         if (forceSuffix || (longName.length() > 8) ||
-                usedNames.contains(new ShortName(longName, shortExt))) {
+                usedNames.contains(new ShortName(longName, shortExt).
+                asSimpleString().toLowerCase())) {
 
             /* we have to append the "~n" suffix */
 
@@ -152,7 +153,9 @@ final class ShortNameGenerator {
                         0, Math.min(maxLongIdx, 8-serialLen)) + serial;
                 final ShortName result = new ShortName(shortName, shortExt);
                 
-                if (!usedNames.contains(result)) {
+                if (!usedNames.contains(
+                        result.asSimpleString().toLowerCase())) {
+                    
                     return result;
                 }
             }

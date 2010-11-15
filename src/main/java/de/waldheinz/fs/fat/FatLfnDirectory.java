@@ -26,9 +26,11 @@ import de.waldheinz.fs.ReadOnlyException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class implements the "long file name" logic atop an
@@ -41,11 +43,19 @@ import java.util.Map;
 public final class FatLfnDirectory
         extends AbstractFsObject
         implements FsDirectory {
+
+    /**
+     * This set is used to check if a file name is already in use in this
+     * directory. The FAT specification says that file names must be unique
+     * ignoring the case, so this set contains all names converted to
+     * lower-case, and all checks must be performed using lower-case strings.
+     */
+    private final Set<String> usedNames;
     
     final Map<ShortName, FatLfnDirectoryEntry> shortNameIndex;
     final Map<String, FatLfnDirectoryEntry> longNameIndex;
-    final Map<FatDirectoryEntry, FatFile> files;
-    private final Map<FatDirectoryEntry, FatLfnDirectory> directories;
+    final Map<FatDirectoryEntry, FatFile> entryToFile;
+    private final Map<FatDirectoryEntry, FatLfnDirectory> entryToDirectory;
     final ShortNameGenerator sng;
     final AbstractDirectory dir;
     final Fat fat;
@@ -59,12 +69,21 @@ public final class FatLfnDirectory
         
         this.fat = fat;
         this.dir = dir;
+        
         this.shortNameIndex =
                 new LinkedHashMap<ShortName, FatLfnDirectoryEntry>();
-        this.longNameIndex = new LinkedHashMap<String, FatLfnDirectoryEntry>();
-        this.sng = new ShortNameGenerator(shortNameIndex.keySet());
-        this.files = new LinkedHashMap<FatDirectoryEntry, FatFile>();
-        this.directories = new LinkedHashMap<FatDirectoryEntry, FatLfnDirectory>();
+                
+        this.longNameIndex =
+                new LinkedHashMap<String, FatLfnDirectoryEntry>();
+                
+        this.entryToFile =
+                new LinkedHashMap<FatDirectoryEntry, FatFile>();
+                
+        this.entryToDirectory =
+                new LinkedHashMap<FatDirectoryEntry, FatLfnDirectory>();
+                
+        this.usedNames = new HashSet<String>();
+        this.sng = new ShortNameGenerator(this.usedNames);
         
         parseLfn();
     }
@@ -76,23 +95,23 @@ public final class FatLfnDirectory
     }
     
     FatFile getFile(FatDirectoryEntry entry) throws IOException {
-        FatFile file = files.get(entry);
+        FatFile file = entryToFile.get(entry);
 
         if (file == null) {
             file = FatFile.get(fat, entry);
-            files.put(entry, file);
+            entryToFile.put(entry, file);
         }
         
         return file;
     }
 
     FsDirectory getDirectory(FatDirectoryEntry entry) throws IOException {
-        FatLfnDirectory result = directories.get(entry);
+        FatLfnDirectory result = entryToDirectory.get(entry);
 
         if (result == null) {
             final ClusterChainDirectory storage = read(entry, fat);
             result = new FatLfnDirectory(storage, fat, isReadOnly());
-            directories.put(entry, result);
+            entryToDirectory.put(entry, result);
         }
         
         return result;
@@ -131,21 +150,36 @@ public final class FatLfnDirectory
         dir.setDirty();
         return entry;
     }
-
+    
     private void checkUniqueName(String name) throws IOException {
-        if (getEntry(name) != null) {
+        final String lowerName = name.toLowerCase();
+
+        if (!this.usedNames.add(lowerName)) {
             throw new IOException(
                     "an entry named " + name + " already exists");
         }
     }
+
+    private void freeUniqueName(String name) {
+        final String lowerName = name.toLowerCase();
+
+        if (!this.usedNames.remove(lowerName)) {
+            throw new AssertionError();
+        }
+    }
     
     private ShortName makeShortName(String name) throws IOException {
+        final ShortName result;
+
         try {
-            return sng.generateShortName(name);
+            result = sng.generateShortName(name);
         } catch (IllegalArgumentException ex) {
             throw new IOException(
                     "could not generate short name for \"" + name + "\"", ex);
         }
+        
+        this.usedNames.add(result.asSimpleString().toLowerCase());
+        return result;
     }
     
     /**
@@ -274,11 +308,11 @@ public final class FatLfnDirectory
 
     @Override
     public void flush() throws IOException {
-        for (FatFile f : files.values()) {
+        for (FatFile f : entryToFile.values()) {
             f.flush();
         }
         
-        for (FatLfnDirectory d : directories.values()) {
+        for (FatLfnDirectory d : entryToDirectory.values()) {
             d.flush();
         }
         
@@ -328,10 +362,7 @@ public final class FatLfnDirectory
         
         final FatLfnDirectoryEntry entry = getEntry(name);
         if (entry == null) return;
-        removeImpl(entry);
-    }
-
-    private void removeImpl(FatLfnDirectoryEntry entry) throws IOException {
+        
         final ShortName sn = entry.realEntry.getShortName();
         
         if (sn.equals(ShortName.DOT) || sn.equals(ShortName.DOT_DOT)) throw
@@ -342,15 +373,17 @@ public final class FatLfnDirectory
                 fat, entry.realEntry.getStartCluster(), false);
 
         cc.setChainLength(0);
-        longNameIndex.remove(entry.getName());
-        shortNameIndex.remove(sn);
-
+        
+        this.longNameIndex.remove(entry.getName());
+        this.shortNameIndex.remove(sn);
+        
         if (entry.isFile()) {
-            files.remove(entry.realEntry);
+            this.entryToFile.remove(entry.realEntry);
         } else {
-            directories.remove(entry.realEntry);
+            this.entryToDirectory.remove(entry.realEntry);
         }
-
+        
+        freeUniqueName(name);
         updateLFN();
     }
 
