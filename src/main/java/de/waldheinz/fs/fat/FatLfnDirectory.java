@@ -50,7 +50,9 @@ public final class FatLfnDirectory
     final AbstractDirectory dir;
     final Fat fat;
     
-    FatLfnDirectory(AbstractDirectory dir, Fat fat, boolean readOnly) {
+    FatLfnDirectory(AbstractDirectory dir, Fat fat, boolean readOnly)
+            throws IOException {
+        
         super(readOnly);
         
         if ((dir == null) || (fat == null)) throw new NullPointerException();
@@ -214,7 +216,7 @@ public final class FatLfnDirectory
         }
     }
     
-    private void parseLfn() {
+    private void parseLfn() throws IOException {
         int i = 0;
         final int size = dir.getEntryCount();
         
@@ -247,6 +249,8 @@ public final class FatLfnDirectory
                     FatLfnDirectoryEntry.extract(this, offset, ++i - offset);
             
             if (!current.realEntry.isDeleted() && current.isValid()) {
+                checkUniqueName(current.getName());
+                
                 shortNameIndex.put(current.realEntry.getShortName(), current);
                 longNameIndex.put(current.getName(), current);
             }
