@@ -53,14 +53,14 @@ public final class FatLfnDirectory
      * lower-case, and all checks must be performed using lower-case strings.
      */
     private final Set<String> usedNames;
-    
-    final Map<ShortName, FatLfnDirectoryEntry> shortNameIndex;
-    final Map<String, FatLfnDirectoryEntry> longNameIndex;
-    final Map<FatDirectoryEntry, FatFile> entryToFile;
+    private final Fat fat;
+    private final Map<ShortName, FatLfnDirectoryEntry> shortNameIndex;
+    private final Map<String, FatLfnDirectoryEntry> longNameIndex;
+    private final Map<FatDirectoryEntry, FatFile> entryToFile;
     private final Map<FatDirectoryEntry, FatLfnDirectory> entryToDirectory;
+    
     final ShortNameGenerator sng;
     final AbstractDirectory dir;
-    final Fat fat;
     
     FatLfnDirectory(AbstractDirectory dir, Fat fat, boolean readOnly)
             throws IOException {
