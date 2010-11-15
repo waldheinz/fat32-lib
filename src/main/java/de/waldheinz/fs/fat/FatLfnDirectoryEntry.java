@@ -261,18 +261,27 @@ public final class FatLfnDirectoryEntry
         this.parent.linkEntry(this);
     }
     
-    public void moveTo(FatLfnDirectory newDir, String newName) 
-            throws IOException {
+    /**
+     * Moves this entry to a new directory under the specified name.
+     *
+     * @param target the direcrory where this entry should be moved to
+     * @param newName the new name under which this entry will be accessible
+     *      in the target directory
+     * @throws IOException on error moving this entry
+     * @throws ReadOnlyException if this directory is read-only
+     */
+    public void moveTo(FatLfnDirectory target, String newName)
+            throws IOException, ReadOnlyException {
 
         checkWritable();
 
-        if (!newDir.isFreeName(newName)) {
+        if (!target.isFreeName(newName)) {
             throw new IOException(
                     "the name \"" + newName + "\" is already in use");
         }
         
         this.parent.unlinkEntry(this);
-        this.parent = newDir;
+        this.parent = target;
         this.fileName = newName;
         this.parent.linkEntry(this);
     }
