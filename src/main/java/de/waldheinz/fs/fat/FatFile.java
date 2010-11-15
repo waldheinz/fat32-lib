@@ -26,8 +26,8 @@ import java.io.EOFException;
 import java.nio.ByteBuffer;
 
 /**
- * A File instance is the in-memory representation of a single file (chain of
- * clusters).
+ * The in-memory representation of a single file (chain of clusters) on a
+ * FAT file system.
  * 
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  * @since 0.6
@@ -94,14 +94,13 @@ public final class FatFile extends AbstractFsObject implements FsFile {
      * <p>
      * {@inheritDoc}
      * </p><p>
-     * Unless this file is read-ony, this method also updates the
-     * "last accessed" field in the {@link FatDirectoryEntry} that is associated with
-     * this file.
+     * Unless this file is {@link #isReadOnly() read-ony}, this method also
+     * updates the "last accessed" field in the directory entry that is
+     * associated with this file.
      * </p>
      * 
      * @param offset {@inheritDoc}
      * @param dest {@inheritDoc}
-     * @throws FileSystemException {@inheritDoc}
      * @see FatDirectoryEntry#setLastAccessed(long)
      */
     @Override
@@ -115,8 +114,8 @@ public final class FatFile extends AbstractFsObject implements FsFile {
         if (offset + len > getLength()) {
             throw new EOFException();
         }
-
-        if (!chain.isReadOnly()) {
+        
+        if (!isReadOnly()) {
             updateTimeStamps(false);
         }
         
@@ -127,14 +126,12 @@ public final class FatFile extends AbstractFsObject implements FsFile {
      * <p>
      * {@inheritDoc}
      * </p><p>
-     * Unless this file is read-ony, this method also updates the
-     * "last accessed" and "last modified" fields in the {@link FatDirectoryEntry}
-     * that is associated with this file.
+     * This method also updates the "last accessed" and "last modified" fields
+     * in the directory entry that is associated with this file.
      * </p>
      *
      * @param offset {@inheritDoc}
      * @param srcBuf {@inheritDoc}
-     * @throws FileSystemException {@inheritDoc}
      */
     @Override
     public void write(long offset, ByteBuffer srcBuf)
