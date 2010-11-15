@@ -50,13 +50,6 @@ public class FatFileTest {
     }
     
     @Test
-    public void testGet() throws Exception {
-        System.out.println("get");
-        
-        assertEquals(ff, FatFile.get(fat, entry.realEntry));
-    }
-    
-    @Test
     public void testGetLength() {
         System.out.println("getLength");
 

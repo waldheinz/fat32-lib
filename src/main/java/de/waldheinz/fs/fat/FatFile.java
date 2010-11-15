@@ -180,32 +180,4 @@ public final class FatFile extends AbstractFsObject implements FsFile {
         return chain;
     }
     
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (!(obj instanceof FatFile)) return false;
-        
-        final FatFile other = (FatFile) obj;
-        
-        if (this.entry != other.entry &&
-                (this.entry == null || !this.entry.equals(other.entry))) {
-            return false;
-        }
-        
-        if (this.chain != other.chain &&
-                (this.chain == null || !this.chain.equals(other.chain))) {
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + (this.entry != null ? this.entry.hashCode() : 0);
-        hash = 97 * hash + (this.chain != null ? this.chain.hashCode() : 0);
-        return hash;
-    }
-    
 }
