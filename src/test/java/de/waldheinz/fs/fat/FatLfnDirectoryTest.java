@@ -61,8 +61,10 @@ public class FatLfnDirectoryTest {
         FatLfnDirectoryEntry f = dir.addFile("oldFileName");
         f.setName("newFileName");
         
-        assertNull(dir.getEntry("oldFileName"));
-        assertNotNull(dir.getEntry("newFileName"));
+        assertNull("entry still in place",
+                dir.getEntry("oldFileName"));
+        assertNotNull("not in place with new name",
+                dir.getEntry("newFileName"));
         assertEquals("newFileName", f.getName());
     }
     

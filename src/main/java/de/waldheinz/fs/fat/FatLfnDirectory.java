@@ -287,7 +287,7 @@ public final class FatLfnDirectory
         }
     }
     
-    void updateLFN() throws IOException {
+    private void updateLFN() throws IOException {
         ArrayList<FatDirectoryEntry> dest =
                 new ArrayList<FatDirectoryEntry>();
 
@@ -377,15 +377,21 @@ public final class FatLfnDirectory
      * deleting it.
      *
      * @param e the entry to be unlinked
+     * @see #linkEntry(de.waldheinz.fs.fat.FatLfnDirectoryEntry) 
      */
     void unlinkEntry(FatLfnDirectoryEntry entry) {
         final ShortName sn = entry.realEntry.getShortName();
-
+        
         if (sn.equals(ShortName.DOT) || sn.equals(ShortName.DOT_DOT)) throw
                 new IllegalArgumentException(
                     "the dot entries can not be removed");
+
+        final String lowerName = entry.getName().toLowerCase();
+
+        assert (this.longNameIndex.containsKey(lowerName));
+        this.longNameIndex.remove(lowerName);
         
-        this.longNameIndex.remove(entry.getName().toLowerCase());
+        assert (this.shortNameIndex.containsKey(sn));
         this.shortNameIndex.remove(sn);
         
         if (entry.isFile()) {
@@ -394,7 +400,22 @@ public final class FatLfnDirectory
             this.entryToDirectory.remove(entry.realEntry);
         }
     }
+    
+    /**
+     * Links the specified entry to this directory.
+     *
+     * @param entry the entry to be linked (added) to this directory
+     * @see #unlinkEntry(de.waldheinz.fs.fat.FatLfnDirectoryEntry) 
+     */
+    void linkEntry(FatLfnDirectoryEntry entry) throws IOException {
+        checkUniqueName(entry.getName());
 
+        this.longNameIndex.put(entry.getName().toLowerCase(), entry);
+        this.shortNameIndex.put(entry.realEntry.getShortName(), entry);
+
+        updateLFN();
+    }
+    
     @Override
     public String toString() {
         return getClass().getSimpleName() +

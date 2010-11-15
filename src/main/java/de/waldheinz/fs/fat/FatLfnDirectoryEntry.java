@@ -248,11 +248,16 @@ public final class FatLfnDirectoryEntry
     }
     
     @Override
-    public void setName(String newName) {
+    public void setName(String newName) throws IOException {
         checkWritable();
+
+        this.parent.unlinkEntry(this);
         
-        fileName = newName;
-        realEntry.setShortName(parent.sng.generateShortName(newName));
+        this.fileName = newName;
+        this.realEntry.setShortName(
+                this.parent.sng.generateShortName(newName));
+
+        this.parent.linkEntry(this);
     }
     
     @Override
