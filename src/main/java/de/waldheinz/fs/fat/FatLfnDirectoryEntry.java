@@ -257,7 +257,7 @@ public final class FatLfnDirectoryEntry
     
     @Override
     public void setLastModified(long lastModified) {
-        parent.checkReadOnly();
+        checkWritable();
         realEntry.setLastModified(lastModified);
     }
     

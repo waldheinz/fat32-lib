@@ -22,7 +22,6 @@ package de.waldheinz.fs.fat;
 import de.waldheinz.fs.AbstractFsObject;
 import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
-import de.waldheinz.fs.ReadOnlyException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,12 +87,6 @@ public final class FatLfnDirectory
         parseLfn();
     }
     
-    void checkReadOnly() throws ReadOnlyException {
-        if (dir.isReadOnly()) {
-            throw new ReadOnlyException();
-        }
-    }
-    
     FatFile getFile(FatDirectoryEntry entry) throws IOException {
         FatFile file = entryToFile.get(entry);
 
@@ -131,7 +124,7 @@ public final class FatLfnDirectory
      */
     @Override
     public FatLfnDirectoryEntry addFile(String name) throws IOException {
-        checkReadOnly();
+        checkWritable();
         checkUniqueName(name);
         
         name = name.trim();
@@ -196,7 +189,7 @@ public final class FatLfnDirectory
      */
     @Override
     public FatLfnDirectoryEntry addDirectory(String name) throws IOException {
-        checkReadOnly();
+        checkWritable();
         checkUniqueName(name);
         
         name = name.trim();
@@ -308,6 +301,8 @@ public final class FatLfnDirectory
 
     @Override
     public void flush() throws IOException {
+        checkWritable();
+        
         for (FatFile f : entryToFile.values()) {
             f.flush();
         }
@@ -358,7 +353,7 @@ public final class FatLfnDirectory
     public void remove(String name)
             throws IOException, IllegalArgumentException {
         
-        checkReadOnly();
+        checkWritable();
         
         final FatLfnDirectoryEntry entry = getEntry(name);
         if (entry == null) return;
