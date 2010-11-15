@@ -113,11 +113,19 @@
             </plugin>
             
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <links>
+                        <link>
+                            http://download.oracle.com/javase/6/docs/api/
+                        </link>
+                    </links>
+                </configuration>
             </plugin>
         </plugins>
     </reporting>
-
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
