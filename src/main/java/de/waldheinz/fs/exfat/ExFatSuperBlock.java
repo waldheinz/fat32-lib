@@ -90,9 +90,22 @@ final class ExFatSuperBlock extends AbstractFsObject {
         result.blockBits = b.get(0x6c);
         result.blocksPerClusterBits = b.get(0x6d);
 
+
+        /* check version */
+
+        if (result.fsVersionMajor != 1) {
+            throw new IOException("unsupported version major " +
+                    result.fsVersionMajor);
+        }
+
+        if (result.fsVersionMinor != 0) {
+            throw new IOException("unsupported version minor " +
+                    result.fsVersionMinor);
+        }
+
         return result;
     }
-
+    
     public long getBlockStart() {
         return blockStart;
     }
