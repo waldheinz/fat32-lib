@@ -39,7 +39,7 @@ public class FatFileTest {
     @Before
     public void setUp() throws IOException {
         final InputStream is = getClass().getResourceAsStream(
-                "/fat12-test.img.gz");
+                "fat12-test.img.gz");
 
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fatFs = new FatFileSystem(rd, false);

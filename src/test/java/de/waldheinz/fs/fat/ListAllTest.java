@@ -40,7 +40,7 @@ public class ListAllTest {
         System.out.println("testListComplex");
 
         final InputStream is = getClass().getResourceAsStream(
-                "/complex.img.gz");
+                "complex.img.gz");
 
         final RamDisk rd = RamDisk.readGzipped(is);
         final FatFileSystem fs = new FatFileSystem(rd, true);
