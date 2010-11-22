@@ -20,6 +20,8 @@ final class ExFatSuperBlock extends AbstractFsObject {
 
     private final static String OEM_NAME = "EXFAT   "; //NOI18N
 
+    private final DeviceAccess da;
+    
     private long blockStart;
     private long blockCount;
     private long fatBlockStart;
@@ -33,9 +35,11 @@ final class ExFatSuperBlock extends AbstractFsObject {
     private short volumeState;
     private byte blockBits;
     private byte blocksPerClusterBits;
-
-    public ExFatSuperBlock(boolean ro) {
+    
+    public ExFatSuperBlock(BlockDevice dev, boolean ro) {
         super(ro);
+        
+        this.da = new DeviceAccess(dev);
     }
     
     public static ExFatSuperBlock read(
@@ -74,7 +78,7 @@ final class ExFatSuperBlock extends AbstractFsObject {
                 (b.get(511) & 0xff) != 0xaa) throw new IOException(
                 "missing boot sector signature");
 
-        final ExFatSuperBlock result = new ExFatSuperBlock(ro);
+        final ExFatSuperBlock result = new ExFatSuperBlock(dev, ro);
 
         result.blockStart = b.getLong(0x40);
         result.blockCount = b.getLong(0x48);
@@ -104,6 +108,10 @@ final class ExFatSuperBlock extends AbstractFsObject {
         }
 
         return result;
+    }
+
+    public DeviceAccess getDeviceAccess() {
+        return da;
     }
     
     public long getBlockStart() {
