@@ -18,7 +18,7 @@ final class ExFatFileSystem {
         
         final DirectoryParser rootDirRead = DirectoryParser.create(rootNode);
         
-        rootDirRead.parse(new RootDirVisitor());
+        rootDirRead.parse(new RootDirVisitor(sb));
 
         final ExFatFileSystem result = new ExFatFileSystem(dev, sb, ro);
         
@@ -37,18 +37,33 @@ final class ExFatFileSystem {
 
     private static class RootDirVisitor implements DirectoryParser.Visitor {
 
+        private final ExFatSuperBlock sb;
+        private ClusterBitMap bitmap;
+        
+        private RootDirVisitor(ExFatSuperBlock sb) {
+            this.sb = sb;
+        }
+
         @Override
         public void foundLabel(String label) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            /* TODO: expose to user */
         }
-
+        
         @Override
-        public void foundBitmap(long startCluster, long size) {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public void foundBitmap(
+                long startCluster, long size) throws IOException {
+            
+            if (this.bitmap != null) {
+                throw new IOException("already had a bitmap");
+            }
+            
+            this.bitmap = ClusterBitMap.read(this.sb, startCluster, size);
         }
-
+        
         @Override
-        public void foundUpcaseTable(long checksum, long startCluster, long size) {
+        public void foundUpcaseTable(
+                long checksum, long startCluster, long size) {
+            
             throw new UnsupportedOperationException("Not supported yet.");
         }
 

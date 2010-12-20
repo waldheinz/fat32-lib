@@ -242,14 +242,16 @@ final class DirectoryParser {
 
     interface Visitor {
         
-        public void foundLabel(String label);
+        public void foundLabel(
+                String label) throws IOException;
 
         /**
          *
          * @param startCluster
          * @param size bitmap size in bytes
          */
-        public void foundBitmap(long startCluster, long size);
+        public void foundBitmap(
+                long startCluster, long size) throws IOException;
 
         /**
          *
@@ -257,9 +259,11 @@ final class DirectoryParser {
          * @param startCluster
          * @param size table size in bytes
          */
-        public void foundUpcaseTable(long checksum, long startCluster, long size);
-
-        public void foundNode(Node node);
+        public void foundUpcaseTable(
+                long checksum, long startCluster, long size) throws IOException;
+                
+        public void foundNode(
+                Node node) throws IOException;
         
     }
 
