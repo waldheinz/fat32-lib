@@ -29,4 +29,16 @@ final class DeviceAccess {
         return (this.buffer.getInt(0) & 0xffffffff);
     }
     
+    public static int getUint8(ByteBuffer src) {
+        return src.get() & 0xff;
+    }
+    
+    public static char getChar(ByteBuffer src) {
+        return (char) src.getShort();
+    }
+    
+    public void read(ByteBuffer dest, long offset) throws IOException {
+        dev.read(offset, dest);
+    }
+    
 }

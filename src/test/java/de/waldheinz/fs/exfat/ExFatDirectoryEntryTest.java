@@ -32,7 +32,7 @@ public class ExFatDirectoryEntryTest {
     public void testCreateRoot() throws Exception {
         System.out.println("createRoot");
         
-        ExFatDirectoryEntry re = ExFatDirectoryEntry.createRoot(sb);
+        Node re = Node.createRoot(sb);
         
         assertNotNull(re);
         assertEquals("root cluster count", 1, re.getClusterCount());

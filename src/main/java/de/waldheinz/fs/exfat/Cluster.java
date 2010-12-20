@@ -22,10 +22,10 @@ final class Cluster {
     /**
      * The first data cluster that can be used on exFAT file systems.
      */
-    private final static long FIRST_DATA_CLUSTER = 2;
+    public final static long FIRST_DATA_CLUSTER = 2;
     
     /**
-     * The size of an exFAT cluster in bytes.
+     * The size of an exFAT cluster in blocks.
      */
     public final static int SIZE = 4;
     
