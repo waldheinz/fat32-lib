@@ -41,6 +41,11 @@ final class ExFatFileSystem {
         public void foundLabel(String label) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public void foundBitmap(long startCluster, long size) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
         
     }
 

@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
  */
 final class DirectoryParser {
 
+    private final static int ENTRY_SIZE = 32;
     private final static int ENAME_MAX_LEN = 15;
     private final static int VALID     = 0x80;
     private final static int CONTINUED = 0x40;
@@ -53,38 +54,70 @@ final class DirectoryParser {
         this.sb.readCluster(chunk, cluster);
         chunk.rewind();
     }
-    
+
+    private void advance() {
+        assert ((chunk.position() % ENTRY_SIZE) == 0) :
+            "not on entry boundary"; //NOI18N
+    }
+
+    private void skip(int bytes) {
+        chunk.position(chunk.position() + bytes);
+    }
+
     public void parse(Visitor v) throws IOException {
-        final int entryType = chunk.get() & 0xff;
         
-        switch (entryType) {
-            case LABEL:
-                parseLabel(v);
-                break;
-                
-            default:
-                throw new IOException("unknown entry type " + entryType);
+        while (true) {
+            final int entryType = chunk.get() & 0xff;
+            
+            switch (entryType) {
+                case LABEL:
+                    parseLabel(v);
+                    break;
+                    
+                case BITMAP:
+                    parseBitmap(v);
+                    break;
+                    
+                default:
+                    throw new IOException("unknown entry type " + entryType);
+            }
+
+            advance();
         }
     }
 
     private void parseLabel(Visitor v) throws IOException {
-        final int length = DeviceAccess.getUint8(chunk);
+        final int len = DeviceAccess.getUint8(chunk);
         
-        if (length > ENAME_MAX_LEN) {
-            throw new IOException(length + " is too long");
+        if (len > ENAME_MAX_LEN) {
+            throw new IOException(len + " is too long");
         }
 
-        final StringBuilder labelBuilder = new StringBuilder(length);
+        final StringBuilder labelBuilder = new StringBuilder(len);
         
-        for (int i=0; i < length; i++) {
+        for (int i=0; i < len; i++) {
             labelBuilder.append(DeviceAccess.getChar(chunk));
         }
         
         v.foundLabel(labelBuilder.toString());
+
+        skip(ENTRY_SIZE - len * 2 - 2);
+    }
+
+    private void parseBitmap(Visitor v) throws IOException {
+        skip(19); /* unknown content */
+
+        final long startCluster = DeviceAccess.getUint32(chunk);
+        final long size = DeviceAccess.getUint64(chunk);
+
+        v.foundBitmap(startCluster, size);
     }
     
     interface Visitor {
         public void foundLabel(String label);
+
+        public void foundBitmap(long startCluster, long size);
+        
     }
 
 }

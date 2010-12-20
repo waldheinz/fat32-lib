@@ -53,6 +53,11 @@ public class DirectoryParserTest {
             public void foundLabel(String label) {
                 print("label : " + label);
             }
+
+            @Override
+            public void foundBitmap(long startCluster, long size) {
+                print("bitmap at " + startCluster + " of size " + size);
+            }
             
         });
         
