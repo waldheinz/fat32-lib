@@ -135,19 +135,23 @@ final class DirectoryParser {
     }
 
     private void parseFile(Visitor v) throws IOException {
+        int actualChecksum = startChecksum();
+        
         int conts = DeviceAccess.getUint8(chunk);
 
         if (conts < 2) {
             throw new IOException("too few continuations (" + conts + ")");
         }
         
-        final int checksum = DeviceAccess.getUint16(chunk);
+        final int referenceChecksum = DeviceAccess.getUint16(chunk);
         final int attrib = DeviceAccess.getUint16(chunk);
         skip(2); /* unknown */
         final EntryTimes times = EntryTimes.read(chunk);
         skip(10); /* unknown */
-
+        
         advance();
+
+        actualChecksum = addChecksum(actualChecksum);
 
         if (DeviceAccess.getUint8(chunk) != FILE_INFO) {
             throw new IOException("expected file info");
@@ -174,7 +178,8 @@ final class DirectoryParser {
 
         while (conts-- > 0) {
             advance();
-
+            actualChecksum = addChecksum(actualChecksum);
+            
             if (DeviceAccess.getUint8(chunk) != FILE_NAME) {
                 throw new IOException("expected file name");
             }
@@ -196,10 +201,45 @@ final class DirectoryParser {
             }
         }
 
+        if (referenceChecksum != actualChecksum) {
+            throw new IOException("checksum mismatch");
+        }
+        
         v.foundNode(Node.create(
                 sb, startCluster, flag, nameBuilder.toString()));
     }
+
+    private int startChecksum() {
+        final int oldPos = chunk.position();
+        chunk.position(chunk.position() - 1);
+        assert((chunk.position() % ENTRY_SIZE) == 0);
+        
+        int result = 0;
+        
+        for (int i=0; i < ENTRY_SIZE; i++) {
+            final int b = DeviceAccess.getUint8(chunk);
+            if ((i==2) || (i == 3)) continue;
+            result = ((result << 15) | (result >> 1)) + b;
+            result &= 0xffff;
+        }
+        
+        chunk.position(oldPos);
+        return result;
+    }
     
+    private int addChecksum(int sum) {
+        chunk.mark();
+        assert((chunk.position() % ENTRY_SIZE) == 0);
+        
+        for (int i=0; i < ENTRY_SIZE; i++) {
+            sum = ((sum << 15) | (sum >> 1)) + DeviceAccess.getUint8(chunk);
+            sum &= 0xffff;
+        }
+        
+        chunk.reset();
+        return sum;
+    }
+
     interface Visitor {
         
         public void foundLabel(String label);
