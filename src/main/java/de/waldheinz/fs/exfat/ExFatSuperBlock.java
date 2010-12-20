@@ -109,7 +109,23 @@ final class ExFatSuperBlock extends AbstractFsObject {
 
         return result;
     }
+    
+    public long clusterToBlock(long cluster) throws IOException {
+        Cluster.checkValid(cluster);
 
+        return this.clusterBlockStart +
+                ((cluster - Cluster.FIRST_DATA_CLUSTER) <<
+                    this.blocksPerClusterBits);
+    }
+    
+    public long blockToOffset(long block) {
+        return (block << this.blockBits);
+    }
+    
+    public long clusterToOffset(long cluster) throws IOException {
+        return blockToOffset(clusterToBlock(cluster));
+    }
+    
     public DeviceAccess getDeviceAccess() {
         return da;
     }
@@ -166,4 +182,8 @@ final class ExFatSuperBlock extends AbstractFsObject {
         return (1 << blocksPerClusterBits);
     }
 
+    public int getBytesPerCluster() {
+        return (getBlockSize() << this.blocksPerClusterBits);
+    }
+    
 }
