@@ -58,6 +58,14 @@ public class DirectoryParserTest {
             public void foundBitmap(long startCluster, long size) {
                 print("bitmap at " + startCluster + " of size " + size);
             }
+
+            @Override
+            public void foundUpcaseTable(
+                    long checksum, long startCluster, long size) {
+
+                print("upcase at " + startCluster + " of size " + size +
+                        " (checksum " + Long.toHexString(checksum) + ")");
+            }
             
         });
         

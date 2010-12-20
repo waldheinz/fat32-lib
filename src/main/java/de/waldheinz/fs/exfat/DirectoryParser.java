@@ -77,6 +77,10 @@ final class DirectoryParser {
                 case BITMAP:
                     parseBitmap(v);
                     break;
+
+                case UPCASE:
+                    parseUpcaseTable(v);
+                    break;
                     
                 default:
                     throw new IOException("unknown entry type " + entryType);
@@ -112,11 +116,29 @@ final class DirectoryParser {
 
         v.foundBitmap(startCluster, size);
     }
+
+    private void parseUpcaseTable(Visitor v) throws IOException {
+        skip(3); /* unknown */
+        final long checksum = DeviceAccess.getUint32(chunk);
+        skip(12); /* unknown */
+        final long startCluster = DeviceAccess.getUint32(chunk);
+        final long size = DeviceAccess.getUint64(chunk);
+        
+        v.foundUpcaseTable(checksum, startCluster, size);
+    }
     
     interface Visitor {
         public void foundLabel(String label);
 
         public void foundBitmap(long startCluster, long size);
+
+        /**
+         *
+         * @param checksum
+         * @param startCluster
+         * @param size table size in bytes
+         */
+        public void foundUpcaseTable(long checksum, long startCluster, long size);
         
     }
 

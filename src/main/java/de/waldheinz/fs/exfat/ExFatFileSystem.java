@@ -46,6 +46,11 @@ final class ExFatFileSystem {
         public void foundBitmap(long startCluster, long size) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public void foundUpcaseTable(long checksum, long startCluster, long size) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
         
     }
 
