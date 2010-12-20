@@ -34,6 +34,10 @@ final class DeviceAccess {
         return src.get() & 0xff;
     }
     
+    public static int getUint16(ByteBuffer src) {
+        return (src.getShort() & 0xffff);
+    }
+    
     public static long getUint32(ByteBuffer src) {
         return src.getInt() & 0xffffffff;
     }

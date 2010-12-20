@@ -26,6 +26,17 @@ final class Node {
         
         return result;
     }
+
+    public static Node create(
+            ExFatSuperBlock sb, long startCluster, int flags,
+            String name) {
+        
+        final Node result = new Node(sb, startCluster, flags);
+        
+        result.name = name;
+
+        return result;
+    }
     
     private final ExFatSuperBlock sb;
     private final DeviceAccess da;
@@ -34,6 +45,7 @@ final class Node {
     private boolean isContiguous;
     private long clusterCount;
     private int flags;
+    private String name;
     
     private Node(ExFatSuperBlock sb, long startCluster, int flags) {
         this.sb = sb;
@@ -84,4 +96,10 @@ final class Node {
         }
     }
 
+    @Override
+    public String toString() {
+        return Node.class.getSimpleName() +
+                " [name=" + this.name + "]";
+    }
+    
 }

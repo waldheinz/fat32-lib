@@ -66,6 +66,11 @@ public class DirectoryParserTest {
                 print("upcase at " + startCluster + " of size " + size +
                         " (checksum " + Long.toHexString(checksum) + ")");
             }
+
+            @Override
+            public void foundNode(Node node) {
+                print("node " + node);
+            }
             
         });
         

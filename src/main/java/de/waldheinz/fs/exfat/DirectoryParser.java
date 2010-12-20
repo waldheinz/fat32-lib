@@ -67,7 +67,7 @@ final class DirectoryParser {
     public void parse(Visitor v) throws IOException {
         
         while (true) {
-            final int entryType = chunk.get() & 0xff;
+            final int entryType = DeviceAccess.getUint8(chunk);
             
             switch (entryType) {
                 case LABEL:
@@ -81,6 +81,13 @@ final class DirectoryParser {
                 case UPCASE:
                     parseUpcaseTable(v);
                     break;
+
+                case FILE:
+                    parseFile(v);
+                    break;
+                    
+                case EOD:
+                    return;
                     
                 default:
                     throw new IOException("unknown entry type " + entryType);
@@ -126,10 +133,82 @@ final class DirectoryParser {
         
         v.foundUpcaseTable(checksum, startCluster, size);
     }
+
+    private void parseFile(Visitor v) throws IOException {
+        int conts = DeviceAccess.getUint8(chunk);
+
+        if (conts < 2) {
+            throw new IOException("too few continuations (" + conts + ")");
+        }
+        
+        final int checksum = DeviceAccess.getUint16(chunk);
+        final int attrib = DeviceAccess.getUint16(chunk);
+        skip(2); /* unknown */
+        final EntryTimes times = EntryTimes.read(chunk);
+        skip(10); /* unknown */
+
+        advance();
+
+        if (DeviceAccess.getUint8(chunk) != FILE_INFO) {
+            throw new IOException("expected file info");
+        }
+
+        final int flag = DeviceAccess.getUint8(chunk);
+        skip(1); /* unknown */
+        int nameLen = DeviceAccess.getUint8(chunk);
+        final int nameHash = DeviceAccess.getUint16(chunk);
+        skip(2); /* unknown */
+        final long realSize = DeviceAccess.getUint64(chunk);
+        skip(4); /* unknown */
+        final long startCluster = DeviceAccess.getUint32(chunk);
+        final long size = DeviceAccess.getUint64(chunk);
+
+        if (realSize != size) {
+            throw new IOException("real size does not equal size");
+        }
+        
+        conts--;
+
+        /* read file name */
+        final StringBuilder nameBuilder = new StringBuilder(nameLen);
+
+        while (conts-- > 0) {
+            advance();
+
+            if (DeviceAccess.getUint8(chunk) != FILE_NAME) {
+                throw new IOException("expected file name");
+            }
+
+            skip(1); /* unknown */
+            
+            final int toRead = Math.min(ENAME_MAX_LEN, nameLen);
+            
+            for (int i=0; i < toRead; i++) {
+                nameBuilder.append(DeviceAccess.getChar(chunk));
+            }
+
+            nameLen -= toRead;
+            assert (nameLen >= 0);
+            
+            if (nameLen == 0) {
+                assert (conts == 0) : "conts remaining?!"; //NOI18N
+                skip((ENAME_MAX_LEN - toRead) * 2);
+            }
+        }
+
+        v.foundNode(Node.create(
+                sb, startCluster, flag, nameBuilder.toString()));
+    }
     
     interface Visitor {
+        
         public void foundLabel(String label);
 
+        /**
+         *
+         * @param startCluster
+         * @param size bitmap size in bytes
+         */
         public void foundBitmap(long startCluster, long size);
 
         /**
@@ -139,6 +218,8 @@ final class DirectoryParser {
          * @param size table size in bytes
          */
         public void foundUpcaseTable(long checksum, long startCluster, long size);
+
+        public void foundNode(Node node);
         
     }
 

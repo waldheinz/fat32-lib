@@ -51,6 +51,11 @@ final class ExFatFileSystem {
         public void foundUpcaseTable(long checksum, long startCluster, long size) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public void foundNode(Node node) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
         
     }
 
