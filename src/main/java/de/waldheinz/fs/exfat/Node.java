@@ -70,6 +70,10 @@ final class Node {
         return startCluster;
     }
     
+    public String getName() {
+        return name;
+    }
+    
     private long rootDirSize() throws IOException {
         long size = 0;
         long current = this.sb.getRootDirCluster();

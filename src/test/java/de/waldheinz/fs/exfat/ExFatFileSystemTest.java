@@ -1,6 +1,8 @@
 
 package de.waldheinz.fs.exfat;
 
+import de.waldheinz.fs.FsDirectory;
+import de.waldheinz.fs.FsDirectoryEntry;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +33,19 @@ public class ExFatFileSystemTest {
         final ExFatFileSystem fs = ExFatFileSystem.read(bd, true);
         
         assertNotNull(fs);
+    }
+
+    @Test
+    public void testGetRoot() throws IOException {
+        System.out.println("getRoot");
+
+        final ExFatFileSystem fs = ExFatFileSystem.read(bd, true);
+        final FsDirectory rootDir = fs.getRoot();
+
+        for (FsDirectoryEntry e : rootDir) {
+            System.out.println(e);
+        }
+        
     }
 
 }

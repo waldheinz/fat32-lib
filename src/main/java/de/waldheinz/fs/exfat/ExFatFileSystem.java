@@ -1,14 +1,16 @@
 
 package de.waldheinz.fs.exfat;
 
+import de.waldheinz.fs.AbstractFileSystem;
 import de.waldheinz.fs.BlockDevice;
+import de.waldheinz.fs.FsDirectory;
 import java.io.IOException;
 
 /**
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-final class ExFatFileSystem {
+final class ExFatFileSystem extends AbstractFileSystem {
     
     public static ExFatFileSystem read(
             BlockDevice dev, boolean ro) throws IOException {
@@ -27,17 +29,44 @@ final class ExFatFileSystem {
             throw new IOException("upcase table not found");
         }
         
-        final ExFatFileSystem result = new ExFatFileSystem(sb, ro);
+        final ExFatFileSystem result = new ExFatFileSystem(sb, rootNode, ro);
         
         return result;
     }
     
     private final ExFatSuperBlock sb;
-    private final boolean ro;
+    private final Node rootNode;
 
-    private ExFatFileSystem(ExFatSuperBlock sb, boolean ro) {
+    private ExFatFileSystem(ExFatSuperBlock sb, Node rootNode, boolean ro) {
+        super(ro);
+        
         this.sb = sb;
-        this.ro = ro;
+        this.rootNode = rootNode;
+    }
+    
+    @Override
+    public FsDirectory getRoot() throws IOException {
+        return new NodeDirectory(rootNode, isReadOnly());
+    }
+    
+    @Override
+    public long getTotalSpace() throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public long getFreeSpace() throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public long getUsableSpace() throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void flush() throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
     private static class RootDirVisitor implements DirectoryParser.Visitor {
