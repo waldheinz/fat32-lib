@@ -56,6 +56,15 @@ final class DeviceAccess {
         return (char) src.getShort();
     }
     
+    public char getChar(long offset) throws IOException {
+        this.buffer.rewind();
+        this.buffer.limit(2);
+        this.dev.read(offset, buffer);
+        this.buffer.rewind();
+        
+        return getChar(buffer);
+    }
+    
     public void read(ByteBuffer dest, long offset) throws IOException {
         dev.read(offset, dest);
     }

@@ -18,15 +18,36 @@ final class UpcaseTable {
             throw new IOException("bad upcase table size " + size);
         }
             
-        final UpcaseTable result = new UpcaseTable(sb);
+        final UpcaseTable result = new UpcaseTable(sb,
+                sb.clusterToOffset(startCluster), size);
         
         return result;
     }
     
     private final ExFatSuperBlock sb;
+    private final long size;
+    private final long chars;
+    private final DeviceAccess da;
+    private final long offset;
 
-    private UpcaseTable(ExFatSuperBlock sb) {
+    private UpcaseTable(ExFatSuperBlock sb, long offset, long size) {
         this.sb = sb;
+        this.da = sb.getDeviceAccess();
+        this.size = size;
+        this.chars = size / 2;
+        this.offset = offset;
+    }
+    
+    public char toUpperCase(char c) throws IOException {
+        if (c > this.chars) {
+            return c;
+        } else {
+            return da.getChar(offset + (c * 2));
+        }
+    }
+    
+    public long getCharCount() {
+        return this.chars;
     }
     
 }
