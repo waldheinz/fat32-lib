@@ -15,31 +15,37 @@ final class ExFatFileSystem {
         
         final ExFatSuperBlock sb = ExFatSuperBlock.read(dev, ro);
         final Node rootNode = Node.createRoot(sb);
+        final RootDirVisitor rootDirVis = new RootDirVisitor(sb);
         
-        final DirectoryParser rootDirRead = DirectoryParser.create(rootNode);
+        DirectoryParser.create(rootNode).parse(rootDirVis);
         
-        rootDirRead.parse(new RootDirVisitor(sb));
-
-        final ExFatFileSystem result = new ExFatFileSystem(dev, sb, ro);
+        if (rootDirVis.bitmap == null) {
+            throw new IOException("cluster bitmap not found");
+        }
+        
+        if (rootDirVis.upcase == null) {
+            throw new IOException("upcase table not found");
+        }
+        
+        final ExFatFileSystem result = new ExFatFileSystem(sb, ro);
         
         return result;
     }
     
-    private final BlockDevice dev;
     private final ExFatSuperBlock sb;
     private final boolean ro;
 
-    private ExFatFileSystem(BlockDevice dev, ExFatSuperBlock sb, boolean ro) {
-        this.dev = dev;
+    private ExFatFileSystem(ExFatSuperBlock sb, boolean ro) {
         this.sb = sb;
         this.ro = ro;
     }
-
+    
     private static class RootDirVisitor implements DirectoryParser.Visitor {
 
         private final ExFatSuperBlock sb;
         private ClusterBitMap bitmap;
         private UpcaseTable upcase;
+        private String label;
         
         private RootDirVisitor(ExFatSuperBlock sb) {
             this.sb = sb;
@@ -47,7 +53,7 @@ final class ExFatFileSystem {
 
         @Override
         public void foundLabel(String label) {
-            /* TODO: expose to user */
+            this.label = label;
         }
         
         @Override
@@ -69,7 +75,6 @@ final class ExFatFileSystem {
                 throw new IOException("already had an upcase table");
             }
             
-                    
             this.upcase = UpcaseTable.read(
                     this.sb, startCluster, size, checksum);
         }
@@ -80,5 +85,5 @@ final class ExFatFileSystem {
         }
         
     }
-
+    
 }
