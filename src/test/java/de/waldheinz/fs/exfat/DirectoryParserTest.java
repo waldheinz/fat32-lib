@@ -61,7 +61,7 @@ public class DirectoryParserTest {
 
             @Override
             public void foundUpcaseTable(
-                    long checksum, long startCluster, long size) {
+                    long startCluster, long size, long checksum) {
 
                 print("upcase at " + startCluster + " of size " + size +
                         " (checksum " + Long.toHexString(checksum) + ")");

@@ -39,6 +39,7 @@ final class ExFatFileSystem {
 
         private final ExFatSuperBlock sb;
         private ClusterBitMap bitmap;
+        private UpcaseTable upcase;
         
         private RootDirVisitor(ExFatSuperBlock sb) {
             this.sb = sb;
@@ -61,10 +62,16 @@ final class ExFatFileSystem {
         }
         
         @Override
-        public void foundUpcaseTable(
-                long checksum, long startCluster, long size) {
+        public void foundUpcaseTable(long startCluster, long size,
+                long checksum) throws IOException {
             
-            throw new UnsupportedOperationException("Not supported yet.");
+            if (this.upcase != null) {
+                throw new IOException("already had an upcase table");
+            }
+            
+                    
+            this.upcase = UpcaseTable.read(
+                    this.sb, startCluster, size, checksum);
         }
 
         @Override
