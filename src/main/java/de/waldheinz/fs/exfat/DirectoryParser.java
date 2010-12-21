@@ -153,7 +153,7 @@ final class DirectoryParser {
         final int attrib = DeviceAccess.getUint16(chunk);
         skip(2); /* unknown */
         final EntryTimes times = EntryTimes.read(chunk);
-        skip(10); /* unknown */
+        skip(7); /* unknown */
         
         advance();
 

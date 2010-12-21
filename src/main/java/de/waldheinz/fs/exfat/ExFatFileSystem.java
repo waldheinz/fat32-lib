@@ -76,7 +76,7 @@ final class ExFatFileSystem {
 
         @Override
         public void foundNode(Node node) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            /* ignore */
         }
         
     }
