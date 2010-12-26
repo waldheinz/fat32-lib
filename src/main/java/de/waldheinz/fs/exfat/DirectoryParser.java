@@ -99,9 +99,14 @@ final class DirectoryParser {
                     return;
                     
                 default:
-                    throw new IOException("unknown entry type " + entryType);
+                    if ((entryType & VALID) != 0) {
+                        throw new IOException(
+                                "unknown entry type " + entryType);
+                    } else {
+                        skip(ENTRY_SIZE - 1);
+                    }
             }
-
+            
             advance();
         }
     }
