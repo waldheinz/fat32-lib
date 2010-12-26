@@ -60,9 +60,9 @@ final class NodeDirectory extends AbstractFsObject implements FsDirectory {
     
     @Override
     public void flush() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        /* nothing to do */
     }
-
+    
     private class VisitorImpl implements DirectoryParser.Visitor {
 
         @Override

@@ -91,14 +91,12 @@ public class NodeDirectoryTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-
+    
     @Test
     public void testFlush() throws Exception {
         System.out.println("flush");
-        NodeDirectory instance = null;
-        instance.flush();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        
+        dir.flush();
     }
-
+    
 }
