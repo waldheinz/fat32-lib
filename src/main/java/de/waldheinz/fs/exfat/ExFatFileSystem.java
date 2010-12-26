@@ -29,24 +29,31 @@ final class ExFatFileSystem extends AbstractFileSystem {
             throw new IOException("upcase table not found");
         }
         
-        final ExFatFileSystem result = new ExFatFileSystem(sb, rootNode, ro);
+        final ExFatFileSystem result = new ExFatFileSystem(
+                sb, rootNode, rootDirVis, ro);
         
         return result;
     }
     
     private final ExFatSuperBlock sb;
     private final Node rootNode;
-
-    private ExFatFileSystem(ExFatSuperBlock sb, Node rootNode, boolean ro) {
+    private final UpcaseTable upcase;
+    private final ClusterBitMap bitmap;
+    
+    private ExFatFileSystem(ExFatSuperBlock sb, Node rootNode,
+            RootDirVisitor vis, boolean ro) {
+        
         super(ro);
         
         this.sb = sb;
         this.rootNode = rootNode;
+        this.upcase = vis.upcase;
+        this.bitmap = vis.bitmap;
     }
     
     @Override
     public FsDirectory getRoot() throws IOException {
-        return new NodeDirectory(rootNode, isReadOnly());
+        return new NodeDirectory(rootNode, upcase, isReadOnly());
     }
     
     @Override
