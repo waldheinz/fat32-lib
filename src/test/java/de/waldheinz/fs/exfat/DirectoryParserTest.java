@@ -69,7 +69,7 @@ public class DirectoryParserTest {
 
             @Override
             public void foundNode(Node node) {
-                print("node " + node);
+                print(node.toString());
             }
             
         });

@@ -29,12 +29,13 @@ final class Node {
 
     public static Node create(
             ExFatSuperBlock sb, long startCluster, int flags,
-            String name) {
+            String name, boolean isContiguous) {
         
         final Node result = new Node(sb, startCluster, flags);
         
         result.name = name;
-
+        result.isContiguous = isContiguous;
+        
         return result;
     }
     
@@ -102,8 +103,16 @@ final class Node {
 
     @Override
     public String toString() {
-        return Node.class.getSimpleName() +
-                " [name=" + this.name + "]";
+        final StringBuilder result = new StringBuilder();
+        
+        result.append(Node.class.getName());
+        result.append(" [name=");
+        result.append(this.name);
+        result.append(", contiguous=");
+        result.append(this.isContiguous);
+        result.append("]");
+        
+        return result.toString();
     }
     
 }

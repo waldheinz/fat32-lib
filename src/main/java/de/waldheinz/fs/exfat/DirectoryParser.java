@@ -28,6 +28,9 @@ final class DirectoryParser {
     private final static int FILE = (0x05 | VALID);
     private final static int FILE_INFO = (0x00 | VALID | CONTINUED);
     private final static int FILE_NAME = (0x01 | VALID | CONTINUED);
+
+    private final static int FLAG_FRAGMENTED = 1;
+    private final static int FLAG_CONTIGUOUS = 3;
     
     public static DirectoryParser create(Node node) throws IOException {
         assert (node.isDirectory()) : "not a directory";
@@ -212,9 +215,10 @@ final class DirectoryParser {
         }
         
         v.foundNode(Node.create(
-                sb, startCluster, flag, nameBuilder.toString()));
+                sb, startCluster, attrib, nameBuilder.toString(),
+                (flag == FLAG_CONTIGUOUS)));
     }
-
+    
     private int startChecksum() {
         final int oldPos = chunk.position();
         chunk.position(chunk.position() - 1);
