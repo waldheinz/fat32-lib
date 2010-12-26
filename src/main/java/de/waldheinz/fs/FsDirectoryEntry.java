@@ -129,17 +129,21 @@ public interface FsDirectoryEntry extends FsObject {
      * 
      * @return the file described by this entry
      * @throws IOException on error accessing the file
+     * @throws UnsupportedOperationException if this entry is a directory
      */
-    public FsFile getFile() throws IOException;
-
+    public FsFile getFile()
+            throws IOException, UnsupportedOperationException;
+    
     /**
      * Gets the directory this entry refers to. This method can only be called
      * if <code>isDirectory</code> returns true.
      * 
      * @return The directory described by this entry
      * @throws IOException on read error
+     * @throws UnsupportedOperationException if this entry is a file
      */
-    public FsDirectory getDirectory() throws IOException;
+    public FsDirectory getDirectory()
+            throws IOException, UnsupportedOperationException;
     
     /**
      * Indicate if the entry has been modified in memory (ie need to be saved)
