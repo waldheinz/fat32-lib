@@ -46,6 +46,16 @@ final class UpcaseTable {
         }
     }
     
+    public String toUpperCase(String s) throws IOException {
+        final StringBuilder result = new StringBuilder(s.length());
+
+        for (char c : s.toCharArray()) {
+            result.append(toUpperCase(c));
+        }
+
+        return result.toString();
+    }
+    
     public long getCharCount() {
         return this.chars;
     }

@@ -38,8 +38,8 @@ public class UpcaseTableTest {
     }
     
     @Test
-    public void testToUpperCase() throws IOException {
-        System.out.println("toUpperCase");
+    public void testToUpperCaseChar() throws IOException {
+        System.out.println("toUpperCase (char)");
         
         final UpcaseTable ut = UpcaseTable.read(
                 sb, 3, 5836, 0xffffffffe619d30dl);
@@ -53,5 +53,20 @@ public class UpcaseTableTest {
         assertEquals('Z', ut.toUpperCase('Z'));
         assertEquals('Ö', ut.toUpperCase('Ö'));
     }
-    
+
+    @Test
+    public void testToUpperCaseString() throws IOException {
+        System.out.println("toUpperCase (String)");
+
+        final UpcaseTable ut = UpcaseTable.read(
+                sb, 3, 5836, 0xffffffffe619d30dl);
+
+        final String input = "äöüasdASDF";
+        final String expected = "ÄÖÜASDASDF";
+
+        final String output = ut.toUpperCase(input);
+
+        assertEquals(expected, output);
+    }
+
 }
