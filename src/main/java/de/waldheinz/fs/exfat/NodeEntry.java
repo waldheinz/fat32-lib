@@ -82,5 +82,19 @@ final class NodeEntry extends AbstractFsObject implements FsDirectoryEntry {
     public boolean isDirty() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(NodeEntry.class.getName());
+        sb.append(" [node=");
+        sb.append(this.node);
+        sb.append(", parent=");
+        sb.append(this.parent);
+        sb.append("]");
+        
+        return sb.toString();
+    }
     
 }
