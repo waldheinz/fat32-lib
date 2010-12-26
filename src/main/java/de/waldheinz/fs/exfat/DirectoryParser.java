@@ -241,7 +241,7 @@ final class DirectoryParser {
         
         v.foundNode(Node.create(
                 sb, startCluster, attrib, name,
-                (flag == FLAG_CONTIGUOUS), realSize));
+                (flag == FLAG_CONTIGUOUS), realSize, times));
     }
 
     private int hashName(String name) throws IOException {

@@ -8,7 +8,7 @@ import java.io.IOException;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 final class Node {
-
+    
     private final static int ATTRIB_RO = 0x01;
     private final static int ATTRIB_HIDDEN = 0x02;
     private final static int ATTRIB_SYSTEM = 0x04;
@@ -19,23 +19,24 @@ final class Node {
     public static Node createRoot(ExFatSuperBlock sb)
             throws IOException {
 
-        final int flags = ATTRIB_DIR;
-        final Node result = new Node(sb, sb.getRootDirCluster(), flags);
+        final Node result = new Node(sb, sb.getRootDirCluster(), null);
         
         result.clusterCount = result.rootDirSize();
-        
+        result.flags = ATTRIB_DIR;
+
         return result;
     }
-
+    
     public static Node create(
             ExFatSuperBlock sb, long startCluster, int flags,
-            String name, boolean isContiguous, long size) {
+            String name, boolean isContiguous, long size, EntryTimes times) {
         
-        final Node result = new Node(sb, startCluster, flags);
+        final Node result = new Node(sb, startCluster, times);
         
         result.name = name;
         result.isContiguous = isContiguous;
         result.size = size;
+        result.flags = flags;
 
         return result;
     }
@@ -43,6 +44,7 @@ final class Node {
     private final ExFatSuperBlock sb;
     private final DeviceAccess da;
     private final long startCluster;
+    private final EntryTimes times;
     
     private boolean isContiguous;
     private long clusterCount;
@@ -50,17 +52,17 @@ final class Node {
     private String name;
     private long size;
     
-    private Node(ExFatSuperBlock sb, long startCluster, int flags) {
+    private Node(ExFatSuperBlock sb, long startCluster, EntryTimes times) {
         this.sb = sb;
         this.da = sb.getDeviceAccess();
         this.startCluster = startCluster;
-        this.flags = flags;
+        this.times = times;
     }
-
+    
     public boolean isDirectory() {
         return ((this.flags & ATTRIB_DIR) != 0);
     }
-
+    
     public ExFatSuperBlock getSuperBlock() {
         return sb;
     }
@@ -68,7 +70,7 @@ final class Node {
     public long getClusterCount() {
         return clusterCount;
     }
-
+    
     public long getStartCluster() {
         return startCluster;
     }
@@ -76,7 +78,7 @@ final class Node {
     public String getName() {
         return name;
     }
-
+    
     public long getSize() {
         return size;
     }
@@ -106,7 +108,7 @@ final class Node {
             return this.da.getUint32(fatOffset);
         }
     }
-
+    
     @Override
     public String toString() {
         final StringBuilder result = new StringBuilder();
