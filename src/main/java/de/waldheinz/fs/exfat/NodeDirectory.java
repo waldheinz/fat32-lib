@@ -18,7 +18,7 @@ final class NodeDirectory extends AbstractFsObject implements FsDirectory {
     
     private final Node node;
     private final Map<String, NodeEntry> nameToNode;
-    private final UpcaseTable upcase;
+    final UpcaseTable upcase;
 
     public NodeDirectory(Node node, UpcaseTable upcase, boolean readOnly)
             throws IOException {

@@ -6,6 +6,7 @@ import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
 import de.waldheinz.fs.FsDirectory;
+import de.waldheinz.fs.FsDirectoryEntry;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -109,13 +110,18 @@ public class NodeEntryTest {
     }
 
     @Test
-    @Ignore
     public void testGetDirectory() throws Exception {
         System.out.println("getDirectory");
-        
-        assertNotNull(entry.getDirectory());
-    }
 
+        final FsDirectory subDir = entry.getDirectory();
+        
+        assertNotNull(subDir);
+
+        for (FsDirectoryEntry e : subDir) {
+            System.out.println(e);
+        }
+    }
+    
     @Test
     public void testIsDirty() {
         System.out.println("isDirty");

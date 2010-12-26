@@ -76,12 +76,12 @@ final class NodeEntry extends AbstractFsObject implements FsDirectoryEntry {
 
         throw new UnsupportedOperationException();
     }
-
+    
     @Override
     public FsDirectory getDirectory() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new NodeDirectory(node, parent.upcase, isReadOnly());
     }
-
+    
     @Override
     public boolean isDirty() {
         return false;
