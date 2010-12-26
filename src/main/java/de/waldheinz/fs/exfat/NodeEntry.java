@@ -70,7 +70,11 @@ final class NodeEntry extends AbstractFsObject implements FsDirectoryEntry {
 
     @Override
     public FsFile getFile() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (!isFile()) {
+            throw new UnsupportedOperationException("not a file");
+        }
+
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -80,7 +84,7 @@ final class NodeEntry extends AbstractFsObject implements FsDirectoryEntry {
 
     @Override
     public boolean isDirty() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return false;
     }
 
     @Override
