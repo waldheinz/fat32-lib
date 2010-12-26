@@ -221,7 +221,7 @@ final class DirectoryParser {
         
         v.foundNode(Node.create(
                 sb, startCluster, attrib, nameBuilder.toString(),
-                (flag == FLAG_CONTIGUOUS)));
+                (flag == FLAG_CONTIGUOUS), realSize));
     }
     
     private int startChecksum() {

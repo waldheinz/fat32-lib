@@ -29,13 +29,14 @@ final class Node {
 
     public static Node create(
             ExFatSuperBlock sb, long startCluster, int flags,
-            String name, boolean isContiguous) {
+            String name, boolean isContiguous, long size) {
         
         final Node result = new Node(sb, startCluster, flags);
         
         result.name = name;
         result.isContiguous = isContiguous;
-        
+        result.size = size;
+
         return result;
     }
     
@@ -47,6 +48,7 @@ final class Node {
     private long clusterCount;
     private int flags;
     private String name;
+    private long size;
     
     private Node(ExFatSuperBlock sb, long startCluster, int flags) {
         this.sb = sb;
@@ -74,17 +76,21 @@ final class Node {
     public String getName() {
         return name;
     }
+
+    public long getSize() {
+        return size;
+    }
     
     private long rootDirSize() throws IOException {
-        long size = 0;
+        long result = 0;
         long current = this.sb.getRootDirCluster();
         
         while (!Cluster.invalid(current)) {
-            size++;
+            result++;
             current = nextCluster(current);
         }
         
-        return size;
+        return result;
     }
     
     public long nextCluster(long cluster) throws IOException {

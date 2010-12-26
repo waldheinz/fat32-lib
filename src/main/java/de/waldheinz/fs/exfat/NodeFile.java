@@ -23,11 +23,13 @@ final class NodeFile extends AbstractFsObject implements FsFile {
     
     @Override
     public long getLength() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.node.getSize();
     }
 
     @Override
     public void setLength(long length) throws IOException {
+        if (getLength() == length) return;
+        
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
