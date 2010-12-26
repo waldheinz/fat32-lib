@@ -18,11 +18,15 @@ final class NodeDirectory extends AbstractFsObject implements FsDirectory {
     
     private final Node node;
     private final Map<String, NodeEntry> nameToNode;
+    private final UpcaseTable upcase;
 
-    public NodeDirectory(Node node, boolean readOnly) throws IOException {
+    public NodeDirectory(Node node, UpcaseTable upcase, boolean readOnly)
+            throws IOException {
+        
         super(readOnly);
         
         this.node = node;
+        this.upcase = upcase;
         this.nameToNode = new HashMap<String, NodeEntry>();
         
         DirectoryParser.create(node).parse(new VisitorImpl());
@@ -36,7 +40,7 @@ final class NodeDirectory extends AbstractFsObject implements FsDirectory {
     
     @Override
     public FsDirectoryEntry getEntry(String name) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.nameToNode.get(upcase.toUpperCase(name));
     }
     
     @Override
@@ -82,7 +86,9 @@ final class NodeDirectory extends AbstractFsObject implements FsDirectory {
         
         @Override
         public void foundNode(Node node) throws IOException {
-            nameToNode.put(node.getName(),
+            final String upcaseName = upcase.toUpperCase(node.getName());
+            
+            nameToNode.put(upcaseName,
                     new NodeEntry(node, isReadOnly(), NodeDirectory.this));
         }
         
