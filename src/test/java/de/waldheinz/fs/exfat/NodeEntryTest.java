@@ -1,6 +1,7 @@
 
 package de.waldheinz.fs.exfat;
 
+import de.waldheinz.fs.FsFile;
 import org.junit.Ignore;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
@@ -103,10 +104,21 @@ public class NodeEntryTest {
     }
 
     @Test(expected=UnsupportedOperationException.class)
-    public void testGetFile() throws Exception {
-        System.out.println("getFile");
+    public void testGetFileFail() throws IOException {
+        System.out.println("getFile (fail)");
 
         entry.getFile();
+    }
+    
+    @Test
+    public void testGetFile() throws Exception {
+        System.out.println("getFile");
+        
+        FsDirectoryEntry fileEntry = dir.getEntry("lorem ipsum.txt");
+        assertTrue(fileEntry.isFile());
+        assertEquals("lorem ipsum.txt", fileEntry.getName());
+        FsFile file = fileEntry.getFile();
+        assertNotNull(file);
     }
 
     @Test
