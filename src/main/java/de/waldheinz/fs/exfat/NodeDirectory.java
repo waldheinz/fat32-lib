@@ -29,7 +29,11 @@ final class NodeDirectory extends AbstractFsObject implements FsDirectory {
         this.upcase = upcase;
         this.nameToNode = new HashMap<String, NodeEntry>();
         
-        DirectoryParser.create(node).parse(new VisitorImpl());
+        DirectoryParser.
+                create(node).
+                setUpcase(this.upcase).
+                parse(new VisitorImpl());
+        
     }
     
     @Override
@@ -78,8 +82,8 @@ final class NodeDirectory extends AbstractFsObject implements FsDirectory {
         }
 
         @Override
-        public void foundUpcaseTable(long checksum, long startCluster,
-                long size) throws IOException {
+        public void foundUpcaseTable(DirectoryParser parser, long checksum,
+                long startCluster, long size) throws IOException {
             
             /* ignore */
         }

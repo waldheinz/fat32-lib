@@ -60,7 +60,7 @@ public class DirectoryParserTest {
             }
 
             @Override
-            public void foundUpcaseTable(
+            public void foundUpcaseTable(DirectoryParser parser,
                     long startCluster, long size, long checksum) {
 
                 print("upcase at " + startCluster + " of size " + size +

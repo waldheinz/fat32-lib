@@ -50,6 +50,7 @@ final class DirectoryParser {
     private final ExFatSuperBlock sb;
     private final ByteBuffer chunk;
     private long cluster;
+    private UpcaseTable upcase;
 
     private DirectoryParser(
             ByteBuffer chunk, ExFatSuperBlock sb, long cluster) {
@@ -57,8 +58,19 @@ final class DirectoryParser {
         this.chunk = chunk;
         this.sb = sb;
         this.cluster = cluster;
+        this.upcase = null;
     }
 
+    public DirectoryParser setUpcase(UpcaseTable upcase) {
+        if (this.upcase != null) {
+            throw new IllegalStateException("already had an upcase table");
+        }
+        
+        this.upcase = upcase;
+        
+        return this;
+    }
+    
     private void init() throws IOException {
         this.sb.readCluster(chunk, cluster);
         chunk.rewind();
@@ -145,7 +157,7 @@ final class DirectoryParser {
         final long startCluster = DeviceAccess.getUint32(chunk);
         final long size = DeviceAccess.getUint64(chunk);
         
-        v.foundUpcaseTable(startCluster, size, checksum);
+        v.foundUpcaseTable(this, startCluster, size, checksum);
     }
 
     private void parseFile(Visitor v) throws IOException {
@@ -218,12 +230,35 @@ final class DirectoryParser {
         if (referenceChecksum != actualChecksum) {
             throw new IOException("checksum mismatch");
         }
+
+        final String name = nameBuilder.toString();
+
+        if ((this.upcase != null) && (hashName(name) != nameHash)) {
+            throw new IOException("name hash mismatch ("
+                    + Integer.toHexString(hashName(name)) +
+                    " != " + Integer.toHexString(nameHash) + ")");
+        }
         
         v.foundNode(Node.create(
-                sb, startCluster, attrib, nameBuilder.toString(),
+                sb, startCluster, attrib, name,
                 (flag == FLAG_CONTIGUOUS), realSize));
     }
-    
+
+    private int hashName(String name) throws IOException {
+        int hash = 0;
+
+        for (int i=0; i < name.length(); i++) {
+            final int c = this.upcase.toUpperCase(name.charAt(i));
+            
+            hash = ((hash << 15) | (hash >> 1)) + (c & 0xff);
+            hash &= 0xffff;
+            hash = ((hash << 15) | (hash >> 1)) + (c >> 8);
+            hash &= 0xffff;
+        }
+        
+        return (hash & 0xffff);
+    }
+
     private int startChecksum() {
         final int oldPos = chunk.position();
         chunk.position(chunk.position() - 1);
@@ -274,7 +309,7 @@ final class DirectoryParser {
          * @param startCluster
          * @param size table size in bytes
          */
-        public void foundUpcaseTable(
+        public void foundUpcaseTable(DirectoryParser parser,
                 long checksum, long startCluster, long size) throws IOException;
                 
         public void foundNode(

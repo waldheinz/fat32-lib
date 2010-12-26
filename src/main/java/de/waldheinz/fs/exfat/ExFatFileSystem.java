@@ -104,7 +104,7 @@ final class ExFatFileSystem extends AbstractFileSystem {
         }
         
         @Override
-        public void foundUpcaseTable(long startCluster, long size,
+        public void foundUpcaseTable(DirectoryParser parser, long startCluster, long size,
                 long checksum) throws IOException {
             
             if (this.upcase != null) {
@@ -113,6 +113,9 @@ final class ExFatFileSystem extends AbstractFileSystem {
             
             this.upcase = UpcaseTable.read(
                     this.sb, startCluster, size, checksum);
+
+            /* the parser may use this table for file names to come */
+            parser.setUpcase(this.upcase);
         }
 
         @Override
