@@ -72,7 +72,6 @@ public class NodeEntryTest {
     }
 
     @Test
-    @Ignore
     public void testIsFile() {
         System.out.println("isFile");
         
@@ -80,7 +79,6 @@ public class NodeEntryTest {
     }
 
     @Test
-    @Ignore
     public void testIsDirectory() {
         System.out.println("isDirectory");
         

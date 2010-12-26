@@ -50,12 +50,12 @@ final class NodeEntry extends AbstractFsObject implements FsDirectoryEntry {
 
     @Override
     public boolean isFile() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return (!this.node.isDirectory());
     }
-
+    
     @Override
     public boolean isDirectory() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.node.isDirectory();
     }
 
     @Override
