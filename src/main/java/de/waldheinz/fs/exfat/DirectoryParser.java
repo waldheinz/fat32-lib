@@ -138,9 +138,9 @@ final class DirectoryParser {
         
         v.foundLabel(labelBuilder.toString());
 
-        skip(ENTRY_SIZE - len * 2 - 2);
+        skip((ENAME_MAX_LEN - len) * DeviceAccess.BYTES_PER_CHAR);
     }
-
+    
     private void parseBitmap(Visitor v) throws IOException {
         skip(19); /* unknown content */
 
@@ -223,7 +223,7 @@ final class DirectoryParser {
             
             if (nameLen == 0) {
                 assert (conts == 0) : "conts remaining?!"; //NOI18N
-                skip((ENAME_MAX_LEN - toRead) * 2);
+                skip((ENAME_MAX_LEN - toRead) * DeviceAccess.BYTES_PER_CHAR);
             }
         }
 

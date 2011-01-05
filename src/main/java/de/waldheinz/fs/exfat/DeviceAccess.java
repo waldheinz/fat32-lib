@@ -12,6 +12,12 @@ import java.nio.ByteOrder;
  */
 final class DeviceAccess {
     
+    /**
+     * The number of bytes per character. ExFat uses UTF-16 everywhere, so this
+     * equals 2.
+     */
+    public static final int BYTES_PER_CHAR = 2;
+    
     private final BlockDevice dev;
     private final ByteBuffer buffer;
     
@@ -58,7 +64,7 @@ final class DeviceAccess {
     
     public char getChar(long offset) throws IOException {
         this.buffer.rewind();
-        this.buffer.limit(2);
+        this.buffer.limit(BYTES_PER_CHAR);
         this.dev.read(offset, buffer);
         this.buffer.rewind();
         
