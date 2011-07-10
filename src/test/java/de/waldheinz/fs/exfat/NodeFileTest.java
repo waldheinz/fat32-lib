@@ -7,6 +7,7 @@ import de.waldheinz.fs.FsFile;
 import org.junit.Ignore;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -49,6 +50,20 @@ public class NodeFileTest {
     public void testSetLength() throws Exception {
         System.out.println("setLength");
 
+    }
+    
+    @Test(expected=EOFException.class)
+    public void testReadTooMuch() throws IOException {
+        System.out.println("read (too much)");
+        
+        long longSize = nf.getLength();
+        
+        assertThat(longSize, allOf(greaterThan(0l), lessThan((long)Integer.MAX_VALUE)));
+        
+        if (longSize > Integer.MAX_VALUE) throw new AssertionError("too big");
+        
+        int size = (int) longSize + 1;
+        nf.read(0, ByteBuffer.allocate(size));
     }
     
     @Test
