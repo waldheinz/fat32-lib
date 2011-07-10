@@ -63,6 +63,10 @@ final class Node {
         return ((this.flags & ATTRIB_DIR) != 0);
     }
     
+    public EntryTimes getTimes() {
+        return times;
+    }
+    
     public ExFatSuperBlock getSuperBlock() {
         return sb;
     }

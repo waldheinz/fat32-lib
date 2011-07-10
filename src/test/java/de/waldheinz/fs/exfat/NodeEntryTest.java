@@ -1,6 +1,7 @@
 
 package de.waldheinz.fs.exfat;
 
+import java.util.Date;
 import de.waldheinz.fs.FsFile;
 import org.junit.Ignore;
 import de.waldheinz.fs.util.RamDisk;
@@ -59,12 +60,14 @@ public class NodeEntryTest {
     }
 
     @Test
-    @Ignore
     public void testGetCreated() throws Exception {
         System.out.println("getCreated");
         
+        long created = entry.getCreated();
+        
+        System.out.println("created : " + new Date(created));
     }
-
+    
     @Test
     @Ignore
     public void testGetLastAccessed() throws Exception {
