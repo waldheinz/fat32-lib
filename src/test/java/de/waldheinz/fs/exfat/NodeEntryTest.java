@@ -53,10 +53,14 @@ public class NodeEntryTest {
     }
     
     @Test
-    @Ignore
     public void testGetLastModified() throws Exception {
         System.out.println("getLastModified");
         
+        
+        long created = entry.getLastModified();
+        
+        System.out.println(
+                "modified : " + created + " ("+ new Date(created) + ")");
     }
 
     @Test
@@ -65,7 +69,8 @@ public class NodeEntryTest {
         
         long created = entry.getCreated();
         
-        System.out.println("created : " + new Date(created));
+        System.out.println(
+                "created : " + created + " ("+ new Date(created) + ")");
     }
     
     @Test
