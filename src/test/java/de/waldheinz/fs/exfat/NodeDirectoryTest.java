@@ -1,6 +1,7 @@
 
 package de.waldheinz.fs.exfat;
 
+import de.waldheinz.fs.FsDirectory;
 import org.junit.Ignore;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
@@ -17,16 +18,33 @@ import static org.junit.Assert.*;
  */
 public class NodeDirectoryTest {
     
-    private RamDisk bd;
+    private RamDisk rd;
     private NodeDirectory dir;
 
     @Before
     public void setUp() throws IOException {
         final InputStream is =
                 getClass().getResourceAsStream("exfat-test.dmg.gz");
-        bd = RamDisk.readGzipped(is);
+        rd = RamDisk.readGzipped(is);
         is.close();
-        dir = (NodeDirectory) ExFatFileSystem.read(bd, false).getRoot();
+        dir = (NodeDirectory) ExFatFileSystem.read(rd, false).getRoot();
+    }
+    
+    @Test
+    public void testReadBig() throws IOException {
+        System.out.println("read big dir");
+        FsDirectoryEntry bde = dir.getEntry("Big Folder");
+        FsDirectory bd = bde.getDirectory();
+        
+        assertNotNull(bd);
+        
+        for (int i=1; i <= 1024; i++) {
+            FsDirectoryEntry e = bd.getEntry("file-" + i);
+            
+            assertNotNull(e);
+            assertTrue(e.isFile());
+            assertEquals(0, e.getFile().getLength());
+        }
     }
     
     @Test

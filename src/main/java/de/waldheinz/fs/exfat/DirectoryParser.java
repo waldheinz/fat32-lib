@@ -33,31 +33,25 @@ final class DirectoryParser {
     private final static int FLAG_CONTIGUOUS = 3;
     
     public static DirectoryParser create(Node node) throws IOException {
-        assert (node.isDirectory()) : "not a directory";
-
-        final ByteBuffer chunk = ByteBuffer.allocate(
-                node.getSuperBlock().getBytesPerCluster());
-        chunk.order(ByteOrder.LITTLE_ENDIAN);
+        assert (node.isDirectory()) : "not a directory"; //NOI18N
         
-        final DirectoryParser result = new DirectoryParser(
-                chunk, node.getSuperBlock(), node.getStartCluster());
-                
+        final DirectoryParser result = new DirectoryParser(node);        
         result.init();
-        
         return result;
     }
     
     private final ExFatSuperBlock sb;
     private final ByteBuffer chunk;
+    private final Node node;
     private long cluster;
     private UpcaseTable upcase;
 
-    private DirectoryParser(
-            ByteBuffer chunk, ExFatSuperBlock sb, long cluster) {
-
-        this.chunk = chunk;
-        this.sb = sb;
-        this.cluster = cluster;
+    private DirectoryParser(Node node) {
+        this.node = node;
+        this.sb = node.getSuperBlock();
+        this.chunk = ByteBuffer.allocate(sb.getBytesPerCluster());
+        this.chunk.order(ByteOrder.LITTLE_ENDIAN);
+        this.cluster = node.getStartCluster();
         this.upcase = null;
     }
 
@@ -76,11 +70,25 @@ final class DirectoryParser {
         chunk.rewind();
     }
 
-    private void advance() {
+    private boolean advance() throws IOException {
         assert ((chunk.position() % ENTRY_SIZE) == 0) :
             "not on entry boundary"; //NOI18N
+        
+        if (chunk.remaining() == 0) {
+            cluster = node.nextCluster(cluster);
+            
+            if (Cluster.invalid(cluster)) {
+                return false;
+            }
+            
+            this.chunk.rewind();
+            this.sb.readCluster(chunk, cluster);
+            this.chunk.rewind();
+        }
+        
+        return true;
     }
-
+    
     private void skip(int bytes) {
         chunk.position(chunk.position() + bytes);
     }
@@ -119,7 +127,9 @@ final class DirectoryParser {
                     }
             }
             
-            advance();
+            if (!advance()) {
+                return;
+            }
         }
     }
 
