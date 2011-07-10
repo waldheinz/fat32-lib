@@ -83,7 +83,7 @@ final class NodeEntry extends AbstractFsObject implements FsDirectoryEntry {
             throw new UnsupportedOperationException("not a directory");
         }
         
-        return new NodeDirectory(node, parent.upcase, isReadOnly());
+        return new NodeDirectory(node, parent);
     }
     
     @Override

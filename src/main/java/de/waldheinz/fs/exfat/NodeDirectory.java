@@ -18,8 +18,12 @@ final class NodeDirectory extends AbstractFsObject implements FsDirectory {
     
     private final Node node;
     private final Map<String, NodeEntry> nameToNode;
-    final UpcaseTable upcase;
-
+    private final UpcaseTable upcase;
+    
+    public NodeDirectory(Node node, NodeDirectory parent) throws IOException {
+        this(node, parent.upcase, parent.isReadOnly());
+    }
+    
     public NodeDirectory(Node node, UpcaseTable upcase, boolean readOnly)
             throws IOException {
         
