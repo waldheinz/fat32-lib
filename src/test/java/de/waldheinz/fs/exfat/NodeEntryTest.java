@@ -57,28 +57,30 @@ public class NodeEntryTest {
         System.out.println("getLastModified");
         
         
-        long created = entry.getLastModified();
+        long time = entry.getLastModified();
         
         System.out.println(
-                "modified : " + created + " ("+ new Date(created) + ")");
+                "modified : " + time + " ("+ new Date(time) + ")");
     }
 
     @Test
     public void testGetCreated() throws Exception {
         System.out.println("getCreated");
         
-        long created = entry.getCreated();
+        long time = entry.getCreated();
         
         System.out.println(
-                "created : " + created + " ("+ new Date(created) + ")");
+                "created : " + time + " ("+ new Date(time) + ")");
     }
     
     @Test
-    @Ignore
     public void testGetLastAccessed() throws Exception {
         System.out.println("getLastAccessed");
-
         
+        long time = entry.getLastAccessed();
+        
+        System.out.println(
+                "accessed : " + time + " ("+ new Date(time) + ")");
     }
 
     @Test

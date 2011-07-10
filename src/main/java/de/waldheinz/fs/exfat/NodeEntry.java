@@ -45,9 +45,9 @@ final class NodeEntry extends AbstractFsObject implements FsDirectoryEntry {
     
     @Override
     public long getLastAccessed() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return node.getTimes().getAccessed().getTime();
     }
-
+    
     @Override
     public boolean isFile() {
         return (!this.node.isDirectory());
