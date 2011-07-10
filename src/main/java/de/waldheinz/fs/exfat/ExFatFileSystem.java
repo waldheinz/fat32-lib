@@ -10,7 +10,7 @@ import java.io.IOException;
  *
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
-final class ExFatFileSystem extends AbstractFileSystem {
+public final class ExFatFileSystem extends AbstractFileSystem {
     
     public static ExFatFileSystem read(
             BlockDevice dev, boolean ro) throws IOException {
