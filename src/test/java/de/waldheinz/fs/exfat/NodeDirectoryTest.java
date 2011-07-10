@@ -51,7 +51,8 @@ public class NodeDirectoryTest {
         
         assertNotNull(e);
         assertEquals(name, e.getName());
-
+        assertTrue(e.isDirectory());
+        
         assertEquals(e, dir.getEntry(name.toUpperCase()));
     }
     

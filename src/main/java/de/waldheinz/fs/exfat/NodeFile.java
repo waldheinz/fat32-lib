@@ -4,6 +4,7 @@ package de.waldheinz.fs.exfat;
 import de.waldheinz.fs.AbstractFsObject;
 import de.waldheinz.fs.FsFile;
 import de.waldheinz.fs.ReadOnlyException;
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -35,7 +36,30 @@ final class NodeFile extends AbstractFsObject implements FsFile {
 
     @Override
     public void read(long offset, ByteBuffer dest) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        final int len = dest.remaining();
+        
+        if (len == 0) return;
+        
+        if (offset + len > getLength()) {
+            throw new EOFException();
+        }
+        
+        long cluster = node.getStartCluster();
+        final int bpc = node.getSuperBlock().getBytesPerCluster();
+        int remain = dest.remaining();
+        
+        while (remain > 0) {
+            int toRead = Math.min(bpc, remain);
+            dest.limit(dest.position() + toRead);
+            node.getSuperBlock().readCluster(dest, cluster);
+            
+            remain -= toRead;
+            cluster = this.node.nextCluster(cluster);
+            
+            if (Cluster.invalid(cluster)) {
+                throw new IOException("invalid cluster");
+            }
+        }
     }
 
     @Override

@@ -83,6 +83,12 @@ final class Node {
         return size;
     }
     
+    /**
+     * Determines the size of the root directory in clusters.
+     * 
+     * @return the number of clusters for the root directoy
+     * @throws IOException on read error
+     */
     private long rootDirSize() throws IOException {
         long result = 0;
         long current = this.sb.getRootDirCluster();

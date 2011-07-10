@@ -5,8 +5,10 @@ import org.junit.Ignore;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import org.junit.Before;
 import org.junit.Test;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -45,10 +47,24 @@ public class NodeFileTest {
     }
     
     @Test
-    @Ignore
-    public void testRead() throws Exception {
-        System.out.println("read");
+    public void testReadLoremIpsum() throws Exception {
+        System.out.println("read (Lorem Ipsum)");
         
+        long longSize = nf.getLength();
+        
+        assertThat(longSize, allOf(greaterThan(0l), lessThan((long)Integer.MAX_VALUE)));
+        
+        if (longSize > Integer.MAX_VALUE) throw new AssertionError("too big");
+        
+        int size = (int) longSize;
+        ByteBuffer buff = ByteBuffer.allocate(size);
+        
+        nf.read(0, buff);
+        
+        assertThat(buff.position(), is(buff.capacity()));
+        
+        System.out.println("The Lorem Imsum:");
+        System.out.println(new String(buff.array()));
     }
     
     @Test
