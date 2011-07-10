@@ -27,6 +27,17 @@ public class ExFatFileSystemTest {
     }
     
     @Test
+    public void testGetSpace() throws IOException {
+        System.out.println("get*Space");
+        
+        final ExFatFileSystem fs = ExFatFileSystem.read(bd, true);
+        
+        assertEquals(fs.getFreeSpace(), -1);
+        assertEquals(fs.getTotalSpace(), -1);
+        assertEquals(fs.getUsableSpace(), -1);
+    }
+    
+    @Test
     public void testRead() throws Exception {
         System.out.println("read");
 

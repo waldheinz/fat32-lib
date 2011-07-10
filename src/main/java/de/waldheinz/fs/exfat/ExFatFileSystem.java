@@ -58,17 +58,17 @@ final class ExFatFileSystem extends AbstractFileSystem {
     
     @Override
     public long getTotalSpace() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return -1;
     }
 
     @Override
     public long getFreeSpace() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return -1;
     }
 
     @Override
     public long getUsableSpace() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return -1;
     }
 
     @Override
