@@ -1,11 +1,16 @@
 
 package de.waldheinz.fs.exfat;
 
+import de.waldheinz.fs.FsDirectory;
+import de.waldheinz.fs.FsDirectoryEntry;
+import de.waldheinz.fs.FsFile;
 import org.junit.Ignore;
 import de.waldheinz.fs.util.RamDisk;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import javax.imageio.ImageIO;
 import org.junit.Before;
 import org.junit.Test;
 import static org.hamcrest.Matchers.*;
@@ -65,6 +70,38 @@ public class NodeFileTest {
         
         System.out.println("The Lorem Imsum:");
         System.out.println(new String(buff.array()));
+    }
+    
+    @Test
+    public void testReadImage() throws IOException {
+        System.out.println("read (image)");
+        FsDirectoryEntry fldE = dir.getEntry("folder with image");
+        
+        assertTrue(fldE.isDirectory());
+        FsDirectory imgDir = fldE.getDirectory();
+        FsDirectoryEntry imgEntry = imgDir.getEntry("missthepoint.png");
+        
+        assertThat(imgEntry, notNullValue());
+        assertTrue(imgEntry.isFile());
+        FsFile file = imgEntry.getFile();
+        
+        long longSize = file.getLength();
+        
+        assertThat(longSize,
+                allOf(greaterThan(0l), lessThan((long)Integer.MAX_VALUE)));
+        
+        int size = (int) longSize;
+        ByteBuffer buff = ByteBuffer.allocate(size);
+        
+        file.read(0, buff);
+        
+        assertThat(buff.position(), is(buff.capacity()));
+        
+        System.out.println("read " + size + " bytes");
+        
+        /* check that the image is valid */
+        final ByteArrayInputStream is = new ByteArrayInputStream(buff.array());
+        ImageIO.read(is);
     }
     
     @Test
