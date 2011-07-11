@@ -4,7 +4,9 @@ package de.waldheinz.fs.exfat;
 import java.io.IOException;
 
 /**
- *
+ * TODO: Add support for compressed format:
+ * http://www.ntfs.com/exfat-upcase-table.htm
+ * 
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 final class UpcaseTable {
