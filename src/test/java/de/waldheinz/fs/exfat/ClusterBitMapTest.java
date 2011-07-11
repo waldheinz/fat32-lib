@@ -33,7 +33,18 @@ public class ClusterBitMapTest {
         ClusterBitMap result = ClusterBitMap.read(sb, 2, 1246);
         assertNotNull(result);
     }
-
+    
+    @Test
+    public void testIsClusterFree() throws IOException {
+        System.out.println("isClusterFree");
+        
+        ClusterBitMap result = ClusterBitMap.read(sb, 2, 1246);
+        
+        for (long i=2; i < 512; i++) {
+            result.isClusterFree(i);
+        }
+    }
+    
     @Test(expected=IOException.class)
     public void testReadFail() throws IOException {
         System.out.println("read (fail)");

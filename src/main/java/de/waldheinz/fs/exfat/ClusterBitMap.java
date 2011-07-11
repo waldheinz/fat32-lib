@@ -40,12 +40,28 @@ final class ClusterBitMap {
     private final long size;
 
     private final long clusterCount;
+    private final long devOffset;
+    private final DeviceAccess da;
     
-    private ClusterBitMap(ExFatSuperBlock sb, long startCluster, long size) {
+    private ClusterBitMap(
+            ExFatSuperBlock sb, long startCluster, long size)
+            throws IOException {
+        
         this.sb = sb;
+        this.da = sb.getDeviceAccess();
         this.startCluster = startCluster;
         this.size = size;
         this.clusterCount = sb.getClusterCount() - Cluster.FIRST_DATA_CLUSTER;
+        this.devOffset = sb.clusterToOffset(startCluster);
+    }
+    
+    public boolean isClusterFree(long cluster) throws IOException {
+        Cluster.checkValid(cluster, this.sb);
+        
+        final long bitNum = cluster - Cluster.FIRST_DATA_CLUSTER;
+        final long offset = bitNum / 8;
+        final int bits = this.da.getUint8(offset + this.devOffset);
+        return (bits & (1 << (bitNum % 8))) == 0;
     }
     
 }
