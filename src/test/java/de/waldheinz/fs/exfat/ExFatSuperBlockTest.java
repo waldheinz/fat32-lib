@@ -44,6 +44,8 @@ public class ExFatSuperBlockTest {
         assertEquals("volume state", 0x0000, sb.getVolumeState());
         assertEquals("block size", 512, sb.getBlockSize());
         assertEquals("cluster size", 8, sb.getBlocksPerCluster());
+        
+        System.out.println(sb.getPercentInUse());
     }
     
 }

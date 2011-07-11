@@ -153,7 +153,7 @@ final class DirectoryParser {
     
     private void parseBitmap(Visitor v) throws IOException {
         skip(19); /* unknown content */
-
+        
         final long startCluster = DeviceAccess.getUint32(chunk);
         final long size = DeviceAccess.getUint64(chunk);
 

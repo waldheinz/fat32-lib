@@ -35,6 +35,7 @@ final class ExFatSuperBlock extends AbstractFsObject {
     private short volumeState;
     private byte blockBits;
     private byte blocksPerClusterBits;
+    private byte percentInUse;
     
     public ExFatSuperBlock(BlockDevice dev, boolean ro) {
         super(ro);
@@ -93,7 +94,7 @@ final class ExFatSuperBlock extends AbstractFsObject {
         result.volumeState = b.getShort(0x6a);
         result.blockBits = b.get(0x6c);
         result.blocksPerClusterBits = b.get(0x6d);
-
+        result.percentInUse = b.get(0x70);
 
         /* check version */
 
@@ -191,6 +192,16 @@ final class ExFatSuperBlock extends AbstractFsObject {
 
     public int getBytesPerCluster() {
         return (getBlockSize() << this.blocksPerClusterBits);
+    }
+    
+    /**
+     * Returns the percentage of allocated clusters, rounded down to
+     * integer value. {@code 0xff} means this value is not available.
+     * 
+     * @return the percent of used clusters
+     */
+    public byte getPercentInUse() {
+        return percentInUse;
     }
     
 }

@@ -39,6 +39,21 @@ final class Cluster {
         }
     }
     
+    public static void checkValid(
+            long cluster, ExFatSuperBlock sblk) throws IOException {
+        
+        checkValid(cluster);
+        
+        final long maxCluster = sblk.getClusterCount() + 1;
+        
+        if (cluster > maxCluster) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("cluster ").append(cluster);
+            sb.append(" exceeds maximum of ").append(maxCluster);
+            throw new IOException(sb.toString());
+        }
+    }
+    
     private Cluster() {
         /* utility class, no instances */
     }
