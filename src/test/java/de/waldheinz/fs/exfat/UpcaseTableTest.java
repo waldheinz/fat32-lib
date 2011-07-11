@@ -31,7 +31,7 @@ public class UpcaseTableTest {
         System.out.println("read");
         
         final UpcaseTable ut = UpcaseTable.read(
-                sb, 3, 5836, 0xffffffffe619d30dl);
+                sb, 3, 5836, 0xe619d30dl);
         
         assertNotNull(ut);
         assertEquals(2918, ut.getCharCount());
@@ -42,7 +42,7 @@ public class UpcaseTableTest {
         System.out.println("toUpperCase (char)");
         
         final UpcaseTable ut = UpcaseTable.read(
-                sb, 3, 5836, 0xffffffffe619d30dl);
+                sb, 3, 5836, 0xe619d30dl);
         
         assertEquals('A', ut.toUpperCase('a'));
         assertEquals('Z', ut.toUpperCase('z'));
@@ -59,7 +59,7 @@ public class UpcaseTableTest {
         System.out.println("toUpperCase (String)");
 
         final UpcaseTable ut = UpcaseTable.read(
-                sb, 3, 5836, 0xffffffffe619d30dl);
+                sb, 3, 5836, 0xe619d30dl);
 
         final String input = "äöüasdASDF";
         final String expected = "ÄÖÜASDASDF";

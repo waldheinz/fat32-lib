@@ -30,7 +30,6 @@ final class Cluster {
     public final static int SIZE = 4;
     
     public static boolean invalid(long cluster) {
-        System.out.println("is valid " + cluster);
         return ((cluster == END) || (cluster == BAD));
     }
     

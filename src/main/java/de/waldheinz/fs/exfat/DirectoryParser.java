@@ -163,6 +163,8 @@ final class DirectoryParser {
     private void parseUpcaseTable(Visitor v) throws IOException {
         skip(3); /* unknown */
         final long checksum = DeviceAccess.getUint32(chunk);
+        assert(checksum >= 0);
+        
         skip(12); /* unknown */
         final long startCluster = DeviceAccess.getUint32(chunk);
         final long size = DeviceAccess.getUint64(chunk);
