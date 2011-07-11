@@ -27,6 +27,15 @@ final class DeviceAccess {
         this.buffer.order(ByteOrder.LITTLE_ENDIAN);
     }
     
+    public int getUint8(long offset) throws IOException {
+        this.buffer.rewind();
+        this.buffer.limit(1);
+        this.dev.read(offset, buffer);
+        this.buffer.rewind();
+        
+        return getUint8(this.buffer);
+    }
+    
     public long getUint32(long offset) throws IOException {
         this.buffer.rewind();
         this.buffer.limit(4);
@@ -45,7 +54,7 @@ final class DeviceAccess {
     }
     
     public static long getUint32(ByteBuffer src) {
-        return (src.getInt() & 0xffffffff);
+        return (src.getInt() & 0xffffffffl);
     }
     
     public static long getUint64(ByteBuffer src) throws IOException {

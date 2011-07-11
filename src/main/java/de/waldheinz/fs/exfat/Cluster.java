@@ -12,12 +12,12 @@ final class Cluster {
     /**
      * Marks a cluster containing a bad block.
      */
-    private final static long BAD = 0xfffffff7;
+    private final static long BAD = 0xfffffff7l;
     
     /**
      * Marks the final cluster of a file or directory.
      */
-    private final static long END = 0xffffffff;
+    private final static long END = 0xffffffffl;
     
     /**
      * The first data cluster that can be used on exFAT file systems.
@@ -30,6 +30,7 @@ final class Cluster {
     public final static int SIZE = 4;
     
     public static boolean invalid(long cluster) {
+        System.out.println("is valid " + cluster);
         return ((cluster == END) || (cluster == BAD));
     }
     
