@@ -64,4 +64,15 @@ final class ClusterBitMap {
         return (bits & (1 << (bitNum % 8))) == 0;
     }
     
+    public long getUsedClusterCount() throws IOException {
+        long result = 0;
+        
+        for (long i=0; i < size; i++) {
+            final int bits = this.da.getUint8(this.devOffset + i);
+            result += Integer.bitCount(bits);
+        }
+        
+        return result;
+    }
+    
 }
