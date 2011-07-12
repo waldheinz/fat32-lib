@@ -158,6 +158,13 @@ final class ExFatSuperBlock extends AbstractFsObject {
         return clusterBlockStart;
     }
     
+    /**
+     * Returns the total number of data clusters available on the file system.
+     * To iterate the clusters the range {@code 0..count} must be shifted by
+     * {@link Cluster#FIRST_DATA_CLUSTER}.
+     * 
+     * @return the number of usable clusters on the file system
+     */
     public long getClusterCount() {
         return clusterCount;
     }
