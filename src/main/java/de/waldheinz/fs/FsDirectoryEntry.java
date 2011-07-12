@@ -55,18 +55,7 @@ public interface FsDirectoryEntry extends FsObject {
      * @return this entrys name
      */
     public String getName();
-
-    /**
-     * Gets the directory this entry is a part of.
-     * 
-     * @return the parent directory of this entry, or {@code null}
-     * @deprecated deprecated since version 0.6 because in the presence of
-     *      hard links it might not always be possible to determine the parent
-     *      directory of an entry
-     */
-    @Deprecated
-    public FsDirectory getParent();
-
+    
     /**
      * Gets the last modification time of this entry.
      *

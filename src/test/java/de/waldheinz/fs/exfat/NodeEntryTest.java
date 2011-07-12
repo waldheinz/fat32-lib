@@ -43,16 +43,6 @@ public class NodeEntryTest {
     }
     
     @Test
-    public void testGetParent() throws IOException {
-        System.out.println("getParent");
-        
-        final FsDirectory parent = entry.getParent();
-        
-        assertNotNull(parent);
-        assertEquals(entry, parent.getEntry(ENTRY_NAME));
-    }
-    
-    @Test
     public void testGetLastModified() throws Exception {
         System.out.println("getLastModified");
         

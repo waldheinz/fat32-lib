@@ -27,12 +27,7 @@ final class NodeEntry extends AbstractFsObject implements FsDirectoryEntry {
     public String getName() {
         return node.getName();
     }
-
-    @Override
-    public FsDirectory getParent() {
-        return this.parent;
-    }
-
+    
     @Override
     public long getLastModified() throws IOException {
         return node.getTimes().getModified().getTime();
