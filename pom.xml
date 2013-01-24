@@ -86,6 +86,14 @@
                         </plugin>
                     </reportPlugins>
                 </configuration>
+                
+                <dependencies>
+                    <dependency><!-- add support for ssh/scp -->
+                        <groupId>org.apache.maven.wagon</groupId>
+                        <artifactId>wagon-ssh</artifactId>
+                        <version>1.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             
             <plugin>
@@ -99,7 +107,7 @@
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9</version>
-                 <executions>
+                <executions>
                     <execution>
                         <id>attach-javadocs</id>
                         <goals>
@@ -191,4 +199,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    
+    <distributionManagement>
+        <site>
+            <id>waldheinz.de</id>
+            <name>waldheinz.de</name>
+            <url>scp://root@waldheinz.de:/var/www/maven/site/fat32-lib</url>
+        </site>
+    </distributionManagement>
+    
 </project>
