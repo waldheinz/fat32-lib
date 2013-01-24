@@ -223,15 +223,6 @@ public final class SuperFloppyFormatter {
             if (label != null) f16bs.setVolumeLabel(label);
             fsi = null;
         }
-
-        
-//        bs.write();
-        
-        if (fatType == FatType.FAT32) {
-            Fat32BootSector f32bs = (Fat32BootSector) bs;
-            /* possibly writes the boot sector copy */
-            f32bs.writeCopy(device);
-        }
         
         final Fat fat = Fat.create(bs, 0);
         
@@ -255,7 +246,13 @@ public final class SuperFloppyFormatter {
         }
         
         bs.write();
-
+        
+        /* possibly write boot sector copy */
+        if (fatType == FatType.FAT32) {
+            Fat32BootSector f32bs = (Fat32BootSector) bs;    
+            f32bs.writeCopy(device);
+        }
+        
         FatFileSystem fs = FatFileSystem.read(device, false);
 
         if (label != null) {
