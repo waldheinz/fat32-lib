@@ -24,9 +24,9 @@ import de.waldheinz.fs.util.FileDisk;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -144,8 +144,8 @@ public class DosFsckTest {
     public void testLargeFileSystem() throws Exception {
         System.out.println("large FAT32 fs");
         
-        FileDisk fd = FileDisk.create(file, 512 * 1024 * 1024);
-        FatFileSystem fs = SuperFloppyFormatter.get(fd)
+        dev = FileDisk.create(file, 512 * 1024 * 1024);
+        FatFileSystem fs = SuperFloppyFormatter.get(dev)
                 .setFatType(FatType.FAT32)
                 .format();
         
@@ -153,10 +153,30 @@ public class DosFsckTest {
         
         for (int i=0; i < 30; i++) {
             FatLfnDirectoryEntry fe = root.addFile("file-" + i + ".test");
-            fe.getFile().write(0, ByteBuffer.allocate(1024 * 1024 * 10));
+            final ByteBuffer bb = ByteBuffer.allocate(1024 * 1024 * 10);
+            byte[] array = bb.array();
+            
+            Arrays.fill(array, (byte) i);
+            fe.getFile().write(0, bb);
         }
         
         fs.close();
+        
+        fs = FatFileSystem.read(dev, true);
+        root = fs.getRoot();
+        
+        for (int i=0; i < 30; i++) {
+            FatLfnDirectoryEntry e = root.getEntry("file-" + i + ".test");
+            assertTrue(e.isFile());
+            FatFile ff = e.getFile();
+            assertEquals(ff.getLength(), 10 * 1024 * 1024);
+            ByteBuffer bb = ByteBuffer.allocate((int) ff.getLength());
+            ff.read(0, bb);
+            
+            for (int j=0; j < bb.limit(); j++) {
+                assertEquals(bb.get(j), i);
+            }
+        }
         
         runFsck();
     }

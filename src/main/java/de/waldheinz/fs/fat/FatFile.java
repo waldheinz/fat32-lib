@@ -53,7 +53,9 @@ public final class FatFile extends AbstractFsObject implements FsFile {
                 fat, entry.getStartCluster(), entry.isReadonlyFlag());
                 
         if (entry.getLength() > cc.getLengthOnDisk()) throw new IOException(
-                "entry is larger than associated cluster chain");
+                "entry (" + entry.getLength() +
+                ") is larger than associated cluster chain ("
+                + cc.getLengthOnDisk() + ")");
                 
         return new FatFile(entry, cc);
     }

@@ -348,7 +348,13 @@ final class FatDirectoryEntry extends AbstractFsObject {
      * @return int the first cluster of a file / directory
      */
     public long getStartCluster() {
-        return LittleEndian.getUInt16(data, 0x1a);
+        if (type == FatType.FAT32) {
+            return
+                    (LittleEndian.getUInt16(data, 0x14) << 16) |
+                     LittleEndian.getUInt16(data, 0x1a);
+        } else {
+            return LittleEndian.getUInt16(data, 0x1a);
+        }
     }
     
     /**
@@ -359,11 +365,12 @@ final class FatDirectoryEntry extends AbstractFsObject {
     void setStartCluster(long startCluster) {
         if (startCluster > Integer.MAX_VALUE) throw new AssertionError();
 
-//        if (this.type == FatType.FAT32) {
-//            LittleEndian.setInt16(data, )
-//        } else {
+        if (this.type == FatType.FAT32) {
+            LittleEndian.setInt16(data, 0x1a, (int) (startCluster & 0xffff));
+            LittleEndian.setInt16(data, 0x14, (int) ((startCluster >> 16) & 0xffff));
+        } else {
             LittleEndian.setInt16(data, 0x1a, (int) startCluster);
-//        }
+        }
     }
     
     @Override
