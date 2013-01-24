@@ -359,7 +359,11 @@ final class FatDirectoryEntry extends AbstractFsObject {
     void setStartCluster(long startCluster) {
         if (startCluster > Integer.MAX_VALUE) throw new AssertionError();
 
-        LittleEndian.setInt16(data, 0x1a, (int) startCluster);
+//        if (this.type == FatType.FAT32) {
+//            LittleEndian.setInt16(data, )
+//        } else {
+            LittleEndian.setInt16(data, 0x1a, (int) startCluster);
+//        }
     }
     
     @Override

@@ -71,6 +71,8 @@ final class LittleEndian {
      * Sets an 8-bit integer in the given byte array at the given offset.
      */
     public static void setInt8(byte[] dst, int offset, int value) {
+        assert (value & 0xff) == value : "value out of range";
+        
         dst[offset] = (byte) value;
     }
 
@@ -78,20 +80,19 @@ final class LittleEndian {
      * Sets a 16-bit integer in the given byte array at the given offset.
      */
     public static void setInt16(byte[] dst, int offset, int value) {
+        assert (value & 0xffff) == value : "value out of range";
+        
         dst[offset + 0] = (byte) (value & 0xFF);
         dst[offset + 1] = (byte) ((value >>> 8) & 0xFF);
     }
-
+    
     /**
      * Sets a 32-bit integer in the given byte array at the given offset.
      */
     public static void setInt32(byte[] dst, int offset, long value)
             throws IllegalArgumentException {
         
-        if (value > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException(
-                    value + " can not be represented in a 32bit dword");
-        }
+        assert value <= Integer.MAX_VALUE : "value out of range";
         
         dst[offset + 0] = (byte) (value & 0xFF);
         dst[offset + 1] = (byte) ((value >>> 8) & 0xFF);

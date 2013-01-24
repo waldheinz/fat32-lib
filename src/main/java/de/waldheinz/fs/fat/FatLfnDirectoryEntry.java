@@ -340,7 +340,7 @@ public final class FatLfnDirectoryEntry
                                                     // attribute tag for
         // lfn
         LittleEndian.setInt8(rawData, 12, 0); // reserved
-        LittleEndian.setInt8(rawData, 13, checkSum); // checksum
+        LittleEndian.setInt8(rawData, 13, checkSum & 0xff); // checksum
         LittleEndian.setInt16(rawData, 14, unicodechar[5]);
         LittleEndian.setInt16(rawData, 16, unicodechar[6]);
         LittleEndian.setInt16(rawData, 18, unicodechar[7]);
