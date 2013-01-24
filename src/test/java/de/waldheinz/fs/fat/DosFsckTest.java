@@ -55,7 +55,6 @@ public class DosFsckTest {
     }
 
     @Test
-    @Ignore
     public void testVolumeLabel() throws Exception {
         System.out.println("volumeLabel");
 
@@ -67,7 +66,6 @@ public class DosFsckTest {
     }
 
     @Test
-    @Ignore
     public void testFat32Write() throws Exception {
         System.out.println("fat32Write");
 
@@ -96,7 +94,6 @@ public class DosFsckTest {
     }
 
     @Test
-    @Ignore
     public void testCreateFat32() throws Exception {
         System.out.println("createFat32");
 
@@ -106,7 +103,6 @@ public class DosFsckTest {
     }
 
     @Test
-    @Ignore
     public void testCreateFat16() throws Exception {
         System.out.println("createFat16");
 
@@ -116,7 +112,6 @@ public class DosFsckTest {
     }
 
     @Test
-    @Ignore
     public void testCreateFat12() throws Exception {
         System.out.println("createFat12");
 
@@ -144,4 +139,26 @@ public class DosFsckTest {
 
         assertEquals(0, proc.waitFor());
     }
+    
+    @Test
+    public void testLargeFileSystem() throws Exception {
+        System.out.println("large FAT32 fs");
+        
+        FileDisk fd = FileDisk.create(file, 512 * 1024 * 1024);
+        FatFileSystem fs = SuperFloppyFormatter.get(fd)
+                .setFatType(FatType.FAT32)
+                .format();
+        
+        FatLfnDirectory root = fs.getRoot();
+        
+        for (int i=0; i < 30; i++) {
+            FatLfnDirectoryEntry fe = root.addFile("file-" + i + ".test");
+            fe.getFile().write(0, ByteBuffer.allocate(1024 * 1024 * 10));
+        }
+        
+        fs.close();
+        
+        runFsck();
+    }
+    
 }
