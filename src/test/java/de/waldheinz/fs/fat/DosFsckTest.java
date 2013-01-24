@@ -43,6 +43,7 @@ public class DosFsckTest {
     @Before
     public void setUp() throws IOException {
         this.file = File.createTempFile("fat32-lib-test-", ".img");
+        this.file.deleteOnExit();
     }
 
     @After
@@ -144,16 +145,19 @@ public class DosFsckTest {
     public void testLargeFileSystem() throws Exception {
         System.out.println("large FAT32 fs");
         
-        dev = FileDisk.create(file, 512 * 1024 * 1024);
+        dev = FileDisk.create(file, 1024 * 1024 * 1024);
         FatFileSystem fs = SuperFloppyFormatter.get(dev)
                 .setFatType(FatType.FAT32)
                 .format();
         
         FatLfnDirectory root = fs.getRoot();
         
-        for (int i=0; i < 30; i++) {
-            FatLfnDirectoryEntry fe = root.addFile("file-" + i + ".test");
-            final ByteBuffer bb = ByteBuffer.allocate(1024 * 1024 * 10);
+        for (int i=0; i < 63; i++) {
+            final String fname = "file-" + i + ".test";
+            System.out.println(fname);
+            
+            FatLfnDirectoryEntry fe = root.addFile(fname);
+            final ByteBuffer bb = ByteBuffer.allocate(1024 * 1024 * 16);
             byte[] array = bb.array();
             
             Arrays.fill(array, (byte) i);
@@ -169,7 +173,7 @@ public class DosFsckTest {
             FatLfnDirectoryEntry e = root.getEntry("file-" + i + ".test");
             assertTrue(e.isFile());
             FatFile ff = e.getFile();
-            assertEquals(ff.getLength(), 10 * 1024 * 1024);
+            assertEquals(ff.getLength(), 16 * 1024 * 1024);
             ByteBuffer bb = ByteBuffer.allocate((int) ff.getLength());
             ff.read(0, bb);
             
