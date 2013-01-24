@@ -61,17 +61,18 @@ final class FatDirectoryEntry extends AbstractFsObject {
     public static final int ENTRY_DELETED_MAGIC = 0xe5;
     
     private final byte[] data;
+    private final FatType type;
     private boolean dirty;
     
-    FatDirectoryEntry(byte[] data, boolean readOnly) {
+    FatDirectoryEntry(FatType fs, byte[] data, boolean readOnly) {
         super(readOnly);
         
         this.data = data;
+        this.type = fs;
     }
     
-    private FatDirectoryEntry() {
-        this(new byte[SIZE], false);
-        
+    private FatDirectoryEntry(FatType fs) {
+        this(fs, new byte[SIZE], false);
     }
     
     /**
@@ -88,7 +89,9 @@ final class FatDirectoryEntry extends AbstractFsObject {
      *      if there was no entry to read from the specified position (first
      *      byte was 0)
      */
-    public static FatDirectoryEntry read(ByteBuffer buff, boolean readOnly) {
+    public static FatDirectoryEntry read(
+            FatType type, ByteBuffer buff, boolean readOnly) {
+        
         assert (buff.remaining() >= SIZE);
 
         /* peek into the buffer to see if we're done with reading */
@@ -99,7 +102,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
 
         final byte[] data = new byte[SIZE];
         buff.get(data);
-        return new FatDirectoryEntry(data, readOnly);
+        return new FatDirectoryEntry(type, data, readOnly);
     }
 
     public static void writeNullEntry(ByteBuffer buff) {
@@ -182,8 +185,8 @@ final class FatDirectoryEntry extends AbstractFsObject {
         return ((getFlags() & (F_DIRECTORY | F_VOLUME_ID)) == F_DIRECTORY);
     }
     
-    public static FatDirectoryEntry create(boolean directory) {
-        final FatDirectoryEntry result = new FatDirectoryEntry();
+    public static FatDirectoryEntry create(FatType type, boolean directory) {
+        final FatDirectoryEntry result = new FatDirectoryEntry(type);
 
         if (directory) {
             result.setFlags(F_DIRECTORY);
@@ -199,7 +202,9 @@ final class FatDirectoryEntry extends AbstractFsObject {
         return result;
     }
     
-    public static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
+    public static FatDirectoryEntry createVolumeLabel(
+            FatType type, String volumeLabel) {
+        
         assert(volumeLabel != null);
         
         final byte[] data = new byte[SIZE];
@@ -209,7 +214,8 @@ final class FatDirectoryEntry extends AbstractFsObject {
                     data, 0,
                     volumeLabel.length());
 
-        final FatDirectoryEntry result = new FatDirectoryEntry(data, false);
+        final FatDirectoryEntry result =
+                new FatDirectoryEntry(type, data, false);
         result.setFlags(FatDirectoryEntry.F_VOLUME_ID);
         return result;
     }
@@ -337,9 +343,9 @@ final class FatDirectoryEntry extends AbstractFsObject {
     }
 
     /**
-     * Returns the startCluster.
+     * Returns the start of the file in clusters.
      * 
-     * @return int
+     * @return int the first cluster of a file / directory
      */
     public long getStartCluster() {
         return LittleEndian.getUInt16(data, 0x1a);

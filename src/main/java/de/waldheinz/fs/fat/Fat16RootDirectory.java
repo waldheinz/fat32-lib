@@ -32,7 +32,7 @@ final class Fat16RootDirectory extends AbstractDirectory {
     private final long deviceOffset;
 
     private Fat16RootDirectory(Fat16BootSector bs, boolean readOnly) {
-        super(bs.getRootDirEntryCount(), readOnly, true);
+        super(bs.getFatType(), bs.getRootDirEntryCount(), readOnly, true);
 
         if (bs.getRootDirEntryCount() <= 0) throw new IllegalArgumentException(
                 "root directory size is " + bs.getRootDirEntryCount());

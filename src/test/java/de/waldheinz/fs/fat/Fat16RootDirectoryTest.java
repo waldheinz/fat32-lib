@@ -39,6 +39,7 @@ public class Fat16RootDirectoryTest {
         this.dev = new RamDisk(1024 * 1024);
         this.bs = new Fat16BootSector(dev);
         this.bs.init();
+        this.bs.setSectorsPerCluster(4);
         this.bs.write();
     }
     

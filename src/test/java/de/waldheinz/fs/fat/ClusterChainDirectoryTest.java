@@ -53,7 +53,7 @@ public class ClusterChainDirectoryTest {
         System.out.println("addEntry");
 
         assertEquals(0, this.dir.getEntryCount());
-        FatDirectoryEntry e = FatDirectoryEntry.create(false);
+        FatDirectoryEntry e = FatDirectoryEntry.create(FatType.FAT32, false);
         dir.addEntry(e);
         assertEquals(1, this.dir.getEntryCount());
     }
@@ -63,7 +63,7 @@ public class ClusterChainDirectoryTest {
         System.out.println("maximumSize");
         
         while (true) {
-            FatDirectoryEntry e = FatDirectoryEntry.create(false);
+            FatDirectoryEntry e = FatDirectoryEntry.create(FatType.FAT12, false);
             dir.addEntry(e);
             
             assertTrue(dir.chain.getLengthOnDisk() <=

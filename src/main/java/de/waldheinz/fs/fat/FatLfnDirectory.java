@@ -89,6 +89,10 @@ public final class FatLfnDirectory
         
         parseLfn();
     }
+
+    Fat getFat() {
+        return fat;
+    }
     
     FatFile getFile(FatDirectoryEntry entry) throws IOException {
         FatFile file = entryToFile.get(entry);

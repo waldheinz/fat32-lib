@@ -144,7 +144,7 @@ public enum FatType {
     
     /**
      * Returns the human-readable FAT name string as written to the
-     * {@link com.meetwise.fs.BootSector}.
+     * {@link BootSector}.
      *
      * @return the boot sector label for this FAT type
      */

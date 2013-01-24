@@ -16,7 +16,7 @@ public class FatDirectoryEntryTest {
         System.out.println("read (null)");
         
         final ByteBuffer buff = ByteBuffer.allocate(FatDirectoryEntry.SIZE);
-        final FatDirectoryEntry result = FatDirectoryEntry.read(buff, false);
+        final FatDirectoryEntry result = FatDirectoryEntry.read(FatType.FAT16, buff, false);
         
         assertNull(result);
     }
@@ -25,7 +25,7 @@ public class FatDirectoryEntryTest {
     public void testVolumeLabel() {
         System.out.println("volumeLabel");
         
-        FatDirectoryEntry vl = FatDirectoryEntry.createVolumeLabel("my name");
+        FatDirectoryEntry vl = FatDirectoryEntry.createVolumeLabel(FatType.FAT16, "my name");
         
         assertTrue(vl.isVolumeLabel());
         assertEquals("my name", vl.getVolumeLabel());
@@ -38,7 +38,7 @@ public class FatDirectoryEntryTest {
     public void testSystemFlag() {
         System.out.println("systemFlag");
         
-        final FatDirectoryEntry e = FatDirectoryEntry.create(false);
+        final FatDirectoryEntry e = FatDirectoryEntry.create(FatType.FAT16, false);
         assertTrue(e.isFile());
         assertFalse(e.isSystemFlag());
 
@@ -53,7 +53,7 @@ public class FatDirectoryEntryTest {
     public void testHiddenFlag() {
         System.out.println("hiddenFlag");
         
-        final FatDirectoryEntry e = FatDirectoryEntry.create(true);
+        final FatDirectoryEntry e = FatDirectoryEntry.create(FatType.FAT16, true);
         e.write(ByteBuffer.allocate(FatDirectoryEntry.SIZE));
 
         assertTrue(e.isDirectory());
@@ -71,7 +71,7 @@ public class FatDirectoryEntryTest {
     public void testCreateFile() {
         System.out.println("create (file)");
         
-        final FatDirectoryEntry result = FatDirectoryEntry.create(false);
+        final FatDirectoryEntry result = FatDirectoryEntry.create(FatType.FAT16, false);
         
         assertTrue(result.isFile());
         assertFalse(result.isDirectory());
@@ -83,7 +83,7 @@ public class FatDirectoryEntryTest {
     public void testCreateDirectory() {
         System.out.println("create (directory)");
 
-        final FatDirectoryEntry result = FatDirectoryEntry.create(true);
+        final FatDirectoryEntry result = FatDirectoryEntry.create(FatType.FAT16, true);
 
         assertTrue(result.isDirectory());
         assertFalse(result.isFile());
@@ -95,13 +95,13 @@ public class FatDirectoryEntryTest {
     public void testIsDeleted() {
         System.out.println("isDeleted");
         
-        FatDirectoryEntry e = FatDirectoryEntry.create(false);
+        FatDirectoryEntry e = FatDirectoryEntry.create(FatType.FAT16, false);
         assertFalse (e.isDeleted());
 
         final ByteBuffer bb = ByteBuffer.allocate(512);
         bb.put(0, (byte) 0xe5);
 
-        e = FatDirectoryEntry.read(bb, false);
+        e = FatDirectoryEntry.read(FatType.FAT16, bb, false);
         assertTrue(e.isDeleted());
     }
     
@@ -109,7 +109,7 @@ public class FatDirectoryEntryTest {
     public void testLength() {
         System.out.println("length");
         
-        final FatDirectoryEntry e = FatDirectoryEntry.create(false);
+        final FatDirectoryEntry e = FatDirectoryEntry.create(FatType.FAT16, false);
         assertEquals(0, e.getLength());
         
         e.setLength(100000);
@@ -121,9 +121,9 @@ public class FatDirectoryEntryTest {
     public void testReadonlyFlag() {
         System.out.println("readonlyFlag");
         
-        final FatDirectoryEntry e = FatDirectoryEntry.create(true);
+        final FatDirectoryEntry e = FatDirectoryEntry.create(FatType.FAT16, true);
         e.write(ByteBuffer.allocate(FatDirectoryEntry.SIZE));
-
+        
         assertTrue(e.isDirectory());
         assertFalse(e.isReadonlyFlag());
         assertFalse(e.isHiddenFlag());

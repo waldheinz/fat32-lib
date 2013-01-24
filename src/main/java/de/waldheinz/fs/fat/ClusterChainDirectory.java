@@ -47,7 +47,9 @@ class ClusterChainDirectory extends AbstractDirectory {
     
     protected ClusterChainDirectory(ClusterChain chain, boolean isRoot) {
         
-        super((int)(chain.getLengthOnDisk() / FatDirectoryEntry.SIZE),
+        super(
+                chain.getFat().getFatType(),
+                (int)(chain.getLengthOnDisk() / FatDirectoryEntry.SIZE),
                 chain.isReadOnly(), isRoot);
         
         this.chain = chain;   

@@ -43,6 +43,7 @@ abstract class AbstractDirectory {
     private final List<FatDirectoryEntry> entries;
     private final boolean readOnly;
     private final boolean isRoot;
+    private final FatType type;
     
     private boolean dirty;
     private int capacity;
@@ -56,10 +57,11 @@ abstract class AbstractDirectory {
      * @param isRoot if the new {@code AbstractDirectory} represents a root
      *      directory
      */
-    protected AbstractDirectory(
+    protected AbstractDirectory(FatType type,
             int capacity, boolean readOnly, boolean isRoot) {
         
         this.entries = new ArrayList<FatDirectoryEntry>();
+        this.type = type;
         this.capacity = capacity;
         this.readOnly = readOnly;
         this.isRoot = isRoot;
@@ -226,7 +228,7 @@ abstract class AbstractDirectory {
         
         if (this.volumeLabel != null) {
             final FatDirectoryEntry labelEntry =
-                    FatDirectoryEntry.createVolumeLabel(volumeLabel);
+                    FatDirectoryEntry.createVolumeLabel(type, volumeLabel);
 
             labelEntry.write(data);
         }
@@ -250,7 +252,7 @@ abstract class AbstractDirectory {
         
         for (int i=0; i < getCapacity(); i++) {
             final FatDirectoryEntry e =
-                    FatDirectoryEntry.read(data, isReadOnly());
+                    FatDirectoryEntry.read(type, data, isReadOnly());
             
             if (e == null) break;
             
@@ -310,7 +312,7 @@ abstract class AbstractDirectory {
         final ClusterChain chain = new ClusterChain(fat, false);
         chain.setChainLength(1);
 
-        final FatDirectoryEntry entry = FatDirectoryEntry.create(true);
+        final FatDirectoryEntry entry = FatDirectoryEntry.create(type, true);
         entry.setStartCluster(chain.getStartCluster());
         
         final ClusterChainDirectory dir =
@@ -318,7 +320,7 @@ abstract class AbstractDirectory {
 
         /* add "." entry */
 
-        final FatDirectoryEntry dot = FatDirectoryEntry.create(true);
+        final FatDirectoryEntry dot = FatDirectoryEntry.create(type, true);
         dot.setShortName(ShortName.DOT);
         dot.setStartCluster(dir.getStorageCluster());
         copyDateTimeFields(entry, dot);
@@ -326,7 +328,7 @@ abstract class AbstractDirectory {
 
         /* add ".." entry */
 
-        final FatDirectoryEntry dotDot = FatDirectoryEntry.create(true);
+        final FatDirectoryEntry dotDot = FatDirectoryEntry.create(type, true);
         dotDot.setShortName(ShortName.DOT_DOT);
         dotDot.setStartCluster(getStorageCluster());
         copyDateTimeFields(entry, dotDot);
@@ -371,13 +373,11 @@ abstract class AbstractDirectory {
                 this.volumeLabel = label;
             }
         } else {
-            if (label != null) {
-                changeSize(getSize() + 1);
-                ShortName.checkValidChars(label.toCharArray());
-                this.volumeLabel = label;
-            }
+            changeSize(getSize() + 1);
+            ShortName.checkValidChars(label.toCharArray());
+            this.volumeLabel = label;
         }
-
+        
         this.dirty = true;
     }
     

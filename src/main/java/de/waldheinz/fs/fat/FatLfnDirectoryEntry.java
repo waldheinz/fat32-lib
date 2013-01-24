@@ -55,7 +55,8 @@ public final class FatLfnDirectoryEntry
         this.fileName = name;
         
         final long now = System.currentTimeMillis();
-        this.realEntry = FatDirectoryEntry.create(directory);
+        this.realEntry = FatDirectoryEntry.create(
+                parent.getFat().getFatType(), directory);
         this.realEntry.setShortName(sn);
         this.realEntry.setCreated(now);
         this.realEntry.setLastAccessed(now);
@@ -218,14 +219,15 @@ public final class FatLfnDirectoryEntry
 
         final byte checkSum = this.realEntry.getShortName().checkSum();
         int j = 0;
+        final FatType type = parent.getFat().getFatType();
         
         for (int i = totalEntrySize - 2; i > 0; i--) {
-            entries[i] = createPart(fileName.substring(j * 13, j * 13 + 13),
+            entries[i] = createPart(type, fileName.substring(j * 13, j * 13 + 13),
                     j + 1, checkSum, false);
             j++;
         }
 
-        entries[0] = createPart(fileName.substring(j * 13),
+        entries[0] = createPart(type, fileName.substring(j * 13),
                 j + 1, checkSum, true);
         
         entries[totalEntrySize - 1] = this.realEntry;
@@ -307,7 +309,7 @@ public final class FatLfnDirectoryEntry
         return "LFN = " + fileName + " / SFN = " + realEntry.getShortName();
     }
     
-    private static FatDirectoryEntry createPart(String subName,
+    private static FatDirectoryEntry createPart(FatType type, String subName,
             int ordinal, byte checkSum, boolean isLast) {
             
         final char[] unicodechar = new char[13];
@@ -349,9 +351,9 @@ public final class FatLfnDirectoryEntry
         LittleEndian.setInt16(rawData, 28, unicodechar[11]);
         LittleEndian.setInt16(rawData, 30, unicodechar[12]);
         
-        return new FatDirectoryEntry(rawData, false);
+        return new FatDirectoryEntry(type, rawData, false);
     }
-
+    
     @Override
     public long getLastModified() throws IOException {
         return realEntry.getLastModified();
