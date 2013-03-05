@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2003-2009 JNode.org
- *               2009,2010 Matthias Treydte <mt@waldheinz.de>
+ *               2009-2013 Matthias Treydte <mt@waldheinz.de>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published

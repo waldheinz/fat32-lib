@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009,2010 Matthias Treydte <mt@waldheinz.de>
+ * Copyright (C) 2009-2013 Matthias Treydte <mt@waldheinz.de>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
