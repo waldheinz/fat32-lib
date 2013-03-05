@@ -21,6 +21,7 @@ package de.waldheinz.fs.fat;
 import de.waldheinz.fs.BlockDevice;
 import de.waldheinz.fs.util.RamDisk;
 import java.io.IOException;
+import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -60,6 +61,30 @@ public class FatLfnDirectoryEntryTest {
 
         assertNull(dir.getEntry("a file"));
         assertNotNull(target.getEntry("the same file"));
+    }
+    
+    @Test
+    public void testShortNameOnly() throws IOException {
+        System.out.println("shortNameOnly");
+        
+        final InputStream is = getClass().getResourceAsStream(
+                "shortname-only.img.gz");
+
+        final RamDisk rd = RamDisk.readGzipped(is);
+        final FatFileSystem fatFs = new FatFileSystem(rd, false);
+        final FatLfnDirectory root = fatFs.getRoot();
+        
+        final String[] names = {
+            "TEST.TXT", "TEST    TXT", "and_a_regular_long_file_name"
+        };
+        
+        for (String name : names) {
+            System.out.println("checking " + name);
+            
+            final FatLfnDirectoryEntry entry = root.getEntry(name);
+            assertNotNull(entry);
+            assertEquals(name, entry.getName());
+        }
     }
     
 }

@@ -35,6 +35,8 @@ final class ShortName {
         0x3C, 0x3D, 0x3E, 0x3F, 0x5B, 0x5C, 0x5D, 0x7C
     };
     
+    private final static byte ASCII_SPACE = " ".getBytes()[0];
+    
     /**
      * The name of the "current directory" (".") entry of a FAT directory.
      */
@@ -45,7 +47,7 @@ final class ShortName {
      */
     public final static ShortName DOT_DOT = new ShortName("..", ""); //NOI18N
 
-    private final char[] name;
+    private final byte[] nameBytes;
     
     private ShortName(String nameExt) {
         if (nameExt.length() > 12) throw
@@ -61,23 +63,23 @@ final class ShortName {
             nameString = nameExt.substring(0, i).toUpperCase();
             extString = nameExt.substring(i + 1).toUpperCase();
         }
-
-        this.name = toCharArray(nameString, extString);
-        checkValidChars(this.name);
+        
+        this.nameBytes = toCharArray(nameString, extString);
+        checkValidChars(nameBytes);
     }
     
     ShortName(String name, String ext) {
-        this.name = toCharArray(name, ext);
+        this.nameBytes = toCharArray(name, ext);
     }
     
-    private static char[] toCharArray(String name, String ext) {
+    private static byte[] toCharArray(String name, String ext) {
         checkValidName(name);
         checkValidExt(ext);
         
-        final char[] result = new char[11];
-        Arrays.fill(result, ' ');
-        System.arraycopy(name.toCharArray(), 0, result, 0, name.length());
-        System.arraycopy(ext.toCharArray(), 0, result, 8, ext.length());
+        final byte[] result = new byte[11];
+        Arrays.fill(result, ASCII_SPACE);
+        System.arraycopy(name.getBytes(), 0, result, 0, name.length());
+        System.arraycopy(ext.getBytes(), 0, result, 8, ext.length());
         
         return result;
     }
@@ -91,7 +93,7 @@ final class ShortName {
     public byte checkSum() {
         final byte[] dest = new byte[11];
         for (int i = 0; i < 11; i++)
-            dest[i] = (byte) name[i];
+            dest[i] = (byte) nameBytes[i];
 
         int sum = dest[0];
         for (int i = 1; i < 11; i++) {
@@ -155,13 +157,14 @@ final class ShortName {
     }
 
     public void write(byte[] dest) {
-        for (int i = 0; i < 11; i++) {
-            dest[i] = (byte) name[i];
-        }
+        System.arraycopy(nameBytes, 0, dest, 0, nameBytes.length);
     }
-
+    
     public String asSimpleString() {
-        return new String(this.name).trim();
+        final String name = new String(this.nameBytes, 0, 8).trim();
+        final String ext = new String(this.nameBytes, 8, 3).trim();
+        
+        return ext.isEmpty() ? name : name + "." + ext;
     }
     
     @Override
@@ -201,12 +204,12 @@ final class ShortName {
         }
 
         final ShortName other = (ShortName) obj;
-        return Arrays.equals(name, other.name);
+        return Arrays.equals(nameBytes, other.nameBytes);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(this.name);
+        return Arrays.hashCode(this.nameBytes);
     }
 
     /**
@@ -216,7 +219,7 @@ final class ShortName {
      * @param chars the char array to test
      * @throws IllegalArgumentException if invalid chars are contained
      */
-    public static void checkValidChars(char[] chars)
+    public static void checkValidChars(byte[] chars)
             throws IllegalArgumentException {
             
         if (chars[0] == 0x20) throw new IllegalArgumentException(

@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
  */
 public class DosFsckTest {
 
-    private final static String DOSFSCK_CMD = "/sbin/dosfsck";
+    private final static String DOSFSCK_CMD = "/usr/sbin/dosfsck";
     private File file;
     private FileDisk dev;
 
@@ -123,6 +123,7 @@ public class DosFsckTest {
     
     private void runFsck() throws Exception {
         System.out.println("running fsck on " + file);
+        
         final ProcessBuilder pb = new ProcessBuilder(
                 DOSFSCK_CMD, "-v", "-n", file.toString());
 

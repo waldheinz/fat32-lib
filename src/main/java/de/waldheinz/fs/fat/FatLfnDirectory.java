@@ -157,7 +157,7 @@ public final class FatLfnDirectory
     
     private void checkUniqueName(String name) throws IOException {
         final String lowerName = name.toLowerCase();
-
+        
         if (!this.usedNames.add(lowerName)) {
             throw new IOException(
                     "an entry named " + name + " already exists");
