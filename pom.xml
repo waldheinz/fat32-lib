@@ -34,11 +34,11 @@
         </url>
         
         <connection>
-            scm:hg:https://fat32-lib.googlecode.com/hg/
+            scm:hg:https://code.google.com/p/fat32-lib/
         </connection>
         
         <developerConnection>
-            scm:hg:https://fat32-lib.googlecode.com/hg/
+            scm:hg:https://code.google.com/p/fat32-lib/
         </developerConnection>
     </scm>
     
