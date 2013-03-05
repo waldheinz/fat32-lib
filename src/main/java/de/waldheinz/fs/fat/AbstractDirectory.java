@@ -361,7 +361,7 @@ abstract class AbstractDirectory {
 
         checkRoot();
 
-        if (label.length() > MAX_LABEL_LENGTH) throw new
+        if (label != null && label.length() > MAX_LABEL_LENGTH) throw new
                 IllegalArgumentException("label too long");
 
         if (this.volumeLabel != null) {
@@ -369,13 +369,15 @@ abstract class AbstractDirectory {
                 changeSize(getSize() - 1);
                 this.volumeLabel = null;
             } else {
-                ShortName.checkValidChars(label.toCharArray());
+                ShortName.checkValidChars(label.getBytes());
                 this.volumeLabel = label;
             }
         } else {
-            changeSize(getSize() + 1);
-            ShortName.checkValidChars(label.toCharArray());
-            this.volumeLabel = label;
+            if (label != null) {
+                changeSize(getSize() + 1);
+                ShortName.checkValidChars(label.getBytes());
+                this.volumeLabel = label;
+            }
         }
         
         this.dirty = true;
