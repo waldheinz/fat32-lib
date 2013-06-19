@@ -86,12 +86,12 @@ public final class FatFileSystem extends AbstractFileSystem {
         
         if (fatType == FatType.FAT32) {
             final Fat32BootSector f32bs = (Fat32BootSector) bs;
-            ClusterChain rootDirFile = new ClusterChain(fat,
+            final ClusterChain rootChain = new ClusterChain(fat,
                     f32bs.getRootDirFirstCluster(), isReadOnly());
-            this.rootDirStore = ClusterChainDirectory.readRoot(rootDirFile);
+            this.rootDirStore = ClusterChainDirectory.readRoot(rootChain);
             this.fsiSector = FsInfoSector.read(f32bs);
             
-            if (fsiSector.getFreeClusterCount() != fat.getFreeClusterCount()) {
+            if (fsiSector.getFreeClusterCount() < fat.getFreeClusterCount()) {
                 throw new IOException("free cluster count mismatch - fat: " +
                         fat.getFreeClusterCount() + " - fsinfo: " +
                         fsiSector.getFreeClusterCount());
