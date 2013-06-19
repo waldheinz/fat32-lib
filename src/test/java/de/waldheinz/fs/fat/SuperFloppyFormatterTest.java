@@ -46,6 +46,15 @@ public class SuperFloppyFormatterTest {
         assertEquals(label, fs.getVolumeLabel());
     }
     
+    @Test
+    public void test4MiBDevice() throws IOException {
+        System.out.println("format (4 MiB device)");
+        
+        int sizeBytes = 4*1024*1024;
+        RamDisk disk = new RamDisk(sizeBytes);
+        SuperFloppyFormatter.get(disk);
+    }
+    
     @Test(expected=IllegalArgumentException.class)
     public void testFat12FormatInvalid() throws IOException {
         System.out.println("fat12Format (invalid)");

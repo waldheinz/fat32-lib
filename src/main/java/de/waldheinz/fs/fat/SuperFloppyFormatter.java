@@ -283,17 +283,21 @@ public final class SuperFloppyFormatter {
     
     /**
      * Determines a usable FAT type from the {@link #device} by looking at the
-     * {@link BlockDevice#getSize() device size} only. The value returned
-     * matches what's recommended in the FAT specification by MS.
+     * {@link BlockDevice#getSize() device size} only.
      *
      * @return the suggested FAT type
      * @throws IOException on error determining the device's size
      */
     private FatType fatTypeFromDevice() throws IOException {
         final long sizeInMb = device.getSize() / (1024 * 1024);
-        if (sizeInMb < 4) return FatType.FAT12;
-        else if (sizeInMb < 512) return FatType.FAT16;
-        else return FatType.FAT32;
+        
+        if (sizeInMb < 5) {
+            return FatType.FAT12;
+        } else if (sizeInMb < 512) {
+            return FatType.FAT16;
+        } else {
+            return FatType.FAT32;
+        }
     }
     
     /**
@@ -373,7 +377,7 @@ public final class SuperFloppyFormatter {
         final long sectors = device.getSize() / device.getSectorSize();
         
         if (sectors <= 8400) throw new IllegalArgumentException(
-                "disk too small for FAT16");
+                "disk too small for FAT16 (" + sectors + ")");
 
         if (sectors > 4194304) throw new IllegalArgumentException(
                 "disk too large for FAT16");
