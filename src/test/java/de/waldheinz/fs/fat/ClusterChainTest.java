@@ -47,6 +47,28 @@ public class ClusterChainTest {
     }
 
     @Test
+    public void testReadOffset() throws IOException {
+        System.out.println("readOffset");
+        
+        final ByteBuffer write = ByteBuffer.allocate(768);
+        
+        for (int i=0; i < 512; i++) {
+            write.put(i, (byte) i);
+        }
+        
+        cc.writeData(0, write);
+        
+        final ByteBuffer read = ByteBuffer.allocate(512 - 5);
+        
+        cc.readData(5, read);
+        
+        for (int i=5; i < 512; i++) {
+            assertEquals(i % 256, ((int)read.get(i - 5)) & 0xff);
+        }
+        
+    }
+    
+    @Test
     public void testWriteBufferLimit() throws IOException {
         System.out.println("writeBufferLimit");
 

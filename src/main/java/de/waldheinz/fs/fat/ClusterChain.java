@@ -199,16 +199,19 @@ final class ClusterChain extends AbstractFsObject {
 
         int len = dest.remaining();
 
-        if ((startCluster == 0 && len > 0)) throw new EOFException();
+        if ((startCluster == 0 && len > 0)) {
+            throw new EOFException("cannot read from empty cluster chain");
+        }
         
         final long[] chain = getFat().getChain(startCluster);
         final BlockDevice dev = getDevice();
 
         int chainIdx = (int) (offset / clusterSize);
+        
         if (offset % clusterSize != 0) {
             int clusOfs = (int) (offset % clusterSize);
             int size = Math.min(len,
-                    (int) (clusterSize - (offset % clusterSize) - 1));
+                    (int) (clusterSize - (offset % clusterSize)));
             dest.limit(dest.position() + size);
 
             dev.read(getDevOffset(chain[chainIdx], clusOfs), dest);
@@ -254,6 +257,7 @@ final class ClusterChain extends AbstractFsObject {
         final long[] chain = fat.getChain(getStartCluster());
 
         int chainIdx = (int) (offset / clusterSize);
+        
         if (offset % clusterSize != 0) {
             int clusOfs = (int) (offset % clusterSize);
             int size = Math.min(len,
