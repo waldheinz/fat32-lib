@@ -281,22 +281,23 @@ final class ClusterChain extends AbstractFsObject {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (!(obj instanceof ClusterChain)) return false;
+        if (obj == null) {
+            return false;
+        }
+        
+        if (!(obj instanceof ClusterChain)){
+            return false;
+        }
         
         final ClusterChain other = (ClusterChain) obj;
         
-        if (this.fat != other.fat &&
-                (this.fat == null || !this.fat.equals(other.fat))) {
+        if ((this.fat != other.fat) &&
+            (this.fat == null || !this.fat.equals(other.fat))) {
 
             return false;
         }
         
-        if (this.startCluster != other.startCluster) {
-            return false;
-        }
-
-        return true;
+        return (this.startCluster == other.startCluster);
     }
 
     @Override
