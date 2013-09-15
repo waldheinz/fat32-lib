@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *

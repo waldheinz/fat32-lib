@@ -29,6 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Assume;
 
 /**
  *
@@ -41,20 +42,26 @@ public class DosFsckTest {
     private FileDisk dev;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
+        Assume.assumeTrue(fsckAvailable());
+        
         this.file = File.createTempFile("fat32-lib-test-", ".img");
         this.file.deleteOnExit();
     }
-
+    
     @After
     public void tearDown() throws IOException {
-        this.dev.close();
-        this.dev = null;
-
-        this.file.delete();
-        this.file = null;
+        if (dev != null) {
+            this.dev.close();
+            this.dev = null;
+        }
+        
+        if (this.file != null) {
+            this.file.delete();
+            this.file = null;
+        }
     }
-
+    
     @Test
     public void testVolumeLabel() throws Exception {
         System.out.println("volumeLabel");
@@ -119,6 +126,20 @@ public class DosFsckTest {
         this.dev = FileDisk.create(file, 2 * 1024 * 1024);
         SuperFloppyFormatter.get(dev).setFatType(FatType.FAT12).format();
         runFsck();
+    }
+    
+    private boolean fsckAvailable() throws Exception {
+        System.out.print("checking if dosfsck is available... ");
+        
+        final boolean result = new File(DOSFSCK_CMD).canExecute();
+        
+        if (result) {
+            System.out.println("ok");
+        } else {
+            System.out.println("no");
+        }
+        
+        return result;
     }
     
     private void runFsck() throws Exception {

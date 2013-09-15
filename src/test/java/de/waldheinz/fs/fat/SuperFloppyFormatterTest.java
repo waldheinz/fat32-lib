@@ -110,7 +110,8 @@ public class SuperFloppyFormatterTest {
         assertEquals("FAT16   ", fs.getBootSector().getFileSystemTypeLabel());
     }
     
-    @Test(expected=IllegalArgumentException.class) @Ignore
+    @Ignore
+    @Test(expected=IllegalArgumentException.class)
     public void testFat16FormatTooBig() throws IOException {
         System.out.println("fat16Format (too big)");
         final File file = File.createTempFile("fat32-test", ".img");
