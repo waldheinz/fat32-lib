@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
+    
+    <properties>
+        <title>fat32-lib History</title>
+        <author email="mt@waldheinz.de">Matthias Treydte</author>
+    </properties>
+    
+    <body>
+        <release version="0.6.4" date="2013-09-15" description="Bugfix Release">
+            <action dev="trem" type="fix">
+                fixed unit tests depending on dosfsck when the binary is not
+                available
+            </action>
+            <action dev="trem" type="fix">
+                fixed off-by-one error when seeking in files
+            </action>
+        </release>
+        
+        <release version="0.6.3" date="2013-06-19" description="Bugfix Release">
+            <action dev="trem" type="fix">
+                fixed not being able to read volumes freshly formatted by
+                Windows 7, because we expected the free cluster count from the
+                FS info sector to match the actual value (it does not have to)
+            </action>
+            <action dev="trem" type="fix">
+                fixed SuperFloppyFormatter? suggesting FAT16 for devices around
+                4 MiB size, which is in fact too small for FAT16
+            </action>
+        </release>
+        
+        <release version="0.6.2" date="2013-03-05" description="Bugfix Release">
+            <action dev="trem" type="fix">
+                fixed a possible NPE when setting the volume label
+            </action>
+            <action dev="trem" type="fix">
+                fixed problems generating canonical file names when no LFN
+                entries are present
+            </action>
+        </release>
+        
+        <release version="0.6.1" date="2013-01-24" description="Bugfix Release">
+            <action dev="trem" type="fix">
+                fixed the boot sector copy for FAT32 filesystems being invalid
+            </action>
+            <action dev="trem" type="fix">
+                fixed clipping cluster numbers to 16 bits when using FAT32
+            </action>
+        </release>
+        
+        <release version="0.6" date="2010-11-17" description="Feature and Bugfix Release">
+            <action dev="trem" type="add">
+                the FAT archive, hidden, read-only and system attributes are
+                now accessible through the FatLfnDirectoryEntry class
+            </action>
+            <action dev="trem" type="fix">
+                the restrictions for "unique" file names as required by the FAT
+                specs are honored
+            </action>
+            <action dev="trem" type="add">
+                it is possible to efficiently rename or move files and
+                directories without doing a copy/delete cycle
+            </action>            
+        </release>
+        
+        <release version="0.5.1" date="2010-10-14" description="Bugfix Release">
+            <action dev="trem" type="fix">
+                fixed a memory leak when deleting directories
+            </action>
+        </release>
+        
+        <release version="0.5.0" date="2010-07-31" description="First Release">
+            <action dev="trem" type="update">
+                no changes since rc2
+            </action>
+            <action dev="trem" type="update">
+                first version available through the Maven Central repository
+            </action>
+        </release>
+        
+        <release version="0.5.0-rc2" date="2010-05-10" description="Bugfixes">
+            <action dev="trem" type="update">
+                rather big cleanup for the boot sector generation, which is no
+                longer based on a blueprint which gets the correct values
+                patched in but rather generated from scratch
+            </action>
+            <action dev="trem" type="fix">
+                fixed handling of the "." and ".." entries
+            </action>
+        </release>
+        
+        <release version="0.5.0-rc1" date="2010-04-22" description="First Version">
+            <action dev="trem" type="update">
+                first released version capable of reading and writing
+                FAT 12/16/32 file systems (to some extent...)
+            </action>
+        </release>
+    </body>
+</document>
