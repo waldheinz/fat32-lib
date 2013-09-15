@@ -8,7 +8,7 @@
     <version>0.6.4-SNAPSHOT</version>
     <name>FAT32 Library</name>
     <description>A library for manipulating FAT file systems.</description>
-    <url>http://code.google.com/p/fat32-lib/</url>
+    <url>https://github.com/waldheinz/fat32-lib</url>
     
     <prerequisites>
         <maven>2.2.1</maven>
@@ -29,22 +29,14 @@
     </licenses>
     
     <scm>
-        <url>
-            http://code.google.com/p/fat32-lib/source/browse/
-        </url>
-        
-        <connection>
-            scm:hg:https://code.google.com/p/fat32-lib/
-        </connection>
-        
-        <developerConnection>
-            scm:hg:https://code.google.com/p/fat32-lib/
-        </developerConnection>
+        <url>https://github.com/waldheinz/fat32-lib</url>
+        <connection>scm:git:https://github.com/waldheinz/fat32-lib.git</connection>
+        <developerConnection>scm:git:git@github.com:waldheinz/fat32-lib.git</developerConnection>
     </scm>
     
     <issueManagement>
-        <system>Google Code issue tracker</system>
-        <url>http://code.google.com/p/fat32-lib/issues/list</url>
+        <system>GitHub Issue Tracker</system>
+        <url>https://github.com/waldheinz/fat32-lib/issues</url>
     </issueManagement>
     
     <build>
