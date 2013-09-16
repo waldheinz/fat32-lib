@@ -41,13 +41,13 @@ public class FileSystemFactory {
      * @param device the device to create the file system for
      * @param readOnly if the file system should be openend read-only
      * @return a new {@code FileSystem} instance for the specified device
-     * @throws UnknownFileSystemException if the file system type could
+     * @throws IOException on read error, or if the file system type could
      *      not be determined
-     * @throws IOException on read error
      */
     public static FileSystem create(BlockDevice device, boolean readOnly)
-            throws UnknownFileSystemException, IOException {
+            throws IOException {
             
         return FatFileSystem.read(device, readOnly);
     }
+    
 }
