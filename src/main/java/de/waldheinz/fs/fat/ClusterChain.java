@@ -30,10 +30,11 @@ import java.nio.ByteBuffer;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
  */
 final class ClusterChain extends AbstractFsObject {
-    protected final Fat fat;
+    
+    private final Fat fat;
     private final BlockDevice device;
     private final int clusterSize;
-    protected final long dataOffset;
+    private final long dataOffset;
     
     private long startCluster;
     
@@ -216,7 +217,6 @@ final class ClusterChain extends AbstractFsObject {
 
             dev.read(getDevOffset(chain[chainIdx], clusOfs), dest);
             
-            offset += size;
             len -= size;
             chainIdx++;
         }
@@ -266,7 +266,6 @@ final class ClusterChain extends AbstractFsObject {
             
             device.write(getDevOffset(chain[chainIdx], clusOfs), srcBuf);
             
-            offset += size;
             len -= size;
             chainIdx++;
         }
