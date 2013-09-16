@@ -19,7 +19,7 @@ public class DeviceAccessTest {
         bb.putInt(-1);
         bb.rewind();
         
-        long unsigned = DeviceAccess.getUint32(bb);
+        final long unsigned = DeviceAccess.getUint32(bb);
         
         System.out.println("read " + unsigned);
         
