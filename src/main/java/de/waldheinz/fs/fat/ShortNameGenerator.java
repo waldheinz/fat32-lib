@@ -19,6 +19,7 @@
 package de.waldheinz.fs.fat;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -44,20 +45,20 @@ final class ShortNameGenerator {
     }
     
     /*
-     * Its in the DOS manual!(DOS 5: page 72) Valid: A..Z 0..9 _ ^ $ ~ ! # % & - {} () @ ' `
+     * Its in the DOS manual!(DOS 5: page 72)
      *
-     * Unvalid: spaces/periods,
+     * Valid: A..Z 0..9 _ ^ $ ~ ! # % & - {} () @ ' `
      */
     public static boolean validChar(char toTest) {
         if (toTest >= 'A' && toTest <= 'Z') return true;
         if (toTest >= '0' && toTest <= '9') return true;
-        if (toTest == '_' || toTest == '^' || toTest == '$' || toTest == '~' ||
-                toTest == '!' || toTest == '#' || toTest == '%' || toTest == '&' ||
-                toTest == '-' || toTest == '{' || toTest == '}' || toTest == '(' ||
-                toTest == ')' || toTest == '@' || toTest == '\'' || toTest == '`')
-            return true;
-
-        return false;
+        
+        return (toTest == '_' || toTest == '^' || toTest == '$' ||
+                toTest == '~' || toTest == '!' || toTest == '#' ||
+                toTest == '%' || toTest == '&' || toTest == '-' ||
+                toTest == '{' || toTest == '}' || toTest == '(' ||
+                toTest == ')' || toTest == '@' || toTest == '\''||
+                toTest == '`');
     }
     
     public static boolean isSkipChar(char c) {
@@ -115,7 +116,8 @@ final class ShortNameGenerator {
     public ShortName generateShortName(String longFullName)
             throws IllegalStateException {
         
-        longFullName = stripLeadingPeriods(longFullName).toUpperCase();
+        longFullName =
+                stripLeadingPeriods(longFullName).toUpperCase(Locale.ROOT);
         
         final String longName;
         final String longExt;
@@ -140,7 +142,7 @@ final class ShortNameGenerator {
             
         if (forceSuffix || (longName.length() > 8) ||
                 usedNames.contains(new ShortName(longName, shortExt).
-                asSimpleString().toLowerCase())) {
+                asSimpleString().toLowerCase(Locale.ROOT))) {
 
             /* we have to append the "~n" suffix */
 
@@ -154,7 +156,7 @@ final class ShortNameGenerator {
                 final ShortName result = new ShortName(shortName, shortExt);
                 
                 if (!usedNames.contains(
-                        result.asSimpleString().toLowerCase())) {
+                        result.asSimpleString().toLowerCase(Locale.ROOT))) {
                     
                     return result;
                 }

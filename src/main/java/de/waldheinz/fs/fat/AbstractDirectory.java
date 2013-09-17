@@ -369,13 +369,13 @@ abstract class AbstractDirectory {
                 changeSize(getSize() - 1);
                 this.volumeLabel = null;
             } else {
-                ShortName.checkValidChars(label.getBytes("ASCII"));
+                ShortName.checkValidChars(label.getBytes(ShortName.ASCII));
                 this.volumeLabel = label;
             }
         } else {
             if (label != null) {
                 changeSize(getSize() + 1);
-                ShortName.checkValidChars(label.getBytes("ASCII"));
+                ShortName.checkValidChars(label.getBytes(ShortName.ASCII));
                 this.volumeLabel = label;
             }
         }

@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -143,7 +144,7 @@ public final class FatLfnDirectory
         dir.addEntries(entry.compactForm());
         
         shortNameIndex.put(sn, entry);
-        longNameIndex.put(name.toLowerCase(), entry);
+        longNameIndex.put(name.toLowerCase(Locale.ROOT), entry);
 
         getFile(entry.realEntry);
         
@@ -152,11 +153,11 @@ public final class FatLfnDirectory
     }
     
     boolean isFreeName(String name) {
-        return !this.usedNames.contains(name.toLowerCase());
+        return !this.usedNames.contains(name.toLowerCase(Locale.ROOT));
     }
     
     private void checkUniqueName(String name) throws IOException {
-        final String lowerName = name.toLowerCase();
+        final String lowerName = name.toLowerCase(Locale.ROOT);
         
         if (!this.usedNames.add(lowerName)) {
             throw new IOException(
@@ -165,7 +166,7 @@ public final class FatLfnDirectory
     }
     
     private void freeUniqueName(String name) {
-        final String lowerName = name.toLowerCase();
+        final String lowerName = name.toLowerCase(Locale.ROOT);
 
         if (!this.usedNames.remove(lowerName)) {
             throw new AssertionError();
@@ -182,7 +183,7 @@ public final class FatLfnDirectory
                     "could not generate short name for \"" + name + "\"", ex);
         }
         
-        this.usedNames.add(result.asSimpleString().toLowerCase());
+        this.usedNames.add(result.asSimpleString().toLowerCase(Locale.ROOT));
         return result;
     }
     
@@ -221,7 +222,7 @@ public final class FatLfnDirectory
         }
         
         shortNameIndex.put(sn, e);
-        longNameIndex.put(name.toLowerCase(), e);
+        longNameIndex.put(name.toLowerCase(Locale.ROOT), e);
 
         getDirectory(real);
         
@@ -242,7 +243,7 @@ public final class FatLfnDirectory
      */
     @Override
     public FatLfnDirectoryEntry getEntry(String name) {
-        name = name.trim().toLowerCase();
+        name = name.trim().toLowerCase(Locale.ROOT);
         
         final FatLfnDirectoryEntry entry = longNameIndex.get(name);
         
@@ -290,7 +291,9 @@ public final class FatLfnDirectory
                 checkUniqueName(current.getName());
                 
                 shortNameIndex.put(current.realEntry.getShortName(), current);
-                longNameIndex.put(current.getName().toLowerCase(), current);
+                longNameIndex.put(current
+                        .getName()
+                        .toLowerCase(Locale.ROOT), current);
             }
         }
     }
@@ -394,7 +397,7 @@ public final class FatLfnDirectory
                 new IllegalArgumentException(
                     "the dot entries can not be removed");
 
-        final String lowerName = entry.getName().toLowerCase();
+        final String lowerName = entry.getName().toLowerCase(Locale.ROOT);
 
         assert (this.longNameIndex.containsKey(lowerName));
         this.longNameIndex.remove(lowerName);
@@ -422,7 +425,7 @@ public final class FatLfnDirectory
         entry.realEntry.setShortName(
             this.sng.generateShortName(entry.getName()));
         
-        this.longNameIndex.put(entry.getName().toLowerCase(), entry);
+        this.longNameIndex.put(entry.getName().toLowerCase(Locale.ROOT), entry);
         this.shortNameIndex.put(entry.realEntry.getShortName(), entry);
         
         updateLFN();

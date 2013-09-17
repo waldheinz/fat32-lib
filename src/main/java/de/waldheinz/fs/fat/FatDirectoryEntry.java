@@ -210,10 +210,10 @@ final class FatDirectoryEntry extends AbstractFsObject {
         final byte[] data = new byte[SIZE];
         
         System.arraycopy(
-                    volumeLabel.getBytes(), 0,
+                    volumeLabel.getBytes(ShortName.ASCII), 0,
                     data, 0,
                     volumeLabel.length());
-
+        
         final FatDirectoryEntry result =
                 new FatDirectoryEntry(type, data, false);
         result.setFlags(FatDirectoryEntry.F_VOLUME_ID);
@@ -400,7 +400,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
     public boolean isReadonlyFlag() {
         return ((getFlags() & F_READONLY) != 0);
     }
-
+    
     /**
      * Updates the read-only file system flag for this entry.
      *

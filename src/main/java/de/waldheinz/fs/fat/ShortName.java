@@ -18,7 +18,9 @@
 
 package de.waldheinz.fs.fat;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * Represents a "short" (8.3) file name as used by DOS.
@@ -27,6 +29,8 @@ import java.util.Arrays;
  */
 final class ShortName {
 
+    public final static Charset ASCII = Charset.forName("ASCII");
+    
     /**
      * These are taken from the FAT specification.
      */
@@ -35,7 +39,7 @@ final class ShortName {
         0x3C, 0x3D, 0x3E, 0x3F, 0x5B, 0x5C, 0x5D, 0x7C
     };
     
-    private final static byte ASCII_SPACE = " ".getBytes()[0];
+    private final static byte ASCII_SPACE = 0x20;
     
     /**
      * The name of the "current directory" (".") entry of a FAT directory.
@@ -57,11 +61,11 @@ final class ShortName {
         final String nameString, extString;
         
         if (i < 0) {
-            nameString = nameExt.toUpperCase();
+            nameString = nameExt.toUpperCase(Locale.ROOT);
             extString = "";
         } else {
-            nameString = nameExt.substring(0, i).toUpperCase();
-            extString = nameExt.substring(i + 1).toUpperCase();
+            nameString = nameExt.substring(0, i).toUpperCase(Locale.ROOT);
+            extString = nameExt.substring(i + 1).toUpperCase(Locale.ROOT);
         }
         
         this.nameBytes = toCharArray(nameString, extString);
@@ -78,8 +82,8 @@ final class ShortName {
         
         final byte[] result = new byte[11];
         Arrays.fill(result, ASCII_SPACE);
-        System.arraycopy(name.getBytes(), 0, result, 0, name.length());
-        System.arraycopy(ext.getBytes(), 0, result, 8, ext.length());
+        System.arraycopy(name.getBytes(ASCII), 0, result, 0, name.length());
+        System.arraycopy(ext.getBytes(ASCII), 0, result, 8, ext.length());
         
         return result;
     }
@@ -161,16 +165,15 @@ final class ShortName {
     }
     
     public String asSimpleString() {
-        final String name = new String(this.nameBytes, 0, 8).trim();
-        final String ext = new String(this.nameBytes, 8, 3).trim();
+        final String name = new String(this.nameBytes, 0, 8, ASCII).trim();
+        final String ext = new String(this.nameBytes, 8, 3, ASCII).trim();
         
         return ext.isEmpty() ? name : name + "." + ext;
     }
     
     @Override
     public String toString() {
-        return getClass().getSimpleName() +
-                " [" + asSimpleString() + "]"; //NOI18N
+        return "ShortName [" + asSimpleString() + "]"; //NOI18N
     }
     
     private static void checkValidName(String name) {
