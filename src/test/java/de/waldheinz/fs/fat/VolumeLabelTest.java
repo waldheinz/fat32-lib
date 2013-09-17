@@ -25,6 +25,7 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -97,4 +98,43 @@ public class VolumeLabelTest {
 
         fs.setVolumeLabel(" invalid");
     }
+    
+    @Test
+    @Ignore
+    public void testUtf8() throws IOException {
+        System.out.println("UTF-8");
+        
+        final String label = "äöü";
+        
+        fs.setVolumeLabel(label);
+        
+        fs.close();
+        
+        fs = new FatFileSystem(dev, true);
+        dirStore = fs.getRootDirStore();
+        bs = (Fat16BootSector) fs.getBootSector();
+        
+        System.out.println("fs: " + fs.getVolumeLabel());
+        assertEquals(label, fs.getVolumeLabel());
+        
+        System.out.println("bs: " + bs.getVolumeLabel());
+        assertEquals(label, bs.getVolumeLabel());
+        
+        System.out.println("ds: " + dirStore.getLabel());
+        assertEquals(label, dirStore.getLabel());
+    }
+    
+    @Test
+    @Ignore
+    public void testUmlauts() throws IOException {
+        System.out.println("umlauts");
+        
+        dev = RamDisk.readGzipped(
+                getClass().getResourceAsStream("umlauts-label.img.gz"));
+        
+        fs = FatFileSystem.read(dev, true);
+        System.out.println(fs.getVolumeLabel());
+        throw new AssertionError(fs.getVolumeLabel());
+    }
+    
 }
