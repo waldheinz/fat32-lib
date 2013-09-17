@@ -135,9 +135,9 @@ public class FatFileSystemTest {
         assertEquals(32, bs.getSectorsPerTrack());
         assertEquals(64, bs.getNrHeads());
         assertEquals(0, bs.getNrHiddenSectors());
-        assertEquals(512, FatUtils.getFatOffset(bs, 0));
-        assertEquals(1536, FatUtils.getFatOffset(bs, 1));
-        assertEquals(2560, FatUtils.getRootDirOffset(bs));
+        assertEquals(512, bs.getFatOffset(0));
+        assertEquals(1536, bs.getFatOffset(1));
+        assertEquals(2560, bs.getRootDirOffset());
 
         final FsDirectory fatRootDir = fatFs.getRoot();
 
@@ -179,9 +179,9 @@ public class FatFileSystemTest {
         assertEquals(32, bs.getSectorsPerTrack());
         assertEquals(64, bs.getNrHeads());
         assertEquals(0, bs.getNrHiddenSectors());
-        assertEquals(0x200, FatUtils.getFatOffset(bs, 0));
-        assertEquals(0x2a00, FatUtils.getFatOffset(bs, 1));
-        assertEquals(0x5200, FatUtils.getRootDirOffset(bs));
+        assertEquals(0x200, bs.getFatOffset(0));
+        assertEquals(0x2a00, bs.getFatOffset(1));
+        assertEquals(0x5200, bs.getRootDirOffset());
         
         final FsDirectory fatRootDir = fatFs.getRoot();
         
@@ -251,9 +251,9 @@ public class FatFileSystemTest {
         assertEquals(32, bs.getSectorsPerTrack());
         assertEquals(64, bs.getNrHeads());
         assertEquals(0, bs.getNrHiddenSectors());
-        assertEquals(16384, FatUtils.getFatOffset(bs, 0));
+        assertEquals(16384, bs.getFatOffset(0));
         assertEquals(16384 + bs.getSectorsPerFat() * bs.getBytesPerSector(),
-                FatUtils.getFatOffset(bs, 1));
+                bs.getFatOffset(1));
         
         final FsDirectory rootDir = fatFs.getRoot();
         System.out.println("   rootDir = " + rootDir);

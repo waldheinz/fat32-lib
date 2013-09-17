@@ -62,11 +62,11 @@ final class ClusterChain extends AbstractFsObject {
         }
         
         this.device = fat.getDevice();
-        this.dataOffset = FatUtils.getFilesOffset(fat.getBootSector());
+        this.dataOffset = fat.getBootSector().getFilesOffset();
         this.startCluster = startCluster;
         this.clusterSize = fat.getBootSector().getBytesPerCluster();
     }
-
+    
     public int getClusterSize() {
         return clusterSize;
     }

@@ -71,7 +71,7 @@ public final class FatFileSystem extends AbstractFileSystem {
         if (bs.getNrFats() <= 0) throw new IOException(
                 "boot sector says there are no FATs");
         
-        this.filesOffset = FatUtils.getFilesOffset(bs);
+        this.filesOffset = bs.getFilesOffset();
         this.fatType = bs.getFatType();
         this.fat = Fat.read(bs, 0);
 
@@ -197,7 +197,7 @@ public final class FatFileSystem extends AbstractFileSystem {
         }
         
         for (int i = 0; i < bs.getNrFats(); i++) {
-            fat.writeCopy(FatUtils.getFatOffset(bs, i));
+            fat.writeCopy(bs.getFatOffset(i));
         }
         
         rootDir.flush();

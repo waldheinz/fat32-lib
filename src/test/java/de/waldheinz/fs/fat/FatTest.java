@@ -96,7 +96,7 @@ public class FatTest {
     public void testWriteCopy() throws Exception {
         System.out.println("writeCopy");
         
-        fat.writeCopy(FatUtils.getFatOffset(bs, 1));
+        fat.writeCopy(bs.getFatOffset(1));
     }
     
     @Test

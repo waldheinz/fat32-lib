@@ -139,7 +139,62 @@ abstract class BootSector extends Sector {
     public abstract int getRootDirEntryCount();
     
     public abstract long getSectorCount();
+    
+    /**
+     * Gets the offset (in bytes) of the fat with the given index
+     * 
+     * @param bs
+     * @param fatNr (0..)
+     * @return long
+     * @throws IOException 
+     */
+    public final long getFatOffset(int fatNr) {
+        long sectSize = this.getBytesPerSector();
+        long sectsPerFat = this.getSectorsPerFat();
+        long resSects = this.getNrReservedSectors();
 
+        long offset = resSects * sectSize;
+        long fatSize = sectsPerFat * sectSize;
+
+        offset += fatNr * fatSize;
+
+        return offset;
+    }
+
+    /**
+     * Gets the offset (in bytes) of the root directory with the given index
+     * 
+     * @param bs
+     * @return long
+     * @throws IOException 
+     */
+    public final long getRootDirOffset() {
+        long sectSize = this.getBytesPerSector();
+        long sectsPerFat = this.getSectorsPerFat();
+        int fats = this.getNrFats();
+
+        long offset = getFatOffset(0);
+        
+        offset += fats * sectsPerFat * sectSize;
+
+        return offset;
+    }
+
+    /**
+     * Gets the offset of the data (file) area
+     * 
+     * @param bs
+     * @return long
+     * @throws IOException 
+     */
+    public final long getFilesOffset() {
+        long offset = getRootDirOffset();
+        
+        offset += this.getRootDirEntryCount() * 32l;
+        
+        return offset;
+    }
+    
     /**
      * Returns the offset to the file system type label, as this differs
      * between FAT12/16 and FAT32.
@@ -223,7 +278,7 @@ abstract class BootSector extends Sector {
      */
     private long getDataSize() {
         return (getSectorCount() * getBytesPerSector()) -
-                FatUtils.getFilesOffset(this);
+                this.getFilesOffset();
     }
 
     /**

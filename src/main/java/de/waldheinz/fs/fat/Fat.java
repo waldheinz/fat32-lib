@@ -67,7 +67,7 @@ final class Fat {
                     " FATs when reading FAT #" + fatNr);
         }
         
-        final long fatOffset = FatUtils.getFatOffset(bs, fatNr);
+        final long fatOffset = bs.getFatOffset(fatNr);
         final Fat result = new Fat(bs, fatOffset);
         result.read();
         return result;
@@ -92,7 +92,7 @@ final class Fat {
                     " FATs when creating FAT #" + fatNr);
         }
         
-        final long fatOffset = FatUtils.getFatOffset(bs, fatNr);
+        final long fatOffset = bs.getFatOffset(fatNr);
         final Fat result = new Fat(bs, fatOffset);
 
         if (bs.getDataClusterCount() > result.entries.length)
@@ -399,10 +399,8 @@ final class Fat {
         if (this.sectorSize != other.sectorSize) return false;
         if (this.lastClusterIndex != other.lastClusterIndex) return false;
         if (!Arrays.equals(this.entries, other.entries)) return false;
-        if (this.getMediumDescriptor() != other.getMediumDescriptor())
-            return false;
-
-        return true;
+        
+        return (this.getMediumDescriptor() == other.getMediumDescriptor());
     }
     
     @Override

@@ -37,7 +37,7 @@ final class Fat16RootDirectory extends AbstractDirectory {
         if (bs.getRootDirEntryCount() <= 0) throw new IllegalArgumentException(
                 "root directory size is " + bs.getRootDirEntryCount());
         
-        this.deviceOffset = FatUtils.getRootDirOffset(bs);
+        this.deviceOffset = bs.getRootDirOffset();
         this.device = bs.getDevice();
     }
     

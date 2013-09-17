@@ -83,14 +83,14 @@ public final class SuperFloppyFormatter {
     private static final int MAX_DIRECTORY = 512;
     
     private final BlockDevice device;
+    private final int fatCount;
     
     private String label;
     private String oemName;
     private FatType fatType;
     private int sectorsPerCluster;
     private int reservedSectors;
-    private int fatCount;
-
+    
     /**
      * Creates a new {@code SuperFloppyFormatter} for the specified
      * {@code BlockDevice}.
@@ -242,7 +242,7 @@ public final class SuperFloppyFormatter {
         rootDir.flush();
         
         for (int i = 0; i < bs.getNrFats(); i++) {
-            fat.writeCopy(FatUtils.getFatOffset(bs, i));
+            fat.writeCopy(bs.getFatOffset(i));
         }
         
         bs.write();
