@@ -20,6 +20,9 @@ package de.waldheinz.fs.util;
 
 import de.waldheinz.fs.*;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -71,6 +74,26 @@ public final class RamDisk implements BlockDevice {
                 
         final ByteBuffer bb = ByteBuffer.wrap(bos.toByteArray(), 0, total);
         return new RamDisk(bb, DEFAULT_SECTOR_SIZE);
+    }
+    
+    /**
+     * Reads a GZIP compressed file into a new {@code RamDisk} instance.
+     * 
+     * @param f the file to read
+     * @return the new RamDisk with the file contents
+     * @throws FileNotFoundException if the specified file does not exist
+     * @throws IOException on read error
+     */
+    public static RamDisk readGzipped(File f)
+            throws FileNotFoundException, IOException {
+        
+        final FileInputStream is = new FileInputStream(f);
+        
+        try {
+            return readGzipped(is);
+        } finally {
+            is.close();
+        }
     }
     
     private RamDisk(ByteBuffer buffer, int sectorSize) {
