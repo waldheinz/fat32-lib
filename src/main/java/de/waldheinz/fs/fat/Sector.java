@@ -91,7 +91,7 @@ class Sector {
     }
 
     protected long get32(int offset) {
-        return buffer.getInt(offset) & 0xffffffff;
+        return buffer.getInt(offset);
     }
     
     protected int get8(int offset) {
