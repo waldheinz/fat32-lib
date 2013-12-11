@@ -165,14 +165,6 @@ public final class FatLfnDirectory
         }
     }
     
-    private void freeUniqueName(String name) {
-        final String lowerName = name.toLowerCase(Locale.ROOT);
-
-        if (!this.usedNames.remove(lowerName)) {
-            throw new AssertionError();
-        }
-    }
-    
     private ShortName makeShortName(String name) throws IOException {
         final ShortName result;
 
@@ -379,7 +371,6 @@ public final class FatLfnDirectory
 
         cc.setChainLength(0);
         
-        freeUniqueName(name);
         updateLFN();
     }
     
@@ -404,6 +395,9 @@ public final class FatLfnDirectory
         
         assert (this.shortNameIndex.containsKey(sn));
         this.shortNameIndex.remove(sn);
+        
+        assert (this.usedNames.contains(lowerName));
+        this.usedNames.remove(lowerName);
         
         if (entry.isFile()) {
             this.entryToFile.remove(entry.realEntry);
