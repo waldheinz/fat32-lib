@@ -212,6 +212,12 @@ public final class FatLfnDirectoryEntry
             return new FatDirectoryEntry[]{this.realEntry};
         }
     
+        if (ShortName.canConvert(fileName) && ShortName.get(fileName).asSimpleString().equals(fileName)) {
+            /* do not add unnecessary LFN when the short name matches the original name */
+            this.realEntry.setShortName(ShortName.get(fileName));
+            return new FatDirectoryEntry[]{this.realEntry};
+        }
+
         final int totalEntrySize = totalEntrySize();
 
         final FatDirectoryEntry[] entries =

@@ -249,6 +249,19 @@ public class FatLfnDirectoryTest {
 
     }
 
+    @Test
+    public void test83UppercaseEntriesLfn() throws IOException {
+        final FatLfnDirectoryEntry subEntry = dir.addDirectory("test83");
+        final FatLfnDirectory subDir = subEntry.getDirectory();
+        subDir.addFile("TEST123.83");
+
+        FatLfnDirectoryEntry entry = subDir.getEntry("TEST123.83");
+        assertNotNull(entry);
+
+        System.out.println(entry);
+        assertEquals(1, entry.compactForm().length);
+    }
+
     @Test(expected=IOException.class)
     public void testOnlyDotsDirectory() throws IOException {
         System.out.println("onlyDotsDirectory");
