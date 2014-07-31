@@ -18,17 +18,24 @@
 
 package de.waldheinz.fs.fat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Locale;
+import org.junit.Before;
+import org.junit.Test;
 import de.waldheinz.fs.BlockDevice;
 import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
 import de.waldheinz.fs.FsFile;
 import de.waldheinz.fs.util.RamDisk;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Date;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -84,6 +91,30 @@ public class FatLfnDirectoryTest {
         assertNotNull("not in place with new name",
                 dir.getEntry("newFileName"));
         assertEquals("newFileName", f.getName());
+    }
+
+    @Test
+    public void testUsedNamesCleanupWithShortnames() throws IOException {
+        System.out.println("testUsedNamesCleanupWithShortnames");
+        
+        FatLfnDirectoryEntry f = dir.addFile("test-with-shortname.txt");
+        f.setName("newFileName");
+        f.setName("test-with-shortname.txt");
+        
+        HashSet<String> usedNames = new HashSet<String> ();
+        ShortNameGenerator shortNameGenerator = new ShortNameGenerator (usedNames);
+        ShortName shortName = shortNameGenerator.generateShortName("test-with-shortname.txt");
+        usedNames.add(shortName.asSimpleString().toLowerCase(Locale.ROOT));
+        ShortName shortName2 = shortNameGenerator.generateShortName("test-with-shortname.txt");
+
+        assertNotNull("entry has not correct shortname",
+                dir.getEntry(shortName.asSimpleString()));
+        assertNull("entry has not correct shortname",
+                dir.getEntry(shortName2.asSimpleString()));
+
+        FatLfnDirectoryEntry f2 = dir.addFile("test-with-shortname1.txt");
+        assertEquals("entry has not correct shortname",f2,
+                dir.getEntry(shortName2.asSimpleString()));
     }
     
     @Test
