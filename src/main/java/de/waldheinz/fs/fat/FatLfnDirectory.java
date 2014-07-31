@@ -395,6 +395,7 @@ public final class FatLfnDirectory
         
         assert (this.shortNameIndex.containsKey(sn));
         this.shortNameIndex.remove(sn);
+        this.usedNames.remove(sn.asSimpleString().toLowerCase(Locale.ROOT));
         
         assert (this.usedNames.contains(lowerName));
         this.usedNames.remove(lowerName);
@@ -415,9 +416,9 @@ public final class FatLfnDirectory
      */
     void linkEntry(FatLfnDirectoryEntry entry) throws IOException {
         checkUniqueName(entry.getName());
-        
-        entry.realEntry.setShortName(
-            this.sng.generateShortName(entry.getName()));
+
+        final ShortName sn = makeShortName(entry.getName());
+        entry.realEntry.setShortName(sn);
         
         this.longNameIndex.put(entry.getName().toLowerCase(Locale.ROOT), entry);
         this.shortNameIndex.put(entry.realEntry.getShortName(), entry);
