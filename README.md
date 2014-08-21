@@ -32,7 +32,7 @@ users it is sufficient to add
 <dependency>
     <groupId>de.waldheinz</groupId>
     <artifactId>fat32-lib</artifactId>
-    <version>0.6.4</version>
+    <version>0.6.5</version>
 </dependency>
 ~~~~
 
