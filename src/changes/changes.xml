@@ -9,6 +9,15 @@
     </properties>
     
     <body>
+        <release version="0.6.5" date="2014-08-21" description="Feature and Bugfix Release">
+            <action dev="trem" type="fix">
+                fix leak when unlinking an entry from a directory
+            </action>
+            <action dev="trem" type="add">
+                don't generate LFN entries for 8.3 names
+            </action>
+        </release>
+        
         <release version="0.6.4" date="2013-09-15" description="Bugfix Release">
             <action dev="trem" type="fix">
                 fixed unit tests depending on dosfsck when the binary is not
