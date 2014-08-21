@@ -5,7 +5,7 @@
     <groupId>de.waldheinz</groupId>
     <artifactId>fat32-lib</artifactId>
     <packaging>jar</packaging>
-    <version>0.6.5-SNAPSHOT</version>
+    <version>0.6.5</version>
     <name>FAT32 Library</name>
     <description>A library for manipulating FAT file systems.</description>
     <url>https://github.com/waldheinz/fat32-lib</url>
@@ -30,7 +30,8 @@
         <url>https://github.com/waldheinz/fat32-lib</url>
         <connection>scm:git:https://github.com/waldheinz/fat32-lib.git</connection>
         <developerConnection>scm:git:git@github.com:waldheinz/fat32-lib.git</developerConnection>
-    </scm>
+      <tag>fat32-lib-0.6.5</tag>
+  </scm>
     
     <developers>
         <developer>
