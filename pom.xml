@@ -45,6 +45,24 @@
         <url>https://github.com/waldheinz/fat32-lib/issues</url>
     </issueManagement>
     
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        
+        <site>
+            <id>waldheinz.de</id>
+            <name>waldheinz.de</name>
+            <url>scp://root@waldheinz.de:/var/www/maven/site/fat32-lib</url>
+        </site>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
@@ -218,13 +236,5 @@
             </build>
         </profile>
     </profiles>
-    
-    <distributionManagement>
-        <site>
-            <id>waldheinz.de</id>
-            <name>waldheinz.de</name>
-            <url>scp://root@waldheinz.de:/var/www/maven/site/fat32-lib</url>
-        </site>
-    </distributionManagement>
     
 </project>
