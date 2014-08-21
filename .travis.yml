@@ -1,3 +1,6 @@
 language: java
 script: mvn test
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y dosfstools
 

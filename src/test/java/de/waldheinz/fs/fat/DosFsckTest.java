@@ -37,7 +37,7 @@ import org.junit.Assume;
  */
 public class DosFsckTest {
 
-    private final static String DOSFSCK_CMD = "/usr/sbin/dosfsck";
+    private final static String DOSFSCK_CMD = "/sbin/dosfsck";
     private File file;
     private FileDisk dev;
 
