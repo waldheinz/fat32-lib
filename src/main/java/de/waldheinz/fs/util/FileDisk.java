@@ -79,8 +79,15 @@ public final class FileDisk implements BlockDevice {
      * @param size the size of the new {@code FileDisk}
      * @return the created {@code FileDisk} instance
      * @throws IOException on error creating the {@code FileDisk}
+     * @throws IllegalArgumentException if size is &lt; 0
      */
-    public static FileDisk create(File file, long size) throws IOException {
+    public static FileDisk create(File file, long size)
+            throws IOException, IllegalArgumentException {
+        
+        if (size < 0) {
+            throw new IllegalArgumentException("size must be >= 0");
+        }
+        
         try {
             final RandomAccessFile raf =
                     new RandomAccessFile(file, "rw"); //NOI18N
