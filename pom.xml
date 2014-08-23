@@ -12,6 +12,7 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <github.global.server>github</github.global.server>
     </properties>
     
     <prerequisites>
@@ -30,8 +31,8 @@
         <url>https://github.com/waldheinz/fat32-lib</url>
         <connection>scm:git:https://github.com/waldheinz/fat32-lib.git</connection>
         <developerConnection>scm:git:git@github.com:waldheinz/fat32-lib.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     
     <developers>
         <developer>
@@ -56,16 +57,26 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
-        
-        <site>
-            <id>waldheinz.de</id>
-            <name>waldheinz.de</name>
-            <url>scp://root@waldheinz.de:/var/www/maven/site/fat32-lib</url>
-        </site>
     </distributionManagement>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.github.github</groupId>
+                <artifactId>site-maven-plugin</artifactId>
+                <version>0.9</version>
+                <configuration>
+                    <message>Creating site for ${project.version}</message>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <phase>site</phase>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5</version>
