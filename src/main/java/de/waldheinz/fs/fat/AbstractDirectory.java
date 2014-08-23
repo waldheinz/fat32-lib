@@ -216,9 +216,7 @@ abstract class AbstractDirectory {
         final ByteBuffer data = ByteBuffer.allocate(
                 getCapacity() * FatDirectoryEntry.SIZE);
         
-        for (int i=0; i < entries.size(); i++) {
-            final FatDirectoryEntry entry = entries.get(i);
-            
+        for (FatDirectoryEntry entry : this.entries) {
             if (entry != null) {
                 entry.write(data);
             }
