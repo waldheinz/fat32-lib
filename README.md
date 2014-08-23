@@ -36,7 +36,7 @@ users it is sufficient to add
 </dependency>
 ~~~~
 
-to the dependencies section of your pom.
+to the dependencies section of your pom. Now check out the [API docs](http://waldheinz.github.io/fat32-lib/apidocs/). If you're into creating FAT file system, the [SuperFloppyFormatter](http://waldheinz.github.io/fat32-lib/apidocs/de/waldheinz/fs/fat/SuperFloppyFormatter.html) would be a good starting point. And don't hestitate to ask if there are any questions.
 
 History
 -------
