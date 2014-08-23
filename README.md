@@ -2,7 +2,7 @@ fat32-lib
 =========
 
 [![Flattr fat32-lib](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=waldheinz&url=https://github.com/waldheinz/fat32-lib&title=fat32-lib&language=en&tags=github&category=software)
-
+[![Build Status](https://travis-ci.org/waldheinz/fat32-lib.svg?branch=master)](https://travis-ci.org/waldheinz/fat32-lib)
 This library allows to manipulate FAT file systems using the Java programming language.
 Because of it's age and simplicity, FAT can be called the least common denominator in
 file systems, being used in digital cameras, cell phones, ... and being supported by
