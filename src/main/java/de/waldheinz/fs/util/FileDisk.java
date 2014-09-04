@@ -95,8 +95,9 @@ public final class FileDisk implements BlockDevice {
     @Override
     public long getSize() throws IOException {
         checkClosed();
-        
-        return raf.length();
+        synchronized (fc) {
+            return raf.length();
+        }
     }
 
     @Override
@@ -106,12 +107,13 @@ public final class FileDisk implements BlockDevice {
         int toRead = dest.remaining();
         if ((devOffset + toRead) > getSize()) throw new IOException(
                 "reading past end of device");
-
-        while (toRead > 0) {
-            final int read = fc.read(dest, devOffset);
-            if (read < 0) throw new IOException();
-            toRead -= read;
-            devOffset += read;
+        synchronized (fc) {
+            while (toRead > 0) {
+                final int read = fc.read(dest, devOffset);
+                if (read < 0) throw new IOException();
+                toRead -= read;
+                devOffset += read;
+            }
         }
     }
 
@@ -127,10 +129,12 @@ public final class FileDisk implements BlockDevice {
                 "writing past end of file");
 
         while (toWrite > 0) {
-            final int written = fc.write(src, devOffset);
-            if (written < 0) throw new IOException();
-            toWrite -= written;
-            devOffset += written;
+            synchronized (fc) {
+                final int written = fc.write(src, devOffset);
+                if (written < 0) throw new IOException();
+                toWrite -= written;
+                devOffset += written;
+            }
         }
     }
 
