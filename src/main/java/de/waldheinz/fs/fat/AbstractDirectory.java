@@ -214,7 +214,7 @@ abstract class AbstractDirectory {
     public void flush() throws IOException {
         
         final ByteBuffer data = ByteBuffer.allocate(
-                getCapacity() * FatDirectoryEntry.SIZE);
+                getCapacity() * FatDirectoryEntry.SIZE + (volumeLabel != null ? FatDirectoryEntry.SIZE : 0));
         
         for (int i=0; i < entries.size(); i++) {
             final FatDirectoryEntry entry = entries.get(i);
