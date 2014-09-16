@@ -44,4 +44,4 @@ History
 
 This library was originally based on the FAT file system driver included in the JNode operating
 system. Since then, many bugs were fixed, the code was re-factored several times, and now I think
-it is fair to call the fat32-lib a unique implementation of the FAT file system family.
+it is fair to call the fat32-lib an original implementation of the FAT file system family.
