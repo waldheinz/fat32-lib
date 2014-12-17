@@ -23,12 +23,11 @@ import java.io.IOException;
 import java.util.Random;
 
 /**
- * <p>
  * Allows to create FAT file systems on {@link BlockDevice}s which follow the
  * "super floppy" standard. This means that the device will be formatted so
  * that it does not contain a partition table. Instead, the entire device holds
  * a single FAT file system.
- * </p><p>
+ * 
  * This class follows the "builder" pattern, which means it's methods always
  * returns the {@code SuperFloppyFormatter} instance they're called on. This
  * allows to chain the method calls like this:
@@ -37,8 +36,6 @@ import java.util.Random;
  *  FatFileSystem fs = SuperFloppyFormatter.get(dev).
  *          setFatType(FatType.FAT12).format();
  * </pre>
- * 
- * </p>
  *
  * @author Matthias Treydte &lt;matthias.treydte at meetwise.com&gt;
  */
