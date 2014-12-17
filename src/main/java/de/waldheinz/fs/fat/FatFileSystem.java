@@ -237,50 +237,42 @@ public final class FatFileSystem extends AbstractFileSystem {
     }
 
     /**
-     * <p>
-     * {@inheritDoc}
-     * </p><p>
-     * This method is currently not implemented for {@code FatFileSystem} and
-     * always returns -1.
-     * </p>
-     * 
-     * @return always -1
+     * The free space of this file system.
+     *
+     * @return if -1 this feature is unsupported
      */
     @Override
     public long getFreeSpace() {
-        // TODO implement me
-        return -1;
+        checkClosed();
+
+        return fat.getFreeClusterCount() * bs.getBytesPerCluster();
     }
 
     /**
-     * <p>
-     * {@inheritDoc}
-     * </p><p>
-     * This method is currently not implemented for {@code FatFileSystem} and
-     * always returns -1.
-     * </p>
+     * The total size of this file system.
      *
-     * @return always -1
+     * @return if -1 this feature is unsupported
      */
     @Override
     public long getTotalSpace() {
-        // TODO implement me
+        checkClosed();
+
+        if (fatType == FatType.FAT32) {
+            return bs.getNrTotalSectors() * bs.getBytesPerSector();
+        }
+
         return -1;
     }
 
     /**
-     * <p>
-     * {@inheritDoc}
-     * </p><p>
-     * This method is currently not implemented for {@code FatFileSystem} and
-     * always returns -1.
-     * </p>
+     * The usable space of this file system.
      *
-     * @return always -1
+     * @return if -1 this feature is unsupported
      */
     @Override
     public long getUsableSpace() {
-        // TODO implement me
-        return -1;
+        checkClosed();
+
+        return bs.getDataClusterCount() * bs.getBytesPerCluster();
     }
 }
