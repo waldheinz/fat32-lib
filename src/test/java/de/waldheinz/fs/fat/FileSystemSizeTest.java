@@ -8,7 +8,7 @@ import java.io.InputStream;
 import de.waldheinz.fs.util.RamDisk;
 
 /**
- * @author Jan Seeger <jan@alphadev.net>
+ * @author Jan Seeger &lt;jan@alphadev.net&gt;
  */
 public class FileSystemSizeTest {
     @Test
