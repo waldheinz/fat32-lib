@@ -138,7 +138,14 @@ public final class RamDisk implements BlockDevice {
     @Override
     public void read(long devOffset, ByteBuffer dest) throws IOException {
         checkClosed();
-        if (devOffset > getSize()) throw new IllegalArgumentException();
+        
+        if (devOffset > getSize()){
+            final StringBuilder sb = new StringBuilder();
+            sb.append("read at ").append(devOffset);
+            sb.append(" is off size (").append(getSize()).append(")");
+            
+            throw new IllegalArgumentException(sb.toString());
+        }
         
         data.limit((int) (devOffset + dest.remaining()));
         data.position((int) devOffset);

@@ -20,7 +20,6 @@
 package de.waldheinz.fs.fat;
 
 import de.waldheinz.fs.AbstractFsObject;
-import de.waldheinz.fs.FsDirectory;
 import de.waldheinz.fs.FsDirectoryEntry;
 import de.waldheinz.fs.ReadOnlyException;
 import java.io.IOException;
@@ -61,7 +60,7 @@ public final class FatLfnDirectoryEntry
         this.realEntry.setCreated(now);
         this.realEntry.setLastAccessed(now);
     }
-
+    
     FatLfnDirectoryEntry(FatLfnDirectory parent,
             FatDirectoryEntry realEntry, String fileName) {
         
@@ -246,13 +245,6 @@ public final class FatLfnDirectoryEntry
         checkValid();
         
         return fileName;
-    }
-    
-    @Override
-    public FsDirectory getParent() {
-        checkValid();
-        
-        return parent;
     }
     
     @Override

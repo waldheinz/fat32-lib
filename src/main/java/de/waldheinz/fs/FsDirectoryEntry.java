@@ -55,18 +55,7 @@ public interface FsDirectoryEntry extends FsObject {
      * @return this entrys name
      */
     public String getName();
-
-    /**
-     * Gets the directory this entry is a part of.
-     * 
-     * @return the parent directory of this entry, or {@code null}
-     * @deprecated deprecated since version 0.6 because in the presence of
-     *      hard links it might not always be possible to determine the parent
-     *      directory of an entry
-     */
-    @Deprecated
-    public FsDirectory getParent();
-
+    
     /**
      * Gets the last modification time of this entry.
      *
@@ -129,17 +118,21 @@ public interface FsDirectoryEntry extends FsObject {
      * 
      * @return the file described by this entry
      * @throws IOException on error accessing the file
+     * @throws UnsupportedOperationException if this entry is a directory
      */
-    public FsFile getFile() throws IOException;
-
+    public FsFile getFile()
+            throws IOException, UnsupportedOperationException;
+    
     /**
      * Gets the directory this entry refers to. This method can only be called
      * if <code>isDirectory</code> returns true.
      * 
      * @return The directory described by this entry
      * @throws IOException on read error
+     * @throws UnsupportedOperationException if this entry is a file
      */
-    public FsDirectory getDirectory() throws IOException;
+    public FsDirectory getDirectory()
+            throws IOException, UnsupportedOperationException;
     
     /**
      * Indicate if the entry has been modified in memory (ie need to be saved)
