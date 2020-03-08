@@ -89,7 +89,7 @@ public interface FileSystem {
     /**
      * Flushes any modified file system structures to the underlying storage.
      *
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     public void flush() throws IOException;
 }
