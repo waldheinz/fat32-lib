@@ -137,4 +137,31 @@ public class FatDirectoryEntryTest {
         assertTrue(e.isDirty());
     }
     
+    @Test
+    public void testLowercaseBasename() {
+        System.out.println("lowercaseBasename");
+
+        final FatDirectoryEntry e = FatDirectoryEntry.create(FatType.FAT16, false);
+        assertFalse (e.isBasenameLowercaseFlag());
+        assertFalse (e.isExtensionLowercaseFlag());
+
+        e.setBasenameLowercaseFlag(true);
+
+        assertTrue (e.isBasenameLowercaseFlag());
+        assertFalse (e.isExtensionLowercaseFlag());
+    }
+
+    @Test
+    public void testLowercaseExtension() {
+        System.out.println("lowercaseExtension");
+
+        final FatDirectoryEntry e = FatDirectoryEntry.create(FatType.FAT16, false);
+        assertFalse (e.isBasenameLowercaseFlag());
+        assertFalse (e.isExtensionLowercaseFlag());
+
+        e.setExtensionLowercaseFlag(true);
+
+        assertFalse (e.isBasenameLowercaseFlag());
+        assertTrue (e.isExtensionLowercaseFlag());
+    }
 }

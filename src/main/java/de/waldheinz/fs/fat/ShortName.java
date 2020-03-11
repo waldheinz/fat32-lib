@@ -52,18 +52,27 @@ final class ShortName {
     public final static ShortName DOT_DOT = new ShortName("..", ""); //NOI18N
 
     private final byte[] nameBytes;
+
+    protected boolean lowercaseBasename = false;
+    protected boolean lowercaseExtension = false;
     
     private ShortName(String nameExt) {
         if (nameExt.length() > 12) throw
                 new IllegalArgumentException("name too long");
         
+        if (nameExt.contains(" ")) throw
+                new IllegalArgumentException("space found");
+
         final int i = nameExt.indexOf('.');
         final String nameString, extString;
         
         if (i < 0) {
+            resolveBasenameCase(nameExt);
             nameString = nameExt.toUpperCase(Locale.ROOT);
             extString = "";
         } else {
+            resolveBasenameCase(nameExt);
+            resolveExtensionCase(nameExt);
             nameString = nameExt.substring(0, i).toUpperCase(Locale.ROOT);
             extString = nameExt.substring(i + 1).toUpperCase(Locale.ROOT);
         }
@@ -75,7 +84,56 @@ final class ShortName {
     ShortName(String name, String ext) {
         this.nameBytes = toCharArray(name, ext);
     }
-    
+
+    public void resolveBasenameCase(String nameExt) {
+        final int i = nameExt.indexOf('.');
+        final String basename;
+
+        // Look for the dot and set the basename
+        if (i < 0) {
+            basename = nameExt;
+        } else {
+            basename = nameExt.substring(0, i);
+        }
+
+        if (basename.length() == 0) return;
+
+        if (basename.toLowerCase(Locale.ROOT) == basename) {
+            // The basename is all lowercase
+            lowercaseBasename = true;
+        } else if (basename.toUpperCase(Locale.ROOT) == basename) {
+            // The basename is all uppercase
+            lowercaseBasename = false;
+        } else {
+            // The basename is mixed case, and so name cannot be a short name
+            new IllegalArgumentException("mixed case basename");
+        }
+    }
+
+    public void resolveExtensionCase(String nameExt) {
+        final int i = nameExt.indexOf('.');
+        final String extension;
+
+        // Look for the dot and set the extension
+        if (i < 0) {
+            extension = "";
+            return;
+        } else {
+            extension = nameExt.substring(i + 1);
+        }
+      
+        if (extension.toLowerCase(Locale.ROOT) == extension) {
+            // The extension is all lowercase
+            lowercaseExtension = true;
+        } else if (extension.toUpperCase(Locale.ROOT) == extension) {
+            // The extension is all uppercase
+            lowercaseExtension = false;
+        } else {
+            // The extension is mixed case, and so name cannot be a short name
+            new IllegalArgumentException("mixed case extension");
+        }
+    }
+
     private static byte[] toCharArray(String name, String ext) {
         checkValidName(name);
         checkValidExt(ext);
@@ -86,6 +144,14 @@ final class ShortName {
         System.arraycopy(ext.getBytes(ASCII), 0, result, 8, ext.length());
         
         return result;
+    }
+
+    public boolean isLowercaseBasename() {
+        return lowercaseBasename;
+    }
+
+    public boolean isLowercaseExtension() {
+        return lowercaseExtension;
     }
 
     /**
@@ -123,7 +189,9 @@ final class ShortName {
     }
     
     /**
-     * Tests if the specified string can be converted to a {@code ShortName}.
+     * Tests if the specified string can be converted to a {@code ShortName}. A {@code ShortName} is
+     * an 8.3 name, either all upper case, the base name is all upper or all lowercase, 
+     * or the extension is all upper or all lowercase.
      *
      * @param nameExt the string to test
      * @return if the string can be converted
@@ -139,7 +207,7 @@ final class ShortName {
         }
     }
     
-    public static ShortName parse(byte[] data) {
+    public static ShortName parse(byte[] data, boolean isBasenameLowercase, boolean isExtensionLowercase) {
         final char[] nameArr = new char[8];
         
         for (int i = 0; i < nameArr.length; i++) {
@@ -155,19 +223,31 @@ final class ShortName {
             extArr[i] = (char) LittleEndian.getUInt8(data, 0x08 + i);
         }
 
-        return new ShortName(
-                new String(nameArr).trim(),
-                new String(extArr).trim());
+        String name = new String(nameArr).trim();
+        String ext = new String(extArr).trim();
+
+        ShortName shortName = new ShortName(name, ext);
+        if (nameArr[0] != 0xe5) {
+            shortName.lowercaseBasename = isBasenameLowercase;
+            shortName.lowercaseExtension = isExtensionLowercase;
+        }
+        return shortName;
     }
 
-    public void write(byte[] dest) {
-        System.arraycopy(nameBytes, 0, dest, 0, nameBytes.length);
+    public byte[] getNameBytes() {
+      // TODO: This should be a copy...
+      return this.nameBytes;
     }
     
     public String asSimpleString() {
-        final String name = new String(this.nameBytes, 0, 8, ASCII).trim();
-        final String ext = new String(this.nameBytes, 8, 3, ASCII).trim();
-        
+        String name = new String(this.nameBytes, 0, 8, ASCII).trim();
+        if (isLowercaseBasename()) {
+          name = name.toLowerCase(Locale.ROOT);
+        }
+        String ext = new String(this.nameBytes, 8, 3, ASCII).trim();
+        if (isLowercaseExtension()) {
+          ext = ext.toLowerCase(Locale.ROOT);
+        }
         return ext.isEmpty() ? name : name + "." + ext;
     }
     
@@ -235,7 +315,7 @@ final class ShortName {
             final byte toTest = (byte) (chars[i] & 0xff);
             
             if (toTest < 0x20 && toTest != 0x05) throw new
-                    IllegalArgumentException("caracter < 0x20 at" + i);
+                    IllegalArgumentException("character < 0x20 at" + i);
 
             for (int j=0; j < ILLEGAL_CHARS.length; j++) {
                 if (toTest == ILLEGAL_CHARS[j]) throw new

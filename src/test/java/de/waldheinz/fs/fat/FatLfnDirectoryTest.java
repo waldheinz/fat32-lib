@@ -499,7 +499,7 @@ public class FatLfnDirectoryTest {
 
         RamDisk testDev = new RamDisk(1024 * 1024);
         FatFileSystem testFs = SuperFloppyFormatter.get(testDev).format();
-        testFs.getRoot().addFile("bundle.jar");
+        testFs.getRoot().addFile("bundle .jar");
         testFs.close();
         
         testFs = FatFileSystem.read(testDev, false);

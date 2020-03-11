@@ -116,6 +116,8 @@ final class ShortNameGenerator {
     public ShortName generateShortName(String longFullName)
             throws IllegalStateException {
         
+        String originalLongFullName = longFullName;
+
         longFullName =
                 stripLeadingPeriods(longFullName).toUpperCase(Locale.ROOT);
         
@@ -140,7 +142,7 @@ final class ShortNameGenerator {
         final String shortExt = (longExt.length() > 3) ?
             longExt.substring(0, 3) : longExt;
             
-        if (forceSuffix || (longName.length() > 8) ||
+        if (forceSuffix || (longName.length() > 8) || (longExt.length() > 3) ||
                 usedNames.contains(new ShortName(longName, shortExt).
                 asSimpleString().toLowerCase(Locale.ROOT))) {
 
@@ -167,7 +169,10 @@ final class ShortNameGenerator {
                     + longFullName + "\"");
         }
 
-        return new ShortName(longName, shortExt);
+        ShortName shortName = new ShortName(longName, shortExt);
+        shortName.resolveBasenameCase(originalLongFullName);
+        shortName.resolveExtensionCase(originalLongFullName);
+        return shortName;
     }
     
 }
