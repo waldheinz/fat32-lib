@@ -75,7 +75,13 @@ public class FatLfnDirectoryEntryTest {
         final FatLfnDirectory root = fatFs.getRoot();
         
         final String[] names = {
-            "TEST.TXT", "TEST    TXT", "and_a_regular_long_file_name"
+            "TEST.TXT", 
+            "TEST    TXT", 
+            "and_a_regular_long_file_name", 
+            "lower.UP", 
+            "lowerbse", 
+            "Mixed.Cas", 
+            "UPPER.low"
         };
         
         for (String name : names) {

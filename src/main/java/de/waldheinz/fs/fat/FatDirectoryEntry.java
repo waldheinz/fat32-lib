@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
  *
  * @author Ewout Prangsma &lt;epr at jnode.org&gt;
  * @author Matthias Treydte &lt;waldheinz at gmail.com&gt;
+ * @author Chuck Benedict &lt;chuck at benedict.email&gt;
  */
 final class FatDirectoryEntry extends AbstractFsObject {
     
@@ -40,6 +41,18 @@ final class FatDirectoryEntry extends AbstractFsObject {
      */
     private static final int OFFSET_ATTRIBUTES = 0x0b;
     
+    /**
+     * The offset of the user attributes byte containing
+     * the short file name lowercase flags. All lowercase
+     * base name and/or extension 8.3 file names do not
+     * need LFNs when these bits are set.
+     * See https://en.wikipedia.org/wiki/Design_of_the_FAT_file_system#VFAT
+     */
+    private static final int OFFSET_USER_ATTRIBUTES = 0x0c;
+
+    private static final int F_LOWERCASE_BASENAME = 0x08;
+    private static final int F_LOWERCASE_EXTENSION = 0x10;
+
     /**
      * The offset to the file size dword.
      */
@@ -134,6 +147,70 @@ final class FatDirectoryEntry extends AbstractFsObject {
         }
 
         this.dirty = true;
+    }
+
+    /**
+     * Get the state of lowercase basename user attribute flag
+     * @return  True if lowercase basename flag is set
+     */
+    public boolean isBasenameLowercaseFlag() {
+      return ((LittleEndian.getUInt8(data, OFFSET_USER_ATTRIBUTES) & F_LOWERCASE_BASENAME) !=0);
+    }
+
+    /**
+     * Set the lowercase basename user attribute flag
+     * @param isBasenameLowercase The state of the flag to set
+     */
+    public void setBasenameLowercaseFlag(boolean isBasenameLowercase) {
+      // Get the current flag state
+      final int oldFlag = LittleEndian.getUInt8(data, OFFSET_USER_ATTRIBUTES);
+
+      if (((oldFlag & F_LOWERCASE_BASENAME) != 0) == isBasenameLowercase) {
+        // Already set so leave function
+        return;
+      }
+
+      if (isBasenameLowercase) {
+        // Set the bit
+        LittleEndian.setInt8(data, OFFSET_USER_ATTRIBUTES, oldFlag | F_LOWERCASE_BASENAME);
+      } else {
+        // Clear the bit
+        LittleEndian.setInt8(data, OFFSET_USER_ATTRIBUTES, oldFlag & ~F_LOWERCASE_BASENAME);
+      }
+
+      this.dirty = true;
+    }
+
+    /**
+     * Get the state of lowercase extension user attribute flag
+     * @return  True if lowercase extension flag is set
+     */
+    public boolean isExtensionLowercaseFlag() {
+      return ((LittleEndian.getUInt8(data, OFFSET_USER_ATTRIBUTES) & F_LOWERCASE_EXTENSION) !=0);
+    }
+
+    /**
+     * Set the lowercase extension user attribute flag
+     * @param isExtensionLowercase  The state of the flag to set
+     */
+    public void setExtensionLowercaseFlag(boolean isExtensionLowercase) {
+      // Get the current flag state
+      final int oldFlag = LittleEndian.getUInt8(data, OFFSET_USER_ATTRIBUTES);
+
+      if (((oldFlag & F_LOWERCASE_EXTENSION) != 0) == isExtensionLowercase) {
+        // Already set so leave function
+        return;
+      }
+
+      if (isExtensionLowercase) {
+        // Set the bit
+        LittleEndian.setInt8(data, OFFSET_USER_ATTRIBUTES, oldFlag | F_LOWERCASE_EXTENSION);
+      } else {
+        // Clear the bit
+        LittleEndian.setInt8(data, OFFSET_USER_ATTRIBUTES, oldFlag & ~F_LOWERCASE_EXTENSION);
+      }
+
+      this.dirty = true;
     }
 
     public boolean isSystemFlag() {
@@ -321,7 +398,7 @@ final class FatDirectoryEntry extends AbstractFsObject {
         if (this.data[0] == 0) {
             return null;
         } else {
-            return ShortName.parse(this.data);
+            return ShortName.parse(this.data, this.isBasenameLowercaseFlag(), this.isExtensionLowercaseFlag());
         }
     }
     
@@ -337,8 +414,10 @@ final class FatDirectoryEntry extends AbstractFsObject {
     
     public void setShortName(ShortName sn) {
         if (sn.equals(this.getShortName())) return;
-        
-        sn.write(this.data);
+
+        System.arraycopy(sn.getNameBytes(), 0, this.data, 0, sn.getNameBytes().length);
+        this.setBasenameLowercaseFlag(sn.isLowercaseBasename());
+        this.setExtensionLowercaseFlag(sn.isLowercaseExtension());
         this.dirty = true;
     }
 

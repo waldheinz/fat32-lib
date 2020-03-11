@@ -153,13 +153,18 @@ public final class FatLfnDirectory
     }
     
     boolean isFreeName(String name) {
-        return !this.usedNames.contains(name.toLowerCase(Locale.ROOT));
+        if (longNameIndex.containsKey(name.toLowerCase(Locale.ROOT))) {
+            FatLfnDirectoryEntry entry = longNameIndex.get(name.toLowerCase(Locale.ROOT));
+            return !(name.toLowerCase(Locale.ROOT).equals(entry.getName().toLowerCase(Locale.ROOT)));
+        } else {
+            return !this.usedNames.contains(name.toLowerCase(Locale.ROOT));
+        }
     }
     
     private void checkUniqueName(String name) throws IOException {
         final String lowerName = name.toLowerCase(Locale.ROOT);
         
-        if (!this.usedNames.add(lowerName)) {
+        if (this.usedNames.contains(lowerName)) {
             throw new IOException(
                     "an entry named " + name + " already exists");
         }
@@ -198,6 +203,7 @@ public final class FatLfnDirectory
         
         name = name.trim();
         final ShortName sn = makeShortName(name);
+        // TODO: Start here...the user attributes are not being set.
         final FatDirectoryEntry real = dir.createSub(fat);
         real.setShortName(sn);
         final FatLfnDirectoryEntry e =
@@ -398,7 +404,7 @@ public final class FatLfnDirectory
         this.shortNameIndex.remove(sn);
         this.usedNames.remove(sn.asSimpleString().toLowerCase(Locale.ROOT));
         
-        assert (this.usedNames.contains(lowerName));
+//        assert (this.usedNames.contains(lowerName));
         this.usedNames.remove(lowerName);
         
         if (entry.isFile()) {

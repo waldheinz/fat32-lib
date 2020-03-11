@@ -212,9 +212,11 @@ public final class FatLfnDirectoryEntry
             return new FatDirectoryEntry[]{this.realEntry};
         }
     
-        if (ShortName.canConvert(fileName) && ShortName.get(fileName).asSimpleString().equals(fileName)) {
-            /* do not add unnecessary LFN when the short name matches the original name */
-            this.realEntry.setShortName(ShortName.get(fileName));
+        if (ShortName.canConvert(fileName)) {
+            ShortName shortName = ShortName.get(fileName);
+            this.realEntry.setBasenameLowercaseFlag(shortName.isLowercaseBasename());
+            this.realEntry.setExtensionLowercaseFlag(shortName.isLowercaseExtension());
+            this.realEntry.setShortName(shortName);
             return new FatDirectoryEntry[]{this.realEntry};
         }
 

@@ -75,8 +75,7 @@ public class ConformanceTest {
     public void testMaxRootEntries() throws Exception {
         System.out.println("testMaxRootEntries");
         
-        /* divide by 2 because we use LFNs which take entries, too */
-        final int max = fs.getBootSector().getRootDirEntryCount() / 2;
+        final int max = fs.getBootSector().getRootDirEntryCount();
 
         System.out.println("max=" + fs.getBootSector().getRootDirEntryCount());
 
